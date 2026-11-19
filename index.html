@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PRO CAREER: TOP 5 — Футбольный симулятор</title>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Oswald for sporty numbers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-card: #111827;
+      --bg-card-elevated: #192338;
+      --accent-green: #10b981;
+      --accent-green-glow: rgba(16, 185, 129, 0.35);
+      --accent-gold: #f59e0b;
+      --accent-gold-glow: rgba(245, 158, 11, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #03060c;
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .font-sport {
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    /* Mobile App Shell */
+    #app-shell {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: radial-gradient(circle at top center, #11223b 0%, var(--bg-deep) 55%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 999px;
+    }
+
+    /* FIFA/EA FC Style Player Card */
+    .fut-card {
+      position: relative;
+      border-radius: 20px;
+      padding: 16px;
+      overflow: hidden;
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .fut-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 10%, rgba(255,255,255,0.18) 0%, transparent 55%),
+                  repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 10px);
+      pointer-events: none;
+    }
+    .fut-bronze {
+      background: linear-gradient(145deg, #5c3a21 0%, #3d2413 45%, #23140a 100%);
+      border-color: rgba(217, 152, 95, 0.45);
+    }
+    .fut-silver {
+      background: linear-gradient(145deg, #475569 0%, #273244 50%, #151c27 100%);
+      border-color: rgba(203, 213, 225, 0.45);
+    }
+    .fut-gold {
+      background: linear-gradient(145deg, #855c12 0%, #4d350a 48%, #221705 100%);
+      border-color: rgba(251, 191, 36, 0.65);
+      box-shadow: 0 14px 36px rgba(245, 158, 11, 0.22);
+    }
+    .fut-toty {
+      background: linear-gradient(145deg, #1d4ed8 0%, #0f172a 50%, #064e3b 100%);
+      border-color: rgba(52, 211, 153, 0.75);
+      box-shadow: 0 14px 40px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Glass Cards & Buttons */
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.82);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #03140e;
+      font-weight: 800;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transition: transform 0.12s ease, filter 0.15s ease;
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+      filter: brightness(1.08);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #1c1002;
+      font-weight: 800;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+      transition: transform 0.12s ease;
+    }
+    .btn-gold:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.9);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      font-weight: 600;
+      border-radius: 14px;
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+    .btn-secondary:active {
+      transform: scale(0.97);
+      background: rgba(51, 65, 85, 0.95);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: rgba(9, 14, 26, 0.94);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 40;
+      padding-bottom: env(safe-area-inset-bottom, 6px);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 2px;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 600;
+      transition: color 0.2s ease, transform 0.15s ease;
+      position: relative;
+    }
+    .nav-btn.active {
+      color: #34d399;
+    }
+    .nav-btn.active::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 3px;
+      background: #10b981;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 2px 10px #10b981;
+    }
+
+    /* Animations */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: fadeSlideUp 0.28s ease-out forwards;
+    }
+
+    @keyframes goalPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      50% { box-shadow: 0 0 35px 8px rgba(16, 185, 129, 0.45); }
+    }
+    .goal-flash {
+      animation: goalPulse 0.9s ease-in-out 2;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, -18px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    .toast-anim {
+      animation: toastIn 0.25s ease-out forwards;
+    }
+
+    /* Penalty Goal Grid */
+    .goal-net {
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px) 0 0 / 16px 16px,
+        linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px) 0 0 / 16px 16px,
+        linear-gradient(180deg, #064e3b 0%, #022c22 100%);
+      border-top: 6px solid #f8fafc;
+      border-left: 6px solid #f8fafc;
+      border-right: 6px solid #f8fafc;
+      border-radius: 10px 10px 0 0;
+      box-shadow: inset 0 12px 28px rgba(0, 0, 0, 0.55);
+    }
+
+    .penalty-zone {
+      transition: all 0.15s ease;
+    }
+    .penalty-zone:hover, .penalty-zone:active {
+      background: rgba(16, 185, 129, 0.35);
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] pointer-events-none w-[92%] max-w-[440px] flex flex-col gap-2 items-center"></div>
+
+    <!-- Main Dynamic Root -->
+    <div id="root" class="flex-1 flex flex-col"></div>
+
+    <!-- Modal Layer -->
+    <div id="modal-layer" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3"></div>
+  </div>
+
+  <script>
+    /*************************************************************************
+     * 1. TELEGRAM WEBAPP SDK INTEGRATION & HAPTIC / AUDIO HELPERS
+     *************************************************************************/
+    const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+
+    function initTelegram() {
+      try {
+        if (tg) {
+          tg.ready();
+          tg.expand();
+          if (tg.setHeaderColor) tg.setHeaderColor('#070b14');
+          if (tg.setBackgroundColor) tg.setBackgroundColor('#070b14');
+        }
+      } catch (e) {
+        console.warn('Telegram SDK fallback mode:', e);
+      }
+    }
+
+    function haptic(type = 'light') {
+      try {
+        if (tg && tg.HapticFeedback) {
+          if (type === 'success' || type === 'error' || type === 'warning') {
+            tg.HapticFeedback.notificationOccurred(type);
+          } else {
+            tg.HapticFeedback.impactOccurred(type);
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Lightweight Web Audio synth for crisp feedback (no external audio URLs)
+    let audioCtx = null;
+    function playSfx(kind) {
+      if (!state || !state.settings || !state.settings.sound) return;
+      try {
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          audioCtx = new Ctx();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (kind === 'goal') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.09);
+          osc.frequency.setValueAtTime(783.99, now + 0.18);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.start(now);
+          osc.stop(now + 0.46);
+        } else if (kind === 'fail') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.22);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.26);
+        } else if (kind === 'train') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(660, now + 0.14);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.19);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          gain.gain.setValueAtTime(0.04, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        }
+      } catch (_) {}
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const colors = {
+        success: 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200',
+        error: 'bg-rose-950/95 border-rose-500/60 text-rose-200',
+        gold: 'bg-amber-950/95 border-amber-400/70 text-amber-200',
+        info: 'bg-slate-900/95 border-slate-600/60 text-slate-100'
+      };
+      const el = document.createElement('div');
+      el.className = `toast-anim px-4 py-2.5 rounded-xl border text-xs font-semibold shadow-xl backdrop-blur-md text-center ${colors[type] || colors.info}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.3s ease';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 320);
+      }, 2400);
+    }
+
+    /*************************************************************************
+     * 2. STATIC GAME DATA — TOP 5 LEAGUES, 50 CLUBS, SHOP, SPONSORS, AGENTS
+     *************************************************************************/
+    const LEAGUES = [
+      {
+        id: 'epl',
+        name: 'АПЛ',
+        fullName: 'Английская Премьер-лига',
+        flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+        prestige: 1.15,
+        clubs: [
+          { id: 'mci', name: 'Манчестер Сити', short: 'MCI', ovr: 90, primary: '#6CABDD', secondary: '#1C2C5B', tier: 5 },
+          { id: 'ars', name: 'Арсенал', short: 'ARS', ovr: 88, primary: '#EF0107', secondary: '#FFFFFF', tier: 5 },
+          { id: 'liv', name: 'Ливерпуль', short: 'LIV', ovr: 88, primary: '#C8102E', secondary: '#F6EB61', tier: 5 },
+          { id: 'che', name: 'Челси', short: 'CHE', ovr: 84, primary: '#034694', secondary: '#FFFFFF', tier: 4 },
+          { id: 'mun', name: 'Манчестер Юнайтед', short: 'MUN', ovr: 83, primary: '#DA291C', secondary: '#FBE122', tier: 4 },
+          { id: 'tot', name: 'Тоттенхэм', short: 'TOT', ovr: 82, primary: '#132257', secondary: '#FFFFFF', tier: 4 },
+          { id: 'new', name: 'Ньюкасл', short: 'NEW', ovr: 80, primary: '#241F20', secondary: '#FFFFFF', tier: 3 },
+          { id: 'avl', name: 'Астон Вилла', short: 'AVL', ovr: 79, primary: '#670E36', secondary: '#95BFE5', tier: 3 },
+          { id: 'bha', name: 'Брайтон', short: 'BHA', ovr: 75, primary: '#0057B8', secondary: '#FFCD00', tier: 2 },
+          { id: 'wol', name: 'Вулверхэмптон', short: 'WOL', ovr: 70, primary: '#FDB913', secondary: '#231F20', tier: 1 }
+        ]
+      },
+      {
+        id: 'laliga',
+        name: 'Ла Лига',
+        fullName: 'Испанская Ла Лига',
+        flag: '🇪🇸',
+        prestige: 1.12,
+        clubs: [
+          { id: 'rma', name: 'Реал Мадрид', short: 'RMA', ovr: 90, primary: '#FFFFFF', secondary: '#FEBE10', tier: 5 },
+          { id: 'bar', name: 'Барселона', short: 'BAR', ovr: 88, primary: '#A50044', secondary: '#004D98', tier: 5 },
+          { id: 'atm', name: 'Атлетико Мадрид', short: 'ATM', ovr: 85, primary: '#CB3524', secondary: '#272E61', tier: 4 },
+          { id: 'ath', name: 'Атлетик Бильбао', short: 'ATH', ovr: 80, primary: '#EE2523', secondary: '#FFFFFF', tier: 3 },
+          { id: 'rso', name: 'Реал Сосьедад', short: 'RSO', ovr: 79, primary: '#0067B1', secondary: '#FFFFFF', tier: 3 },
+          { id: 'vil', name: 'Вильярреал', short: 'VIL', ovr: 78, primary: '#FFE667', secondary: '#005187', tier: 3 },
+          { id: 'bet', name: 'Бетис', short: 'BET', ovr: 77, primary: '#0BB363', secondary: '#FFFFFF', tier: 2 },
+          { id: 'sev', name: 'Севилья', short: 'SEV', ovr: 75, primary: '#D4002A', secondary: '#FFFFFF', tier: 2 },
+          { id: 'val', name: 'Валенсия', short: 'VAL', ovr: 72, primary: '#EE7500', secondary: '#111111', tier: 2 },
+          { id: 'get', name: 'Хетафе', short: 'GET', ovr: 69, primary: '#005999', secondary: '#FFFFFF', tier: 1 }
+        ]
+      },
+      {
+        id: 'seriea',
+        name: 'Серия А',
+        fullName: 'Итальянская Серия А',
+        flag: '🇮🇹',
+        prestige: 1.06,
+        clubs: [
+          { id: 'int', name: 'Интер', short: 'INT', ovr: 88, primary: '#010E80', secondary: '#000000', tier: 5 },
+          { id: 'nap', name: 'Наполи', short: 'NAP', ovr: 85, primary: '#12A0D7', secondary: '#FFFFFF', tier: 4 },
+          { id: 'mil', name: 'Милан', short: 'MIL', ovr: 84, primary: '#FB090B', secondary: '#000000', tier: 4 },
+          { id: 'juv', name: 'Ювентус', short: 'JUV', ovr: 84, primary: '#111111', secondary: '#FFFFFF', tier: 4 },
+          { id: 'ata', name: 'Аталанта', short: 'ATA', ovr: 83, primary: '#1E71B8', secondary: '#000000', tier: 4 },
+          { id: 'rom', name: 'Рома', short: 'ROM', ovr: 80, primary: '#8E1F2F', secondary: '#F0BC42', tier: 3 },
+          { id: 'laz', name: 'Лацио', short: 'LAZ', ovr: 79, primary: '#87D8F7', secondary: '#FFFFFF', tier: 3 },
+          { id: 'fio', name: 'Фиорентина', short: 'FIO', ovr: 77, primary: '#482E92', secondary: '#FFFFFF', tier: 2 },
+          { id: 'bol', name: 'Болонья', short: 'BOL', ovr: 75, primary: '#9F1F33', secondary: '#1A2F48', tier: 2 },
+          { id: 'lec', name: 'Лечче', short: 'LEC', ovr: 68, primary: '#F7D117', secondary: '#D52B1E', tier: 1 }
+        ]
+      },
+      {
+        id: 'bundes',
+        name: 'Бундеслига',
+        fullName: 'Немецкая Бундеслига',
+        flag: '🇩🇪',
+        prestige: 1.08,
+        clubs: [
+          { id: 'bay', name: 'Бавария', short: 'BAY', ovr: 89, primary: '#DC052D', secondary: '#0066B2', tier: 5 },
+          { id: 'lev', name: 'Байер Леверкузен', short: 'LEV', ovr: 86, primary: '#E32221', secondary: '#111111', tier: 4 },
+          { id: 'bvb', name: 'Боруссия Дортмунд', short: 'BVB', ovr: 84, primary: '#FDE100', secondary: '#000000', tier: 4 },
+          { id: 'rbl', name: 'РБ Лейпциг', short: 'RBL', ovr: 83, primary: '#DD0741', secondary: '#FFFFFF', tier: 4 },
+          { id: 'stu', name: 'Штутгарт', short: 'STU', ovr: 80, primary: '#E32219', secondary: '#FFFFFF', tier: 3 },
+          { id: 'sge', name: 'Айнтрахт', short: 'SGE', ovr: 79, primary: '#E1000F', secondary: '#111111', tier: 3 },
+          { id: 'fre', name: 'Фрайбург', short: 'FRE', ovr: 76, primary: '#D71920', secondary: '#111111', tier: 2 },
+          { id: 'wob', name: 'Вольфсбург', short: 'WOB', ovr: 75, primary: '#65B32E', secondary: '#FFFFFF', tier: 2 },
+          { id: 'wer', name: 'Вердер', short: 'WER', ovr: 72, primary: '#1D9053', secondary: '#FFFFFF', tier: 2 },
+          { id: 'boc', name: 'Бохум', short: 'BOC', ovr: 67, primary: '#005CA9', secondary: '#FFFFFF', tier: 1 }
+        ]
+      },
+      {
+        id: 'ligue1',
+        name: 'Лига 1',
+        fullName: 'Французская Лига 1',
+        flag: '🇫🇷',
+        prestige: 1.0,
+        clubs: [
+          { id: 'psg', name: 'ПСЖ', short: 'PSG', ovr: 89, primary: '#004170', secondary: '#DA291C', tier: 5 },
+          { id: 'mon', name: 'Монако', short: 'MON', ovr: 82, primary: '#E51B22', secondary: '#FFFFFF', tier: 4 },
+          { id: 'mar', name: 'Марсель', short: 'OM', ovr: 81, primary: '#2FAEE0', secondary: '#FFFFFF', tier: 3 },
+          { id: 'lil', name: 'Лилль', short: 'LIL', ovr: 80, primary: '#E01E13', secondary: '#242B5E', tier: 3 },
+          { id: 'lyo', name: 'Лион', short: 'OL', ovr: 79, primary: '#14387F', secondary: '#DA291C', tier: 3 },
+          { id: 'nic', name: 'Ницца', short: 'NIC', ovr: 78, primary: '#CC0000', secondary: '#111111', tier: 3 },
+          { id: 'len', name: 'Ланс', short: 'LEN', ovr: 76, primary: '#EC1C24', secondary: '#FFF200', tier: 2 },
+          { id: 'ren', name: 'Ренн', short: 'REN', ovr: 75, primary: '#E30613', secondary: '#111111', tier: 2 },
+          { id: 'str', name: 'Страсбург', short: 'STR', ovr: 71, primary: '#009FE3', secondary: '#FFFFFF', tier: 2 },
+          { id: 'hac', name: 'Гавр', short: 'HAC', ovr: 66, primary: '#1C355E', secondary: '#75B2DD', tier: 1 }
+        ]
+      }
+    ];
+
+    const POSITIONS = {
+      FWD: {
+        code: 'НАП',
+        name: 'Нападающий',
+        icon: '⚡',
+        desc: 'Голы, выходы 1 на 1, пенальти. Главная звезда атаки.',
+        baseStats: { pac: 66, sho: 67, pas: 56, dri: 64, def: 35, phy: 58 },
+        weights: { pac: 0.22, sho: 0.28, pas: 0.13, dri: 0.22, def: 0.03, phy: 0.12 }
+      },
+      MID: {
+        code: 'ПЗ',
+        name: 'Полузащитник',
+        icon: '🎯',
+        desc: 'Ассисты, штрафные, дирижёр темпа игры и контроль центра.',
+        baseStats: { pac: 62, sho: 59, pas: 67, dri: 65, def: 52, phy: 59 },
+        weights: { pac: 0.14, sho: 0.14, pas: 0.28, dri: 0.24, def: 0.10, phy: 0.10 }
+      },
+      DEF: {
+        code: 'ЗАЩ',
+        name: 'Защитник',
+        icon: '🛡️',
+        desc: 'Подкаты, перехваты, игра головой на стандартах. Стена обороны.',
+        baseStats: { pac: 61, sho: 42, pas: 58, dri: 52, def: 67, phy: 66 },
+        weights: { pac: 0.16, sho: 0.06, pas: 0.14, dri: 0.08, def: 0.32, phy: 0.24 }
+      }
+    };
+
+    const STAT_META = [
+      { key: 'pac', label: 'СКР', name: 'Скорость', icon: '💨', trainTitle: 'Спринты и рывки', energy: 14 },
+      { key: 'sho', label: 'УДР', name: 'Удар', icon: '🎯', trainTitle: 'Завершение атак', energy: 14 },
+      { key: 'pas', label: 'ПАС', name: 'Пас', icon: '📐', trainTitle: 'Видение поля', energy: 13 },
+      { key: 'dri', label: 'ДРБ', name: 'Дриблинг', icon: '🕺', trainTitle: 'Техника и финты', energy: 14 },
+      { key: 'def', label: 'ЗАЩ', name: 'Защита', icon: '🛡️', trainTitle: 'Отбор и опека', energy: 14 },
+      { key: 'phy', label: 'ФИЗ', name: 'Физика', icon: '🏋️', trainTitle: 'Тренажёрный зал', energy: 16 }
+    ];
+
+    const AGENTS = [
+      { id: 0, name: 'Дядя Игорь', desc: 'Знакомый семьи. Ищет варианты в середняках.', cost: 0, bonusTop: 0, negBonus: 0, emoji: '🧔' },
+      { id: 1, name: 'Марко Росси', desc: 'Лицензированный агент. +15% к интересу крепких клубов.', cost: 120000, bonusTop: 15, negBonus: 10, emoji: '💼' },
+      { id: 2, name: 'Дэвид Стерлинг', desc: 'Топ-агент Европы. +30% к офферам из грандов и сильные торги.', cost: 650000, bonusTop: 30, negBonus: 22, emoji: '🕶️' },
+      { id: 3, name: 'Жорже Суперстар', desc: 'Король трансферов. Открывает двери в Реал, Сити, Баварию и ПСЖ!', cost: 2500000, bonusTop: 50, negBonus: 35, emoji: '👑' }
+    ];
+
+    const GEAR_STAFF = [
+      { id: 'boots1', name: 'Карбоновые бутсы Pro', desc: '+2 к УДР и СКР в матчах, +8% к шансу тренировки', cost: 45000, icon: '👟', category: 'gear', effect: { matchBonus: 2, trainBonus: 0.08 } },
+      { id: 'boots2', name: 'Золотые бутсы Signature', desc: '+4 к УДР, ДРБ и СКР в матчах, +12% к тренировкам', cost: 420000, icon: '⚡', category: 'gear', effect: { matchBonus: 4, trainBonus: 0.12 } },
+      { id: 'physio', name: 'Личный физиотерапевт', desc: '+14 энергии восстановления после каждого матча', cost: 110000, icon: '💆', category: 'staff', effect: { energyRegen: 14 } },
+      { id: 'coach', name: 'Личный тренер', desc: '+30% к эффективности всех тренировок статов', cost: 260000, icon: '📋', category: 'staff', effect: { trainBonus: 0.30 } },
+      { id: 'nutri', name: 'Спортивный нутрициолог', desc: '-50% риска получить травму +8 энергии после матча', cost: 180000, icon: '🥗', category: 'staff', effect: { injuryRed: 0.5, energyRegen: 8 } }
+    ];
+
+    const LIFESTYLE_ITEMS = [
+      { id: 'car1', name: 'Спортивное купе', desc: '+15 000 фанатов, +6 к морали после каждого матча', cost: 95000, icon: '🏎️', fans: 15000, moraleBonus: 6 },
+      { id: 'apt', name: 'Пентхаус в центре', desc: '+45 000 фанатов, +8 к морали и престижу', cost: 480000, icon: '🏙️', fans: 45000, moraleBonus: 8 },
+      { id: 'villa', name: 'Вилла с бассейном', desc: '+150 000 фанатов, +12 к морали и элитный статус', cost: 2200000, icon: '🏡', fans: 150000, moraleBonus: 12 },
+      { id: 'yacht', name: 'Суперъяхта 40м', desc: '+450 000 фанатов, статус мировой иконы футбола', cost: 7500000, icon: '🛥️', fans: 450000, moraleBonus: 15 }
+    ];
+
+    const SPONSORS = [
+      { id: 'sp1', name: 'Local Energy Drink', reqFans: 5000, perMatch: 5000, perGoal: 4000, icon: '⚡', desc: 'Первый рекламный контракт на напитки.' },
+      { id: 'sp2', name: 'Apex Sportwear', reqFans: 35000, perMatch: 18000, perGoal: 12000, icon: '👕', desc: 'Лицо новой коллекции спортивной одежды.' },
+      { id: 'sp3', name: 'Chronos Luxury Watch', reqFans: 150000, perMatch: 48000, perGoal: 30000, icon: '⌚', desc: 'Элитные швейцарские часы для звёзд.' },
+      { id: 'sp4', name: 'AeroJet Global', reqFans: 500000, perMatch: 120000, perGoal: 75000, icon: '✈️', desc: 'Мировой амбассадор авиалиний.' },
+      { id: 'sp5', name: 'Titan Footwear Icon', reqFans: 1500000, perMatch: 280000, perGoal: 160000, icon: '👑', desc: 'Именная линейка бутс по всему миру!' }
+    ];
+
+    const RANDOM_NAMES = [
+      'Артём Волков', 'Максим Соколов', 'Даниил Морозов', 'Кирилл Громов', 'Никита Орлов',
+      'Алексей Титов', 'Матвей Белов', 'Егор Сафонов', 'Роман Ковалёв', 'Илья Мельников',
+      'Лука Морено', 'Матео Сильва', 'Лео Вальдес', 'Маркус Шмидт', 'Тео Лоран'
+    ];
+
+    const SAVE_KEY = 'pro_career_top5_save_v1';
+
+    /*************************************************************************
+     * 3. STATE MANAGEMENT & CORE FORMULAS
+     *************************************************************************/
+    let state = null;
+    let activeTab = 'career'; // career | training | table | transfers | life
+    let selectedTableLeague = null;
+    let liveMatch = null; // Active interactive match object
+
+    function getLeagueById(id) {
+      return LEAGUES.find(l => l.id === id) || LEAGUES[0];
+    }
+
+    function getClubById(clubId) {
+      for (const l of LEAGUES) {
+        const c = l.clubs.find(cl => cl.id === clubId);
+        if (c) return { ...c, leagueId: l.id, leagueName: l.name, leagueFlag: l.flag, prestige: l.prestige };
+      }
+      return null;
+    }
+
+    function calcOVR(stats, posKey) {
+      const w = POSITIONS[posKey].weights;
+      const raw =
+        stats.pac * w.pac +
+        stats.sho * w.sho +
+        stats.pas * w.pas +
+        stats.dri * w.dri +
+        stats.def * w.def +
+        stats.phy * w.phy;
+      return Math.min(99, Math.max(40, Math.round(raw)));
+    }
+
+    function calcMarketValue(p) {
+      const ovr = calcOVR(p.stats, p.pos);
+      const league = getLeagueById(p.leagueId);
+      // Exponential curve so 62 OVR ≈ €1.2M, 75 OVR ≈ €14M, 85 OVR ≈ €68M, 93 OVR ≈ €180M+
+      let base = Math.pow(Math.max(1, ovr - 55), 2.38) * 32000;
+      // Age multiplier
+      let ageMult = 1.0;
+      if (p.age <= 21) ageMult = 1.35;
+      else if (p.age <= 26) ageMult = 1.15;
+      else if (p.age >= 32) ageMult = Math.max(0.25, 1 - (p.age - 31) * 0.14);
+      // Season performance bonus
+      const perfMult = 1 + Math.min(0.45, (p.seasonStats.goals * 0.025 + p.seasonStats.assists * 0.015));
+      const val = Math.round((base * ageMult * league.prestige * perfMult) / 100000) * 100000;
+      return Math.max(500000, val);
+    }
+
+    function formatMoney(num) {
+      if (num >= 1000000) return '€' + (num / 1000000).toFixed(num >= 10000000 ? 1 : 2) + ' млн';
+      if (num >= 1000) return '€' + Math.round(num / 1000) + ' тыс.';
+      return '€' + Math.round(num);
+    }
+
+    function formatFans(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return String(Math.round(num));
+    }
+
+    function getRoleLabel(trust) {
+      if (trust >= 70) return { label: 'Основа', color: 'text-emerald-400', moments: 4 };
+      if (trust >= 35) return { label: 'Ротация', color: 'text-amber-400', moments: 3 };
+      return { label: 'Запасной', color: 'text-rose-400', moments: 2 };
+    }
+
+    function getPlayerGearBonuses() {
+      let matchBonus = 0;
+      let trainBonus = 0;
+      let energyRegen = 0;
+      let injuryRed = 0;
+      let moraleBonus = 0;
+
+      const owned = state.player.ownedItems || [];
+      GEAR_STAFF.forEach(item => {
+        if (owned.includes(item.id)) {
+          if (item.effect.matchBonus) matchBonus = Math.max(matchBonus, item.effect.matchBonus);
+          if (item.effect.trainBonus) trainBonus += item.effect.trainBonus;
+          if (item.effect.energyRegen) energyRegen += item.effect.energyRegen;
+          if (item.effect.injuryRed) injuryRed = Math.max(injuryRed, item.effect.injuryRed);
+        }
+      });
+      LIFESTYLE_ITEMS.forEach(item => {
+        if (owned.includes(item.id)) {
+          moraleBonus = Math.max(moraleBonus, item.moraleBonus);
+        }
+      });
+      return { matchBonus, trainBonus, energyRegen, injuryRed, moraleBonus };
+    }
+
+    function saveState() {
+      try {
+        if (state) localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Save error:', e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+          state = JSON.parse(raw);
+          if (state && state.player) {
+            selectedTableLeague = state.player.leagueId;
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn('Load error:', e);
+      }
+      return false;
+    }
+
+    /*************************************************************************
+     * 4. SEASON SCHEDULE & LEAGUE SIMULATION ENGINE
+     *************************************************************************/
+    // Generates an 18-round double round-robin schedule for 10 teams
+    function generateLeagueSchedule(clubs) {
+      const ids = clubs.map(c => c.id);
+      const n = ids.length; // 10
+      const half = n / 2;
+      const rounds = [];
+      const arr = [...ids];
+
+      for (let r = 0; r < n - 1; r++) {
+        const matches = [];
+        for (let i = 0; i < half; i++) {
+          const home = (r % 2 === 0) ? arr[i] : arr[n - 1 - i];
+          const away = (r % 2 === 0) ? arr[n - 1 - i] : arr[i];
+          matches.push({ home, away });
+        }
+        rounds.push(matches);
+        // Rotate all except first element
+        const last = arr.pop();
+        arr.splice(1, 0, last);
+      }
+      // Second half (swapped home/away)
+      const secondHalf = rounds.map(r => r.map(m => ({ home: m.away, away: m.home })));
+      return [...rounds, ...secondHalf];
+    }
+
+    function initSeasonTables() {
+      const tables = {};
+      const schedules = {};
+      LEAGUES.forEach(l => {
+        tables[l.id] = l.clubs.map(c => ({
+          clubId: c.id,
+          played: 0,
+          w: 0,
+          d: 0,
+          l: 0,
+          gf: 0,
+          ga: 0,
+          pts: 0
+        }));
+        schedules[l.id] = generateLeagueSchedule(l.clubs);
+      });
+      return { tables, schedules };
+    }
+
+    function sortTable(rows) {
+      return [...rows].sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        const gdA = a.gf - a.ga;
+        const gdB = b.gf - b.ga;
+        if (gdB !== gdA) return gdB - gdA;
+        if (b.gf !== a.gf) return b.gf - a.gf;
+        return a.clubId.localeCompare(b.clubId);
+      });
+    }
+
+    function simulateAIMatchScore(homeClub, awayClub) {
+      // Home advantage +2 OVR
+      const diff = (homeClub.ovr + 2) - awayClub.ovr;
+      const homeExp = Math.max(0.35, 1.35 + diff * 0.065);
+      const awayExp = Math.max(0.30, 1.15 - diff * 0.055);
+      const poisson = (lambda) => {
+        let L = Math.exp(-lambda);
+        let k = 0, p = 1;
+        do { k++; p *= Math.random(); } while (p > L && k < 7);
+        return k - 1;
+      };
+      return { hg: poisson(homeExp), ag: poisson(awayExp) };
+    }
+
+    function applyMatchToTable(leagueId, homeId, awayId, hg, ag) {
+      const table = state.tables[leagueId];
+      const hRow = table.find(r => r.clubId === homeId);
+      const aRow = table.find(r => r.clubId === awayId);
+      if (!hRow || !aRow) return;
+
+      hRow.played++; aRow.played++;
+      hRow.gf += hg; hRow.ga += ag;
+      aRow.gf += ag; aRow.ga += hg;
+
+      if (hg > ag) {
+        hRow.w++; hRow.pts += 3; aRow.l++;
+      } else if (ag > hg) {
+        aRow.w++; aRow.pts += 3; hRow.l++;
+      } else {
+        hRow.d++; hRow.pts += 1; aRow.d++; aRow.pts += 1;
+      }
+    }
+
+    function simulateOtherLeagueMatches(roundIdx, excludeLeagueId, excludeMatch) {
+      LEAGUES.forEach(league => {
+        const roundMatches = state.schedules[league.id][roundIdx];
+        if (!roundMatches) return;
+        roundMatches.forEach(m => {
+          if (league.id === excludeLeagueId && excludeMatch &&
+              m.home === excludeMatch.home && m.away === excludeMatch.away) {
+            return;
+          }
+          const hc = getClubById(m.home);
+          const ac = getClubById(m.away);
+          const { hg, ag } = simulateAIMatchScore(hc, ac);
+          applyMatchToTable(league.id, m.home, m.away, hg, ag);
+        });
+      });
+    }
+
+    function getNextPlayerMatch() {
+      const p = state.player;
+      // Check Champions League stage
+      if (state.ucl && state.ucl.active && !state.ucl.finished) {
+        return {
+          type: 'ucl',
+          stage: state.ucl.stage, // 'semi' | 'final'
+          home: state.ucl.currentOpponentHome ? state.ucl.opponentId : p.clubId,
+          away: state.ucl.currentOpponentHome ? p.clubId : state.ucl.opponentId,
+          opponentId: state.ucl.opponentId,
+          isHome: !state.ucl.currentOpponentHome
+        };
+      }
+      if (state.round >= 18) return null;
+      const roundMatches = state.schedules[p.leagueId][state.round];
+      const match = roundMatches.find(m => m.home === p.clubId || m.away === p.clubId);
+      if (!match) return null;
+      const isHome = match.home === p.clubId;
+      return {
+        type: 'league',
+        round: state.round + 1,
+        home: match.home,
+        away: match.away,
+        opponentId: isHome ? match.away : match.home,
+        isHome
+      };
+    }
+
+    /*************************************************************************
+     * 5. NEW CAREER INITIALIZATION
+     *************************************************************************/
+    function createNewCareer(name, posKey, leagueId) {
+      const league = getLeagueById(leagueId);
+      // Lowest rated club in chosen league
+      const starterClub = [...league.clubs].sort((a, b) => a.ovr - b.ovr)[0];
+      const base = POSITIONS[posKey].baseStats;
+      const stats = { ...base };
+      const { tables, schedules } = initSeasonTables();
+
+      state = {
+        season: 1,
+        round: 0, // 0..17 (18 rounds)
+        weekActionsLeft: 3,
+        transferWindowOpen: false,
+        transferOffers: [],
+        ucl: { active: false, stage: null, opponentId: null, finished: false, won: false },
+        tables,
+        schedules,
+        settings: { sound: true },
+        player: {
+          name: name.trim() || 'Артём Волков',
+          pos: posKey,
+          age: 17,
+          leagueId: league.id,
+          clubId: starterClub.id,
+          salary: 14000, // per match
+          money: 25000,
+          stats,
+          energy: 100,
+          form: 72,
+          trust: 45,
+          fans: 1200,
+          injuryRounds: 0,
+          agentId: 0,
+          ownedItems: [],
+          activeSponsorId: null,
+          seasonStats: { matches: 0, goals: 0, assists: 0, motm: 0, ratingSum: 0 },
+          careerStats: { matches: 0, goals: 0, assists: 0, motm: 0, ratingSum: 0 },
+          trophies: { league: 0, ucl: 0, goldenBoot: 0, ballonDor: 0 },
+          history: []
+        }
+      };
+      selectedTableLeague = league.id;
+      activeTab = 'career';
+      saveState();
+      haptic('success');
+      playSfx('goal');
+      render();
+      showToast(`Добро пожаловать в ${starterClub.name}!`, 'success');
+    }
+
+    /*************************************************************************
+     * 6. SVG CREST & FIFA CARD RENDERING HELPERS
+     *************************************************************************/
+    function renderClubCrest(club, size = 38) {
+      if (!club) return '';
+      const textColor = (club.primary === '#FFFFFF' || club.primary === '#FFE667' || club.primary === '#FDE100' || club.primary === '#FDB913' || club.primary === '#F7D117') ? '#0f172a' : '#ffffff';
+      return `
+        <svg width="${size}" height="${size}" viewBox="0 0 48 48" class="shrink-0 drop-shadow-md">
+          <defs>
+            <linearGradient id="g-${club.id}-${size}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="${club.primary}" />
+              <stop offset="100%" stop-color="${club.secondary}" />
+            </linearGradient>
+          </defs>
+          <path d="M24 3 L42 10 V24 C42 35 33.5 42.5 24 46 C14.5 42.5 6 35 6 24 V10 Z"
+                fill="url(#g-${club.id}-${size})" stroke="rgba(255,255,255,0.75)" stroke-width="2" />
+          <path d="M24 6 L39 12 V24 C39 33 32 39.5 24 42.5 V6 Z" fill="rgba(0,0,0,0.16)" />
+          <text x="24" y="28" text-anchor="middle" fill="${textColor}" font-family="Oswald, sans-serif" font-weight="700" font-size="11.5" letter-spacing="0.5">${club.short}</text>
+        </svg>
+      `;
+    }
+
+    function getFutCardClass(ovr) {
+      if (ovr >= 88) return 'fut-toty';
+      if (ovr >= 78) return 'fut-gold';
+      if (ovr >= 68) return 'fut-silver';
+      return 'fut-bronze';
+    }
+
+    function getStatColor(val) {
+      if (val >= 85) return 'text-emerald-400';
+      if (val >= 75) return 'text-amber-300';
+      if (val >= 65) return 'text-sky-300';
+      return 'text-slate-300';
+    }
+
+    /*************************************************************************
+     * 7. INTERACTIVE MATCH ENGINE
+     *************************************************************************/
+    function openPreMatchModal() {
+      const p = state.player;
+      const next = getNextPlayerMatch();
+      if (!next) {
+        if (state.round >= 18 && (!state.ucl.active || state.ucl.finished)) {
+          openSeasonSummaryModal();
+        }
+        return;
+      }
+
+      // If injured, offer heal or skip
+      if (p.injuryRounds > 0) {
+        openInjuryModal();
+        return;
+      }
+
+      const myClub = getClubById(p.clubId);
+      const oppClub = getClubById(next.opponentId);
+      const role = getRoleLabel(p.trust);
+      const isUcl = next.type === 'ucl';
+      const title = isUcl
+        ? (next.stage === 'semi' ? '🏆 Лига Чемпионов — 1/2 финала' : '🏆 ФИНАЛ ЛИГИ ЧЕМПИОНОВ')
+        : `${myClub.leagueFlag} ${myClub.leagueName} • Тур ${next.round} из 18`;
+
+      const energyWarn = p.energy < 35
+        ? `<div class="mt-3 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2">
+            <span>⚠️</span>
+            <span>Низкая энергия (${p.energy}%)! Высокий риск травмы. Рекомендуем отдохнуть во вкладке «Тренировки».</span>
+           </div>`
+        : '';
+
+      openModal(`
+        <div class="w-full max-w-[420px] glass-panel p-5 animate-in">
+          <div class="text-center text-xs font-bold uppercase tracking-wider ${isUcl ? 'text-amber-400' : 'text-emerald-400'} mb-4">${title}</div>
+
+          <div class="flex items-center justify-between gap-2 bg-slate-900/80 rounded-2xl p-4 border border-white/10">
+            <div class="flex flex-col items-center w-[40%] text-center">
+              ${renderClubCrest(next.isHome ? myClub : oppClub, 52)}
+              <div class="text-xs font-bold mt-2 leading-tight">${(next.isHome ? myClub : oppClub).name}</div>
+              <div class="text-[11px] text-slate-400 font-sport mt-0.5">OVR ${(next.isHome ? myClub : oppClub).ovr}</div>
+            </div>
+            <div class="flex flex-col items-center">
+              <span class="font-sport text-2xl font-bold text-slate-400">VS</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 mt-1">${next.isHome ? 'Дома' : 'В гостях'}</span>
+            </div>
+            <div class="flex flex-col items-center w-[40%] text-center">
+              ${renderClubCrest(next.isHome ? oppClub : myClub, 52)}
+              <div class="text-xs font-bold mt-2 leading-tight">${(next.isHome ? oppClub : myClub).name}</div>
+              <div class="text-[11px] text-slate-400 font-sport mt-0.5">OVR ${(next.isHome ? oppClub : myClub).ovr}</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs">
+            <div class="bg-slate-900/70 rounded-xl p-2 border border-white/5">
+              <div class="text-slate-400 text-[10px]">Статус</div>
+              <div class="font-bold ${role.color}">${role.label}</div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-2 border border-white/5">
+              <div class="text-slate-400 text-[10px]">Моментов</div>
+              <div class="font-bold text-white">${role.moments}</div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-2 border border-white/5">
+              <div class="text-slate-400 text-[10px]">Энергия</div>
+              <div class="font-bold ${p.energy < 35 ? 'text-rose-400' : 'text-emerald-400'}">${p.energy}%</div>
+            </div>
+          </div>
+
+          ${energyWarn}
+
+          <div class="flex flex-col gap-2.5 mt-5">
+            <button onclick="startInteractiveMatch()" class="btn-primary py-3.5 text-sm flex items-center justify-center gap-2">
+              <span>⚽</span> Играть ключевые моменты
+            </button>
+            <button onclick="runQuickSimMatch()" class="btn-secondary py-3 text-sm flex items-center justify-center gap-2">
+              <span>⏩</span> Быстрая симуляция
+            </button>
+            <button onclick="closeModal()" class="text-xs text-slate-400 py-1.5 hover:text-white">Отмена</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function calcActionChance(statKey, oppOvr, difficultyMod = 0) {
+      const p = state.player;
+      const bonuses = getPlayerGearBonuses();
+      const playerStat = p.stats[statKey] + bonuses.matchBonus;
+      const formMod = (p.form - 65) * 0.28;
+      const energyMod = p.energy < 35 ? -10 : (p.energy > 80 ? 3 : 0);
+      const raw = 54 + (playerStat - oppOvr) * 1.45 + formMod + energyMod + difficultyMod;
+      return Math.max(15, Math.min(93, Math.round(raw)));
+    }
+
+    function buildMomentScenario(pos, oppClub) {
+      const oppOvr = oppClub.ovr;
+      const pool = [];
+
+      // Attacking moments
+      const oneOnOne = {
+        id: '1v1',
+        title: 'Выход 1 на 1 с вратарём!',
+        desc: `Партнёр вырезал идеальную передачу за спину защитникам ${oppClub.name}. Вы летите к воротам!`,
+        icon: '🔥',
+        choices: [
+          { label: 'Ударить на силу в угол', stat: 'sho', chance: calcActionChance('sho', oppOvr, 2), outcomeType: 'goal', successText: 'ПУШКА! Мяч вонзается в сетку — вратарь бессилен!', failText: 'Вратарь кончиками пальцев переводит мяч на угловой.' },
+          { label: 'Обвести вратаря финтом', stat: 'dri', chance: calcActionChance('dri', oppOvr, -2), outcomeType: 'goal', successText: 'Хладнокровный финт! Вы укладываете голкипера и катите в пустые!', failText: 'Вратарь бросился в ноги и забрал мяч.' },
+          { label: 'Отдать на пустые партнёру', stat: 'pas', chance: calcActionChance('pas', oppOvr, 8), outcomeType: 'assist', successText: 'Идеальный пас на дальнюю штангу — партнёр легко замыкает! Ассист!', failText: 'Защитник в последнюю секунду перехватил прострел.' }
+        ]
+      };
+
+      const freeKick = {
+        id: 'fk',
+        title: 'Опасный штрафной у ворот!',
+        desc: '21 метр до ворот. Стенка выстроена, стадион замер в ожидании вашего удара.',
+        icon: '🎯',
+        choices: [
+          { label: 'Закрутить в девятку', stat: 'sho', chance: calcActionChance('sho', oppOvr, -5), outcomeType: 'goal', successText: 'ШЕДЕВР! Мяч по дуге огибает стенку и залетает точно в девятку!', failText: 'Мяч чиркнул перекладину и ушёл выше ворот!' },
+          { label: 'Навесить точно на голову', stat: 'pas', chance: calcActionChance('pas', oppOvr, 5), outcomeType: 'assist', successText: 'Ювелирная подача! Партнёр вколачивает мяч головой — ассист!', failText: 'Вратарь уверенно сыграл на выходе и забрал мяч.' }
+        ]
+      };
+
+      const wingRun = {
+        id: 'wing',
+        title: 'Скоростной прорыв по флангу!',
+        desc: `Вы на скорости уходите от опекуна ${oppClub.name} и врываетесь к штрафной.`,
+        icon: '💨',
+        choices: [
+          { label: 'Сместиться в центр и пробить', stat: 'dri', chance: calcActionChance('dri', oppOvr, -1), outcomeType: 'goal', successText: 'Убрали на замахе двоих и точно пробили в дальний угол! ГОЛ!', failText: 'Защитник успел заблокировать удар в подкате.' },
+          { label: 'Прострелить в штрафную', stat: 'pas', chance: calcActionChance('pas', oppOvr, 7), outcomeType: 'assist', successText: 'Резкий прострел вдоль ворот — форвард в касание отправляет мяч в сетку!', failText: 'Никто из партнёров не успел замкнуть передачу.' },
+          { label: 'Прокинуть мяч на скорости', stat: 'pac', chance: calcActionChance('pac', oppOvr, 3), outcomeType: 'goal', successText: 'Сумасшедший рывок! Вы выбежали под острым углом и прошили вратаря!', failText: 'Мяч ушёл за лицевую — не хватило метра поля.' }
+        ]
+      };
+
+      const defenseAlert = {
+        id: 'def',
+        title: `Опасная контратака ${oppClub.name}!`,
+        desc: 'Форвард соперника набирает скорость и вот-вот выйдет на ударную позицию!',
+        icon: '🛡️',
+        isDefense: true,
+        choices: [
+          { label: 'Чистый подкат', stat: 'def', chance: calcActionChance('def', oppOvr, 3), outcomeType: 'save', successText: 'Блестящий подкат! Вы чисто выбиваете мяч и срываете атаку!', failText: 'Соперник прокинул мяч мимо вас и забил гол...' },
+          { label: 'Сыграть на перехвате', stat: 'pac', chance: calcActionChance('pac', oppOvr, 1), outcomeType: 'save', successText: 'Молниеносный рывок на опережение! Мяч у вашей команды!', failText: 'Не успели на долю секунды — соперник реализовал момент.' },
+          { label: 'Навязать силовую борьбу', stat: 'phy', chance: calcActionChance('phy', oppOvr, 2), outcomeType: 'save', successText: 'Мощно поставили корпус и оттеснили нападающего от мяча!', failText: 'Форвард удержался на ногах и пробил точно в угол.' }
+        ]
+      };
+
+      const cornerHeader = {
+        id: 'corner',
+        title: 'Угловой удар! Подача в штрафную!',
+        desc: 'Вы вбегаете в центр вратарской, мяч летит на идеальной высоте.',
+        icon: '⚡',
+        choices: [
+          { label: 'Пробить головой в борьбе', stat: 'phy', chance: calcActionChance('phy', oppOvr, 0), outcomeType: 'goal', successText: 'Вы перевисели всех в воздухе и вколотили мяч в сетку! ГОЛ!', failText: 'Удар головой прошёл в сантиметрах от штанги.' },
+          { label: 'Скинуть партнёру на линию', stat: 'pas', chance: calcActionChance('pas', oppOvr, 8), outcomeType: 'assist', successText: 'Умная скидка на набегающего партнёра — пушечный гол с лёта!', failText: 'Защитник вынес мяч из штрафной.' }
+        ]
+      };
+
+      const penalty = {
+        id: 'penalty',
+        title: 'ПЕНАЛЬТИ В ВОРОТА СОПЕРНИКА!',
+        desc: 'Судья указывает на точку! Вы берёте мяч в руки и подходите к 11-метровой отметке.',
+        icon: '⚽',
+        isPenalty: true
+      };
+
+      if (pos === 'FWD') {
+        pool.push(oneOnOne, oneOnOne, wingRun, freeKick, cornerHeader, penalty);
+      } else if (pos === 'MID') {
+        pool.push(wingRun, freeKick, oneOnOne, defenseAlert, cornerHeader, penalty);
+      } else {
+        pool.push(defenseAlert, defenseAlert, cornerHeader, wingRun, freeKick);
+      }
+
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function startInteractiveMatch() {
+      const p = state.player;
+      const next = getNextPlayerMatch();
+      const myClub = getClubById(p.clubId);
+      const oppClub = getClubById(next.opponentId);
+      const role = getRoleLabel(p.trust);
+
+      // Schedule moment minutes
+      const count = role.moments;
+      const momentMins = [];
+      const startMin = role.label === 'Запасной' ? 52 : 12;
+      const step = Math.floor((86 - startMin) / count);
+      for (let i = 0; i < count; i++) {
+        momentMins.push(startMin + i * step + Math.floor(Math.random() * 6));
+      }
+
+      liveMatch = {
+        next,
+        myClub,
+        oppClub,
+        minute: 0,
+        myScore: 0,
+        oppScore: 0,
+        playerGoals: 0,
+        playerAssists: 0,
+        playerSaves: 0,
+        rating: 6.2,
+        momentMins,
+        momentIdx: 0,
+        activeMoment: null,
+        log: [
+          { min: 0, text: `Стартовый свисток! ${next.isHome ? myClub.name : oppClub.name} против ${next.isHome ? oppClub.name : myClub.name}.`, type: 'info' }
+        ],
+        timer: null,
+        finished: false,
+        goalFlash: false
+      };
+
+      if (role.label === 'Запасной') {
+        liveMatch.log.unshift({ min: 1, text: 'Вы начинаете матч на скамейке запасных. Тренер выпустит вас во втором тайме.', type: 'muted' });
+      }
+
+      haptic('medium');
+      renderLiveMatchModal();
+      resumeMatchTimer();
+    }
+
+    function resumeMatchTimer() {
+      if (!liveMatch || liveMatch.finished) return;
+      clearInterval(liveMatch.timer);
+      liveMatch.timer = setInterval(() => {
+        if (!liveMatch || liveMatch.activeMoment) return;
+        liveMatch.minute += 2;
+
+        // Background team goals simulation
+        const diff = (liveMatch.myClub.ovr + (liveMatch.next.isHome ? 2 : 0)) - liveMatch.oppClub.ovr;
+        const myBgChance = Math.max(0.008, 0.022 + diff * 0.0012);
+        const oppBgChance = Math.max(0.008, 0.022 - diff * 0.0012);
+
+        if (Math.random() < myBgChance && liveMatch.minute > 4 && liveMatch.minute < 89) {
+          liveMatch.myScore++;
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `⚽ ГОЛ! Партнёр по ${liveMatch.myClub.name} открывает счёт в атаке!`, type: 'good' });
+        } else if (Math.random() < oppBgChance && liveMatch.minute > 4 && liveMatch.minute < 89) {
+          liveMatch.oppScore++;
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `🔴 ${liveMatch.oppClub.name} забивает после быстрой комбинации.`, type: 'bad' });
+        }
+
+        // Check if subbed in
+        if (liveMatch.minute === 50 && getRoleLabel(state.player.trust).label === 'Запасной') {
+          liveMatch.log.unshift({ min: 50, text: `🔄 Замена! Вы выходите на поле под аплодисменты трибун!`, type: 'info' });
+        }
+
+        // Trigger interactive moment
+        const targetMin = liveMatch.momentMins[liveMatch.momentIdx];
+        if (targetMin && liveMatch.minute >= targetMin) {
+          clearInterval(liveMatch.timer);
+          liveMatch.activeMoment = buildMomentScenario(state.player.pos, liveMatch.oppClub);
+          liveMatch.momentIdx++;
+          haptic('medium');
+          renderLiveMatchModal();
+          return;
+        }
+
+        // End of match
+        if (liveMatch.minute >= 90) {
+          liveMatch.minute = 90;
+          clearInterval(liveMatch.timer);
+
+          // UCL tie-breaker (no draws allowed in knockout)
+          if (liveMatch.next.type === 'ucl' && liveMatch.myScore === liveMatch.oppScore) {
+            const winPen = Math.random() < (0.5 + (liveMatch.myClub.ovr - liveMatch.oppClub.ovr) * 0.02);
+            if (winPen) {
+              liveMatch.myScore++;
+              liveMatch.log.unshift({ min: 90, text: '🏆 Серия пенальти! Ваша команда вырывает победу!', type: 'good' });
+            } else {
+              liveMatch.oppScore++;
+              liveMatch.log.unshift({ min: 90, text: '💔 Серия пенальти... Соперник оказался точнее.', type: 'bad' });
+            }
+          }
+
+          liveMatch.finished = true;
+          liveMatch.log.unshift({ min: 90, text: '🏁 Финальный свисток! Матч завершён.', type: 'info' });
+          renderLiveMatchModal();
+          return;
+        }
+
+        renderLiveMatchModal();
+      }, 170);
+    }
+
+    function resolveMomentChoice(choiceIdx) {
+      if (!liveMatch || !liveMatch.activeMoment) return;
+      const choice = liveMatch.activeMoment.choices[choiceIdx];
+      const success = Math.random() * 100 < choice.chance;
+
+      if (success) {
+        haptic('success');
+        playSfx('goal');
+        if (choice.outcomeType === 'goal') {
+          liveMatch.myScore++;
+          liveMatch.playerGoals++;
+          liveMatch.rating = Math.min(10, liveMatch.rating + 1.15);
+          liveMatch.goalFlash = true;
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `⚽ ГОЛ! ${choice.successText}`, type: 'good' });
+        } else if (choice.outcomeType === 'assist') {
+          liveMatch.myScore++;
+          liveMatch.playerAssists++;
+          liveMatch.rating = Math.min(10, liveMatch.rating + 0.85);
+          liveMatch.goalFlash = true;
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `🎯 АССИСТ! ${choice.successText}`, type: 'good' });
+        } else if (choice.outcomeType === 'save') {
+          liveMatch.playerSaves++;
+          liveMatch.rating = Math.min(10, liveMatch.rating + 0.7);
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `🛡️ ОТБОР! ${choice.successText}`, type: 'good' });
+        }
+      } else {
+        haptic('error');
+        playSfx('fail');
+        liveMatch.rating = Math.max(4.5, liveMatch.rating - 0.35);
+        if (liveMatch.activeMoment.isDefense) {
+          liveMatch.oppScore++;
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `🔴 ПРОПУСТИЛИ! ${choice.failText}`, type: 'bad' });
+        } else {
+          liveMatch.log.unshift({ min: liveMatch.minute, text: `❌ Момент упущен: ${choice.failText}`, type: 'bad' });
+        }
+      }
+
+      liveMatch.activeMoment = null;
+      renderLiveMatchModal();
+      setTimeout(() => {
+        if (liveMatch) liveMatch.goalFlash = false;
+        resumeMatchTimer();
+      }, 550);
+    }
+
+    function resolvePenaltyShot(direction) {
+      if (!liveMatch || !liveMatch.activeMoment) return;
+      const dirs = ['left', 'center', 'right'];
+      const dirLabels = { left: 'левый угол', center: 'центр', right: 'правый угол' };
+      const keeperDir = dirs[Math.floor(Math.random() * 3)];
+
+      // Base penalty conversion chance boosted by SHO
+      const shoChance = calcActionChance('sho', liveMatch.oppClub.ovr, 18);
+      const scored = (direction !== keeperDir)
+        ? (Math.random() * 100 < Math.min(96, shoChance + 15))
+        : (Math.random() * 100 < Math.max(25, shoChance - 35));
+
+      if (scored) {
+        haptic('success');
+        playSfx('goal');
+        liveMatch.myScore++;
+        liveMatch.playerGoals++;
+        liveMatch.rating = Math.min(10, liveMatch.rating + 1.0);
+        liveMatch.goalFlash = true;
+        liveMatch.log.unshift({
+          min: liveMatch.minute,
+          text: `⚽ ГООООЛ с пенальти! Вы пробили в ${dirLabels[direction]}, а вратарь прыгнул в ${dirLabels[keeperDir]}!`,
+          type: 'good'
+        });
+      } else {
+        haptic('error');
+        playSfx('fail');
+        liveMatch.rating = Math.max(4.5, liveMatch.rating - 0.55);
+        liveMatch.log.unshift({
+          min: liveMatch.minute,
+          text: `🧤 СЕЙВ ВРАТАРЯ! Голкипер угадал направление (${dirLabels[direction]}) и отбил пенальти!`,
+          type: 'bad'
+        });
+      }
+
+      liveMatch.activeMoment = null;
+      renderLiveMatchModal();
+      setTimeout(() => {
+        if (liveMatch) liveMatch.goalFlash = false;
+        resumeMatchTimer();
+      }, 650);
+    }
+
+    function renderLiveMatchModal() {
+      if (!liveMatch) return;
+      const { next, myClub, oppClub, minute, myScore, oppScore, activeMoment, log, finished, goalFlash } = liveMatch;
+      const homeClub = next.isHome ? myClub : oppClub;
+      const awayClub = next.isHome ? oppClub : myClub;
+      const homeScore = next.isHome ? myScore : oppScore;
+      const awayScore = next.isHome ? oppScore : myScore;
+
+      let momentHtml = '';
+      if (activeMoment) {
+        if (activeMoment.isPenalty) {
+          momentHtml = `
+            <div class="mt-3 p-4 rounded-2xl bg-slate-900/95 border border-emerald-500/50 shadow-lg animate-in">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <span>⚽</span> ${activeMoment.title}
+              </div>
+              <p class="text-xs text-slate-300 mt-1 mb-3">${activeMoment.desc} Выберите угол ворот:</p>
+
+              <!-- Interactive Visual Goal -->
+              <div class="goal-net h-32 grid grid-cols-3 gap-1.5 p-2 relative">
+                <button onclick="resolvePenaltyShot('left')" class="penalty-zone rounded-lg border border-dashed border-emerald-400/50 flex flex-col items-center justify-center bg-black/25">
+                  <span class="text-lg">↖️</span>
+                  <span class="text-[11px] font-bold text-white">ЛЕВЫЙ</span>
+                </button>
+                <button onclick="resolvePenaltyShot('center')" class="penalty-zone rounded-lg border border-dashed border-emerald-400/50 flex flex-col items-center justify-center bg-black/25">
+                  <span class="text-2xl">🧤</span>
+                  <span class="text-[11px] font-bold text-white">ЦЕНТР</span>
+                </button>
+                <button onclick="resolvePenaltyShot('right')" class="penalty-zone rounded-lg border border-dashed border-emerald-400/50 flex flex-col items-center justify-center bg-black/25">
+                  <span class="text-lg">↗️</span>
+                  <span class="text-[11px] font-bold text-white">ПРАВЫЙ</span>
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          momentHtml = `
+            <div class="mt-3 p-4 rounded-2xl bg-slate-900/95 border border-emerald-500/50 shadow-lg animate-in">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <span>${activeMoment.icon}</span> ${activeMoment.title}
+              </div>
+              <p class="text-xs text-slate-300 mt-1 mb-3 leading-relaxed">${activeMoment.desc}</p>
+              <div class="flex flex-col gap-2">
+                ${activeMoment.choices.map((c, idx) => {
+                  const statLabel = STAT_META.find(s => s.key === c.stat).label;
+                  const chanceColor = c.chance >= 68 ? 'text-emerald-400 bg-emerald-500/15' : (c.chance >= 45 ? 'text-amber-300 bg-amber-500/15' : 'text-rose-400 bg-rose-500/15');
+                  return `
+                    <button onclick="resolveMomentChoice(${idx})" class="w-full text-left p-3 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 active:scale-[0.98] border border-white/10 transition flex items-center justify-between gap-2">
+                      <div>
+                        <div class="text-xs font-bold text-white">${c.label}</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Навык: <span class="text-sky-300 font-bold">${statLabel}</span></div>
+                      </div>
+                      <span class="px-2.5 py-1 rounded-lg font-sport text-sm font-bold ${chanceColor}">${c.chance}%</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      openModal(`
+        <div class="w-full max-w-[440px] glass-panel p-4 flex flex-col max-h-[92vh] ${goalFlash ? 'goal-flash' : ''}">
+          <!-- Live Scoreboard -->
+          <div class="bg-gradient-to-b from-slate-900 to-slate-950 rounded-2xl p-3.5 border border-white/10">
+            <div class="flex justify-between items-center text-[11px] mb-2">
+              <span class="text-slate-400 font-semibold">${next.type === 'ucl' ? '🏆 Лига Чемпионов' : `${myClub.leagueFlag} Тур ${next.round}`}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-sport font-bold tracking-wider">${minute}'</span>
+              <span class="text-amber-300 font-bold">⭐ ${liveMatch.rating.toFixed(1)}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 w-[38%]">
+                ${renderClubCrest(homeClub, 36)}
+                <span class="text-xs font-bold truncate">${homeClub.short}</span>
+              </div>
+              <div class="font-sport text-3xl font-bold tracking-widest text-white px-2">
+                ${homeScore} <span class="text-slate-600">:</span> ${awayScore}
+              </div>
+              <div class="flex items-center justify-end gap-2 w-[38%]">
+                <span class="text-xs font-bold truncate">${awayClub.short}</span>
+                ${renderClubCrest(awayClub, 36)}
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3">
+              <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-300 transition-all duration-200" style="width:${(minute / 90) * 100}%"></div>
+            </div>
+          </div>
+
+          <!-- Active Interactive Moment -->
+          ${momentHtml}
+
+          <!-- Commentary Feed -->
+          <div class="mt-3 flex-1 overflow-y-auto space-y-1.5 max-h-44 pr-1">
+            ${log.map(item => {
+              const cls = item.type === 'good' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                : item.type === 'bad' ? 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+                : 'bg-slate-900/70 border-white/5 text-slate-300';
+              return `
+                <div class="text-[11px] px-3 py-2 rounded-xl border ${cls} flex gap-2">
+                  <span class="font-sport font-bold opacity-75 shrink-0">${item.min}'</span>
+                  <span>${item.text}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          ${finished ? `
+            <button onclick="finalizeMatchFromLive()" class="btn-primary py-3.5 text-sm mt-4 w-full">
+              Перейти к итогам матча →
+            </button>
+          ` : ''}
+        </div>
+      `);
+    }
+
+    function runQuickSimMatch() {
+      const p = state.player;
+      const next = getNextPlayerMatch();
+      const myClub = getClubById(p.clubId);
+      const oppClub = getClubById(next.opponentId);
+      const role = getRoleLabel(p.trust);
+      const bonuses = getPlayerGearBonuses();
+
+      const homeClub = next.isHome ? myClub : oppClub;
+      const awayClub = next.isHome ? oppClub : myClub;
+      const score = simulateAIMatchScore(homeClub, awayClub);
+      let myScore = next.isHome ? score.hg : score.ag;
+      let oppScore = next.isHome ? score.ag : score.hg;
+
+      // Player contribution based on OVR, pos, role
+      const ovr = calcOVR(p.stats, p.pos) + bonuses.matchBonus;
+      const eff = (ovr - oppClub.ovr + (p.form - 60) * 0.25) / 100;
+      let pGoals = 0, pAssists = 0;
+
+      for (let i = 0; i < role.moments; i++) {
+        const roll = Math.random();
+        const goalProb = p.pos === 'FWD' ? 0.28 + eff : (p.pos === 'MID' ? 0.16 + eff : 0.07 + eff * 0.5);
+        const astProb = p.pos === 'MID' ? 0.26 + eff : (p.pos === 'FWD' ? 0.14 + eff : 0.08 + eff * 0.5);
+        if (roll < Math.max(0.05, goalProb)) pGoals++;
+        else if (roll < Math.max(0.1, goalProb + astProb)) pAssists++;
+      }
+
+      if (pGoals > myScore) myScore = pGoals;
+      if (pAssists > myScore) myScore = Math.max(myScore, pAssists);
+
+      // UCL tie-breaker
+      if (next.type === 'ucl' && myScore === oppScore) {
+        if (Math.random() < 0.52) myScore++; else oppScore++;
+      }
+
+      const winBonus = myScore > oppScore ? 0.6 : (myScore === oppScore ? 0.1 : -0.3);
+      const rating = Math.min(10, Math.max(5.2, 6.2 + pGoals * 1.05 + pAssists * 0.75 + winBonus + (Math.random() * 0.6 - 0.3)));
+
+      finalizeMatch({
+        next,
+        myClub,
+        oppClub,
+        myScore,
+        oppScore,
+        playerGoals: pGoals,
+        playerAssists: pAssists,
+        rating: Number(rating.toFixed(1))
+      });
+    }
+
+    function finalizeMatchFromLive() {
+      if (!liveMatch) return;
+      const result = {
+        next: liveMatch.next,
+        myClub: liveMatch.myClub,
+        oppClub: liveMatch.oppClub,
+        myScore: liveMatch.myScore,
+        oppScore: liveMatch.oppScore,
+        playerGoals: liveMatch.playerGoals,
+        playerAssists: liveMatch.playerAssists,
+        rating: Number(liveMatch.rating.toFixed(1))
+      };
+      liveMatch = null;
+      finalizeMatch(result);
+    }
+
+    function finalizeMatch(res) {
+      const p = state.player;
+      const bonuses = getPlayerGearBonuses();
+      const { next, myClub, oppClub, myScore, oppScore, playerGoals, playerAssists, rating } = res;
+      const won = myScore > oppScore;
+      const draw = myScore === oppScore;
+
+      // Update League Table or UCL
+      if (next.type === 'league') {
+        const hg = next.isHome ? myScore : oppScore;
+        const ag = next.isHome ? oppScore : myScore;
+        applyMatchToTable(p.leagueId, next.home, next.away, hg, ag);
+        simulateOtherLeagueMatches(state.round, p.leagueId, { home: next.home, away: next.away });
+        state.round++;
+      } else if (next.type === 'ucl') {
+        if (won) {
+          if (next.stage === 'semi') {
+            state.ucl.stage = 'final';
+            // Pick strongest opponent from another league
+            const otherTop = LEAGUES.filter(l => l.id !== p.leagueId).map(l => sortTable(state.tables[l.id])[0].clubId);
+            const candidates = otherTop.filter(id => id !== state.ucl.opponentId);
+            state.ucl.opponentId = candidates[Math.floor(Math.random() * candidates.length)] || otherTop[0];
+            state.ucl.currentOpponentHome = Math.random() < 0.5;
+          } else {
+            state.ucl.finished = true;
+            state.ucl.won = true;
+            p.trophies.ucl++;
+            p.fans += 250000;
+          }
+        } else {
+          state.ucl.finished = true;
+          state.ucl.won = false;
+        }
+      }
+
+      // MOTM check
+      const isMotm = rating >= 8.2 || (won && (playerGoals + playerAssists >= 2));
+
+      // Update stats
+      p.seasonStats.matches++;
+      p.seasonStats.goals += playerGoals;
+      p.seasonStats.assists += playerAssists;
+      p.seasonStats.ratingSum += rating;
+      if (isMotm) p.seasonStats.motm++;
+
+      p.careerStats.matches++;
+      p.careerStats.goals += playerGoals;
+      p.careerStats.assists += playerAssists;
+      p.careerStats.ratingSum += rating;
+      if (isMotm) p.careerStats.motm++;
+
+      // Economy: salary + sponsor bonuses
+      let sponsorIncome = 0;
+      if (p.activeSponsorId) {
+        const sp = SPONSORS.find(s => s.id === p.activeSponsorId);
+        if (sp) sponsorIncome = sp.perMatch + sp.perGoal * playerGoals;
+      }
+      const winBonusMoney = won ? Math.round(p.salary * 0.25) : 0;
+      const totalEarned = p.salary + sponsorIncome + winBonusMoney;
+      p.money += totalEarned;
+
+      // Energy, Form, Trust, Fans deltas
+      const energyCost = Math.max(12, 26 - bonuses.energyRegen);
+      const prevEnergy = p.energy;
+      p.energy = Math.max(5, Math.min(100, p.energy - energyCost + 10)); // +10 natural week recovery
+
+      const formDelta = (won ? 5 : (draw ? 1 : -4)) + (rating >= 7.5 ? 4 : (rating < 6.0 ? -4 : 0)) + Math.round(bonuses.moraleBonus / 3);
+      p.form = Math.max(20, Math.min(100, p.form + formDelta));
+
+      const trustDelta = (rating >= 8.0 ? 8 : (rating >= 7.0 ? 4 : (rating >= 6.3 ? 1 : -5))) + (playerGoals * 2) + playerAssists;
+      p.trust = Math.max(10, Math.min(100, p.trust + trustDelta));
+
+      const fansGain = Math.round((playerGoals * 4200 + playerAssists * 2400 + (isMotm ? 7000 : 0) + (won ? 1500 : 300)) * (myClub.tier * 0.55));
+      p.fans += fansGain;
+
+      // Injury risk check (high when playing below 35 energy)
+      let injuredNow = false;
+      if (prevEnergy < 35) {
+        const baseRisk = (38 - prevEnergy) * 0.018; // up to ~55% at 8 energy
+        const finalRisk = baseRisk * (1 - bonuses.injuryRed);
+        if (Math.random() < finalRisk) {
+          p.injuryRounds = Math.random() < 0.65 ? 1 : 2;
+          injuredNow = true;
+        }
+      }
+
+      // Reset weekly training slots
+      state.weekActionsLeft = 3;
+
+      // Trigger Winter Transfer Window after Round 9
+      let windowNotice = '';
+      if (next.type === 'league' && state.round === 9) {
+        state.transferWindowOpen = true;
+        generateTransferOffers();
+        windowNotice = '❄️ Открылось зимнее трансферное окно! Проверьте вкладку «Трансферы».';
+      } else if (next.type === 'league' && state.round === 18) {
+        // Check Champions League qualification (Top 2)
+        const sorted = sortTable(state.tables[p.leagueId]);
+        const posIdx = sorted.findIndex(r => r.clubId === p.clubId);
+        if (posIdx <= 1) {
+          const otherLeaders = LEAGUES.filter(l => l.id !== p.leagueId).map(l => sortTable(state.tables[l.id])[0].clubId);
+          state.ucl = {
+            active: true,
+            stage: 'semi',
+            opponentId: otherLeaders[Math.floor(Math.random() * otherLeaders.length)],
+            currentOpponentHome: Math.random() < 0.5,
+            finished: false,
+            won: false
+          };
+          windowNotice = '🏆 Ваш клуб в Топ-2 лиги и вышел в полуфинал Лиги Чемпионов!';
+        }
+      }
+
+      saveState();
+      haptic(won ? 'success' : 'light');
+
+      // Show Post-Match Summary Modal
+      const resultBadge = won
+        ? '<span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-xs">ПОБЕДА</span>'
+        : (draw ? '<span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs">НИЧЬЯ</span>'
+                : '<span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 font-bold text-xs">ПОРАЖЕНИЕ</span>');
+
+      openModal(`
+        <div class="w-full max-w-[420px] glass-panel p-5 animate-in">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-slate-400 font-semibold">Итоги матча</span>
+            ${resultBadge}
+          </div>
+
+          <div class="bg-slate-900/90 rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+            <div class="flex flex-col items-center w-[36%]">
+              ${renderClubCrest(next.isHome ? myClub : oppClub, 42)}
+              <span class="text-[11px] font-bold mt-1 text-center truncate w-full">${(next.isHome ? myClub : oppClub).short}</span>
+            </div>
+            <div class="font-sport text-4xl font-bold text-white">
+              ${next.isHome ? myScore : oppScore} : ${next.isHome ? oppScore : myScore}
+            </div>
+            <div class="flex flex-col items-center w-[36%]">
+              ${renderClubCrest(next.isHome ? oppClub : myClub, 42)}
+              <span class="text-[11px] font-bold mt-1 text-center truncate w-full">${(next.isHome ? oppClub : myClub).short}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+            <div class="bg-slate-900/70 rounded-xl p-2.5 border border-white/5">
+              <div class="text-[10px] text-slate-400">Оценка</div>
+              <div class="font-sport text-xl font-bold text-amber-300">${rating.toFixed(1)} ⭐</div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-2.5 border border-white/5">
+              <div class="text-[10px] text-slate-400">Голы</div>
+              <div class="font-sport text-xl font-bold text-emerald-400">${playerGoals}</div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-2.5 border border-white/5">
+              <div class="text-[10px] text-slate-400">Ассисты</div>
+              <div class="font-sport text-xl font-bold text-sky-400">${playerAssists}</div>
+            </div>
+          </div>
+
+          ${isMotm ? `
+            <div class="mt-3 p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-200 text-xs font-bold text-center">
+              🏆 ИГРОК МАТЧА! Пресса в восторге от вашей игры!
+            </div>
+          ` : ''}
+
+          <div class="mt-3 space-y-1.5 text-xs bg-slate-900/60 rounded-xl p-3 border border-white/5">
+            <div class="flex justify-between"><span class="text-slate-400">Зарплата и премиальные</span><span class="font-bold text-emerald-400">+${formatMoney(p.salary + winBonusMoney)}</span></div>
+            ${sponsorIncome > 0 ? `<div class="flex justify-between"><span class="text-slate-400">Бонус спонсора</span><span class="font-bold text-amber-300">+${formatMoney(sponsorIncome)}</span></div>` : ''}
+            <div class="flex justify-between"><span class="text-slate-400">Доверие тренера</span><span class="font-bold ${trustDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${trustDelta >= 0 ? '+' : ''}${trustDelta}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Новые фанаты</span><span class="font-bold text-sky-300">+${formatFans(fansGain)}</span></div>
+          </div>
+
+          ${injuredNow ? `
+            <div class="mt-3 p-2.5 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-200 text-xs font-semibold">
+              🚑 Травма! Из-за усталости вы потянули мышцу и пропустите ${p.injuryRounds} тур(а).
+            </div>
+          ` : ''}
+
+          ${windowNotice ? `
+            <div class="mt-3 p-2.5 rounded-xl bg-sky-500/15 border border-sky-400/40 text-sky-200 text-xs font-semibold">
+              ${windowNotice}
+            </div>
+          ` : ''}
+
+          <button onclick="closePostMatch()" class="btn-primary py-3.5 text-sm w-full mt-4">
+            Продолжить
+          </button>
+        </div>
+      `);
+    }
+
+    function closePostMatch() {
+      closeModal();
+      // Check if season completely finished (round 18 and no pending UCL)
+      if (state.round >= 18 && (!state.ucl.active || state.ucl.finished)) {
+        openSeasonSummaryModal();
+      } else {
+        render();
+      }
+    }
+
+    /*************************************************************************
+     * 8. INJURY HANDLING
+     *************************************************************************/
+    function openInjuryModal() {
+      const p = state.player;
+      const healCost = Math.max(25000, Math.round(p.salary * 1.4));
+      openModal(`
+        <div class="w-full max-w-[400px] glass-panel p-5 animate-in">
+          <div class="text-center text-4xl mb-2">🚑</div>
+          <h3 class="text-center font-bold text-lg text-rose-300">Вы травмированы</h3>
+          <p class="text-center text-xs text-slate-300 mt-1">
+            Осталось пропустить туров: <strong class="text-white">${p.injuryRounds}</strong>. Вы можете ускорить лечение в топ-клинике или пропустить матч и восстановить силы.
+          </p>
+          <div class="flex flex-col gap-2.5 mt-5">
+            <button onclick="healInjury(${healCost})" class="btn-gold py-3 text-sm">
+              💉 Срочное лечение (${formatMoney(healCost)})
+            </button>
+            <button onclick="skipInjuredRound()" class="btn-secondary py-3 text-sm">
+              🛌 Пропустить матч (+30 энергии)
+            </button>
+            <button onclick="closeModal()" class="text-xs text-slate-400 py-1">Закрыть</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function healInjury(cost) {
+      if (state.player.money < cost) {
+        haptic('error');
+        showToast('Недостаточно средств на клинику!', 'error');
+        return;
+      }
+      state.player.money -= cost;
+      state.player.injuryRounds = 0;
+      state.player.energy = Math.min(100, state.player.energy + 20);
+      saveState();
+      haptic('success');
+      closeModal();
+      render();
+      showToast('Вы полностью восстановились и готовы к матчу!', 'success');
+    }
+
+    function skipInjuredRound() {
+      const p = state.player;
+      const next = getNextPlayerMatch();
+      if (next && next.type === 'league') {
+        simulateOtherLeagueMatches(state.round, null, null);
+        state.round++;
+      } else if (next && next.type === 'ucl') {
+        // Team plays without you
+        const myClub = getClubById(p.clubId);
+        const oppClub = getClubById(next.opponentId);
+        const won = Math.random() < (0.45 + (myClub.ovr - oppClub.ovr) * 0.02);
+        if (won && next.stage === 'semi') {
+          state.ucl.stage = 'final';
+          const otherTop = LEAGUES.filter(l => l.id !== p.leagueId).map(l => sortTable(state.tables[l.id])[0].clubId);
+          state.ucl.opponentId = otherTop[Math.floor(Math.random() * otherTop.length)];
+        } else {
+          state.ucl.finished = true;
+          state.ucl.won = won && next.stage === 'final';
+          if (state.ucl.won) p.trophies.ucl++;
+        }
+      }
+      p.injuryRounds = Math.max(0, p.injuryRounds - 1);
+      p.energy = Math.min(100, p.energy + 30);
+      state.weekActionsLeft = 3;
+      saveState();
+      closeModal();
+      if (state.round >= 18 && (!state.ucl.active || state.ucl.finished)) {
+        openSeasonSummaryModal();
+      } else {
+        render();
+        showToast('Вы пропустили матч и восстановили силы.', 'info');
+      }
+    }
+
+    /*************************************************************************
+     * 9. SEASON SUMMARY, AWARDS & NEXT SEASON TRANSITION
+     *************************************************************************/
+    function openSeasonSummaryModal() {
+      const p = state.player;
+      const league = getLeagueById(p.leagueId);
+      const sorted = sortTable(state.tables[p.leagueId]);
+      const posRank = sorted.findIndex(r => r.clubId === p.clubId) + 1;
+      const isChamp = posRank === 1;
+
+      // Golden Boot threshold for an 18-round season (~14+ goals)
+      const aiTopScorer = 12 + Math.floor(Math.random() * 5); // 12..16
+      const wonGoldenBoot = p.seasonStats.goals >= aiTopScorer && p.seasonStats.goals >= 12;
+
+      // Ballon d'Or check
+      const avgRating = p.seasonStats.matches > 0 ? p.seasonStats.ratingSum / p.seasonStats.matches : 0;
+      const ovr = calcOVR(p.stats, p.pos);
+      const bdorScore =
+        ovr * 0.5 +
+        p.seasonStats.goals * 1.7 +
+        p.seasonStats.assists * 1.2 +
+        avgRating * 5 +
+        (isChamp ? 14 : 0) +
+        (state.ucl.won ? 24 : 0) +
+        Math.min(15, p.fans / 120000);
+      const wonBallonDor = bdorScore >= 118 && ovr >= 82 && p.seasonStats.matches >= 12;
+
+      // Award trophies once
+      if (!state.seasonAwardsGranted) {
+        if (isChamp) { p.trophies.league++; p.fans += 120000; p.money += 250000; }
+        if (wonGoldenBoot) { p.trophies.goldenBoot++; p.fans += 90000; p.money += 150000; }
+        if (wonBallonDor) { p.trophies.ballonDor++; p.fans += 500000; p.money += 1000000; }
+
+        p.history.unshift({
+          season: state.season,
+          age: p.age,
+          club: getClubById(p.clubId).name,
+          league: league.name,
+          rank: posRank,
+          goals: p.seasonStats.goals,
+          assists: p.seasonStats.assists,
+          avgRating: avgRating.toFixed(1),
+          ballonDor: wonBallonDor
+        });
+
+        state.seasonAwardsGranted = true;
+        state.transferWindowOpen = true;
+        generateTransferOffers(true);
+        saveState();
+      }
+
+      haptic(wonBallonDor || isChamp || state.ucl.won ? 'success' : 'medium');
+
+      openModal(`
+        <div class="w-full max-w-[430px] glass-panel p-5 animate-in max-h-[90vh] overflow-y-auto">
+          <div class="text-center">
+            <div class="text-xs font-bold uppercase tracking-widest text-amber-400">Итоги сезона ${state.season}</div>
+            <h2 class="font-sport text-2xl font-bold mt-1">${league.flag} ${league.fullName}</h2>
+            <div class="text-sm text-slate-300 mt-0.5">${getClubById(p.clubId).name} — <span class="font-bold text-white">${posRank}-е место</span></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <div class="bg-slate-900/80 rounded-xl p-2.5 border border-white/5">
+              <div class="text-[10px] text-slate-400">Голы</div>
+              <div class="font-sport text-xl font-bold text-emerald-400">${p.seasonStats.goals}</div>
+            </div>
+            <div class="bg-slate-900/80 rounded-xl p-2.5 border border-white/5">
+              <div class="text-[10px] text-slate-400">Ассисты</div>
+              <div class="font-sport text-xl font-bold text-sky-400">${p.seasonStats.assists}</div>
+            </div>
+            <div class="bg-slate-900/80 rounded-xl p-2.5 border border-white/5">
+              <div class="text-[10px] text-slate-400">Ср. оценка</div>
+              <div class="font-sport text-xl font-bold text-amber-300">${avgRating.toFixed(1)}</div>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-2">
+            ${isChamp ? `<div class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 text-xs font-bold flex items-center gap-2"><span>🏆</span> ЧЕМПИОН ${league.name.toUpperCase()}! (+€250 тыс.)</div>` : ''}
+            ${state.ucl.won ? `<div class="p-3 rounded-xl bg-sky-500/20 border border-sky-400/50 text-sky-200 text-xs font-bold flex items-center gap-2"><span>🌟</span> ПОБЕДИТЕЛЬ ЛИГИ ЧЕМПИОНОВ!</div>` : ''}
+            ${wonGoldenBoot ? `<div class="p-3 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-200 text-xs font-bold flex items-center gap-2"><span>👟</span> ЗОЛОТАЯ БУТСА ЛИГИ! (+€150 тыс.)</div>` : ''}
+            ${wonBallonDor ? `<div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/30 to-yellow-500/20 border border-amber-300 text-amber-100 text-xs font-extrabold flex items-center gap-2 shadow-lg"><span>🌕</span> ЗОЛОТОЙ МЯЧ (BALLON D'OR)! ВЫ ЛУЧШИЙ ИГРОК МИРА! (+€1 млн)</div>` : ''}
+            ${(!isChamp && !state.ucl.won && !wonGoldenBoot && !wonBallonDor) ? `<div class="p-3 rounded-xl bg-slate-900/70 border border-white/5 text-slate-300 text-xs text-center">Достойный сезон! Продолжайте качаться и подпишите контракт с топ-клубом.</div>` : ''}
+          </div>
+
+          <div class="mt-4 p-3 rounded-xl bg-slate-900/70 border border-white/5 text-xs text-slate-300">
+            ☀️ <strong>Летнее трансферное окно открыто!</strong> Вы можете сначала проверить предложения во вкладке «Трансферы», а затем начать следующий сезон (возраст станет <strong>${p.age + 1}</strong>).
+          </div>
+
+          <div class="flex flex-col gap-2 mt-4">
+            <button onclick="goToSummerTransfers()" class="btn-gold py-3 text-sm">
+              💼 Посмотреть трансферные офферы (${state.transferOffers.length})
+            </button>
+            <button onclick="startNextSeason()" class="btn-primary py-3.5 text-sm">
+              🚀 Начать Сезон ${state.season + 1}
+            </button>
+          </div>
+        </div>
+      `);
+    }
+
+    function goToSummerTransfers() {
+      closeModal();
+      activeTab = 'transfers';
+      render();
+    }
+
+    function startNextSeason() {
+      const p = state.player;
+      p.age++;
+
+      // Realistic aging curve: after 33 stats gradually decline
+      let declineMsg = '';
+      if (p.age >= 34) {
+        const drop = p.age >= 36 ? 2 : 1;
+        p.stats.pac = Math.max(40, p.stats.pac - drop);
+        p.stats.phy = Math.max(40, p.stats.phy - drop);
+        if (p.age >= 36) {
+          p.stats.dri = Math.max(40, p.stats.dri - 1);
+          p.stats.sho = Math.max(40, p.stats.sho - 1);
+        }
+        declineMsg = ` Возраст берёт своё (${p.age} лет): физические показатели немного снизились.`;
+      }
+
+      const { tables, schedules } = initSeasonTables();
+      state.season++;
+      state.round = 0;
+      state.tables = tables;
+      state.schedules = schedules;
+      state.ucl = { active: false, stage: null, opponentId: null, finished: false, won: false };
+      state.seasonAwardsGranted = false;
+      state.transferWindowOpen = false;
+      state.transferOffers = [];
+      state.weekActionsLeft = 3;
+
+      p.energy = 100;
+      p.injuryRounds = 0;
+      p.seasonStats = { matches: 0, goals: 0, assists: 0, motm: 0, ratingSum: 0 };
+
+      selectedTableLeague = p.leagueId;
+      activeTab = 'career';
+      saveState();
+      closeModal();
+      render();
+      showToast(`Сезон ${state.season} начался!${declineMsg}`, 'success');
+    }
+
+    /*************************************************************************
+     * 10. TRAINING & RECOVERY LOGIC
+     *************************************************************************/
+    function getTrainSuccessChance(currentVal) {
+      const bonuses = getPlayerGearBonuses();
+      // Easier at 60 (85%), harder at 88+ (24%), boosted by coach & boots
+      let base = 92 - Math.max(0, currentVal - 58) * 2.15;
+      base = base * (1 + bonuses.trainBonus);
+      return Math.max(15, Math.min(96, Math.round(base)));
+    }
+
+    function performStatTraining(statKey) {
+      const p = state.player;
+      const meta = STAT_META.find(s => s.key === statKey);
+      if (state.weekActionsLeft <= 0) {
+        haptic('error');
+        showToast('Слоты подготовки на эту неделю закончились! Сыграйте матч.', 'error');
+        return;
+      }
+      if (p.energy < meta.energy) {
+        haptic('error');
+        showToast('Недостаточно энергии! Отдохните перед тренировкой.', 'error');
+        return;
+      }
+      if (p.stats[statKey] >= 99) {
+        showToast('Этот навык уже на максимуме (99)!', 'gold');
+        return;
+      }
+
+      const chance = getTrainSuccessChance(p.stats[statKey]);
+      p.energy = Math.max(0, p.energy - meta.energy);
+      state.weekActionsLeft--;
+
+      const success = Math.random() * 100 < chance;
+      if (success) {
+        p.stats[statKey] = Math.min(99, p.stats[statKey] + 1);
+        haptic('success');
+        playSfx('train');
+        showToast(`🔥 Прогресс! ${meta.name} +1 (теперь ${p.stats[statKey]})`, 'success');
+      } else {
+        p.form = Math.min(100, p.form + 2);
+        haptic('light');
+        playSfx('click');
+        showToast(`Хорошая сессия! Навык не вырос, но Форма +2.`, 'info');
+      }
+      saveState();
+      render();
+    }
+
+    function performTeamTraining() {
+      const p = state.player;
+      if (state.weekActionsLeft <= 0) {
+        haptic('error');
+        showToast('Слоты подготовки закончились! Сыграйте матч.', 'error');
+        return;
+      }
+      if (p.energy < 12) {
+        haptic('error');
+        showToast('Слишком мало энергии для командной тренировки.', 'error');
+        return;
+      }
+      p.energy -= 12;
+      p.trust = Math.min(100, p.trust + 7);
+      p.form = Math.min(100, p.form + 6);
+      state.weekActionsLeft--;
+      haptic('medium');
+      playSfx('train');
+      saveState();
+      render();
+      showToast('Командная тренировка: Доверие +7, Форма +6!', 'success');
+    }
+
+    function performRest() {
+      const p = state.player;
+      if (state.weekActionsLeft <= 0) {
+        haptic('error');
+        showToast('Слоты подготовки на эту неделю закончились!', 'error');
+        return;
+      }
+      if (p.energy >= 100) {
+        showToast('Энергия уже на максимуме!', 'info');
+        return;
+      }
+      const gain = 28;
+      p.energy = Math.min(100, p.energy + gain);
+      p.form = Math.min(100, p.form + 2);
+      state.weekActionsLeft--;
+      haptic('light');
+      playSfx('click');
+      saveState();
+      render();
+      showToast(`Отличный отдых! Энергия +${gain}%, Форма +2.`, 'success');
+    }
+
+    /*************************************************************************
+     * 11. TRANSFERS, AGENT & CONTRACT NEGOTIATIONS
+     *************************************************************************/
+    function generateTransferOffers(isSummer = false) {
+      const p = state.player;
+      const ovr = calcOVR(p.stats, p.pos);
+      const agent = AGENTS[p.agentId] || AGENTS[0];
+
+      // Flatten all clubs except current
+      const allClubs = [];
+      LEAGUES.forEach(l => {
+        l.clubs.forEach(c => {
+          if (c.id !== p.clubId) {
+            allClubs.push({ ...c, leagueId: l.id, leagueName: l.name, leagueFlag: l.flag, prestige: l.prestige });
+          }
+        });
+      });
+
+      // Target club OVR range based on player OVR + agent pull + season goals
+      const maxReach = ovr + 5 + Math.round(agent.bonusTop * 0.22) + (p.seasonStats.goals >= 10 ? 3 : 0);
+      const minReach = Math.max(66, ovr - 6);
+
+      let candidates = allClubs.filter(c => c.ovr <= maxReach && c.ovr >= minReach);
+      if (candidates.length < 3) {
+        candidates = allClubs.sort((a, b) => Math.abs(a.ovr - ovr) - Math.abs(b.ovr - ovr)).slice(0, 6);
+      }
+
+      // Shuffle and pick 3-4 offers
+      candidates.sort(() => Math.random() - 0.5);
+      const count = isSummer ? 4 : 3;
+      const picked = candidates.slice(0, count);
+
+      state.transferOffers = picked.map((club, idx) => {
+        const baseSal = Math.round((Math.pow(club.tier, 2.05) * 9500 + Math.max(0, ovr - 65) * 4200) / 1000) * 1000;
+        const role = ovr >= club.ovr - 2 ? 'Ключевой игрок' : (ovr >= club.ovr - 6 ? 'Основа / Ротация' : 'Игрок ротации');
+        const startTrust = ovr >= club.ovr - 2 ? 75 : (ovr >= club.ovr - 6 ? 55 : 38);
+        return {
+          offerId: `off_${Date.now()}_${idx}`,
+          clubId: club.id,
+          salary: Math.max(15000, baseSal),
+          role,
+          startTrust,
+          negotiated: false,
+          collapsed: false
+        };
+      });
+      saveState();
+    }
+
+    function requestAgentOffers() {
+      const p = state.player;
+      const ovr = calcOVR(p.stats, p.pos);
+      if (!state.transferWindowOpen && ovr < 72 && p.agentId === 0) {
+        haptic('error');
+        showToast('Клубы проявят интерес в трансферное окно (после 9 и 18 тура) или наймите агента!', 'info');
+        return;
+      }
+      generateTransferOffers(false);
+      haptic('medium');
+      playSfx('click');
+      render();
+      showToast('Агент собрал свежие предложения от клубов!', 'success');
+    }
+
+    function negotiateOffer(offerId) {
+      const offer = state.transferOffers.find(o => o.offerId === offerId);
+      if (!offer || offer.negotiated || offer.collapsed) return;
+
+      const agent = AGENTS[state.player.agentId] || AGENTS[0];
+      const successChance = 42 + agent.negBonus + (state.player.form > 75 ? 10 : 0);
+      offer.negotiated = true;
+
+      if (Math.random() * 100 < successChance) {
+        offer.salary = Math.round((offer.salary * 1.22) / 1000) * 1000;
+        haptic('success');
+        playSfx('train');
+        showToast(`Успешные торги! Зарплата повышена до ${formatMoney(offer.salary)}/матч!`, 'gold');
+      } else {
+        offer.collapsed = true;
+        haptic('error');
+        playSfx('fail');
+        showToast('Клуб посчитал требования завышенными и отозвал предложение!', 'error');
+      }
+      saveState();
+      render();
+    }
+
+    function acceptOffer(offerId) {
+      const offer = state.transferOffers.find(o => o.offerId === offerId);
+      if (!offer || offer.collapsed) return;
+      const club = getClubById(offer.clubId);
+      const p = state.player;
+
+      p.clubId = club.id;
+      p.leagueId = club.leagueId;
+      p.salary = offer.salary;
+      p.trust = offer.startTrust;
+      p.fans += club.tier * 12000;
+
+      // Clear offers after signing
+      state.transferOffers = [];
+      state.transferWindowOpen = false;
+      selectedTableLeague = club.leagueId;
+
+      haptic('success');
+      playSfx('goal');
+      saveState();
+      render();
+      showToast(`HERE WE GO! Вы перешли в ${club.name} (${formatMoney(p.salary)}/матч)!`, 'gold');
+    }
+
+    function hireAgent(agentId) {
+      const ag = AGENTS[agentId];
+      const p = state.player;
+      if (p.agentId >= agentId) return;
+      if (p.money < ag.cost) {
+        haptic('error');
+        showToast('Недостаточно денег для контракта с этим агентом!', 'error');
+        return;
+      }
+      p.money -= ag.cost;
+      p.agentId = agentId;
+      haptic('success');
+      playSfx('train');
+      saveState();
+      render();
+      showToast(`Новый агент: ${ag.name}! Топ-клубы обратят на вас внимание.`, 'gold');
+    }
+
+    /*************************************************************************
+     * 12. LIFE, SHOP & SPONSORS LOGIC
+     *************************************************************************/
+    function buyItem(itemId, type) {
+      const p = state.player;
+      if (p.ownedItems.includes(itemId)) return;
+      const list = type === 'lifestyle' ? LIFESTYLE_ITEMS : GEAR_STAFF;
+      const item = list.find(i => i.id === itemId);
+      if (!item) return;
+
+      if (p.money < item.cost) {
+        haptic('error');
+        showToast('Недостаточно средств на балансе!', 'error');
+        return;
+      }
+      p.money -= item.cost;
+      p.ownedItems.push(item.id);
+      if (item.fans) p.fans += item.fans;
+      if (item.moraleBonus) p.form = Math.min(100, p.form + item.moraleBonus);
+
+      haptic('success');
+      playSfx('train');
+      saveState();
+      render();
+      showToast(`Куплено: ${item.name}!`, 'success');
+    }
+
+    function signSponsor(sponsorId) {
+      const p = state.player;
+      const sp = SPONSORS.find(s => s.id === sponsorId);
+      if (!sp) return;
+      if (p.fans < sp.reqFans) {
+        haptic('error');
+        showToast(`Нужно минимум ${formatFans(sp.reqFans)} фанатов!`, 'error');
+        return;
+      }
+      p.activeSponsorId = sp.id;
+      haptic('success');
+      playSfx('goal');
+      saveState();
+      render();
+      showToast(`Подписан спонсор: ${sp.name}!`, 'gold');
+    }
+
+    /*************************************************************************
+     * 13. SETTINGS & RESET MODAL
+     *************************************************************************/
+    function openSettingsModal() {
+      const p = state.player;
+      const avgRat = p.careerStats.matches > 0 ? (p.careerStats.ratingSum / p.careerStats.matches).toFixed(2) : '—';
+      openModal(`
+        <div class="w-full max-w-[420px] glass-panel p-5 animate-in max-h-[88vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-base">⚙️ Профиль и Зал славы</h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-white text-lg px-2">✕</button>
+          </div>
+
+          <!-- Trophy Cabinet -->
+          <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Шкаф трофеев</div>
+          <div class="grid grid-cols-4 gap-2 text-center mb-4">
+            <div class="bg-slate-900/80 rounded-xl p-2 border border-amber-500/20">
+              <div class="text-xl">🏆</div>
+              <div class="font-sport text-lg font-bold text-white">${p.trophies.league}</div>
+              <div class="text-[9px] text-slate-400">Лига</div>
+            </div>
+            <div class="bg-slate-900/80 rounded-xl p-2 border border-sky-500/20">
+              <div class="text-xl">🌟</div>
+              <div class="font-sport text-lg font-bold text-white">${p.trophies.ucl}</div>
+              <div class="text-[9px] text-slate-400">ЛЧ</div>
+            </div>
+            <div class="bg-slate-900/80 rounded-xl p-2 border border-emerald-500/20">
+              <div class="text-xl">👟</div>
+              <div class="font-sport text-lg font-bold text-white">${p.trophies.goldenBoot}</div>
+              <div class="text-[9px] text-slate-400">Бутса</div>
+            </div>
+            <div class="bg-slate-900/80 rounded-xl p-2 border border-amber-400/40">
+              <div class="text-xl">🌕</div>
+              <div class="font-sport text-lg font-bold text-amber-300">${p.trophies.ballonDor}</div>
+              <div class="text-[9px] text-slate-400">Зол. мяч</div>
+            </div>
+          </div>
+
+          <!-- Career Totals -->
+          <div class="bg-slate-900/70 rounded-xl p-3 border border-white/5 text-xs space-y-1.5 mb-4">
+            <div class="font-bold text-slate-200 mb-1">Статистика за всю карьеру</div>
+            <div class="flex justify-between"><span class="text-slate-400">Матчи</span><span class="font-bold">${p.careerStats.matches}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Голы / Ассисты</span><span class="font-bold text-emerald-400">${p.careerStats.goals} / ${p.careerStats.assists}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Игрок матча</span><span class="font-bold text-amber-300">${p.careerStats.motm}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Средняя оценка</span><span class="font-bold text-sky-300">${avgRat} ⭐</span></div>
+          </div>
+
+          ${p.history.length > 0 ? `
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">История сезонов</div>
+            <div class="space-y-1.5 max-h-32 overflow-y-auto mb-4 pr-1">
+              ${p.history.map(h => `
+                <div class="text-[11px] bg-slate-900/80 rounded-lg px-2.5 py-2 border border-white/5 flex justify-between items-center">
+                  <div>
+                    <span class="font-bold text-white">С${h.season}</span> • ${h.club} (${h.rank}м) ${h.ballonDor ? '🌕' : ''}
+                  </div>
+                  <div class="text-emerald-400 font-bold">${h.goals}Г ${h.assists}П</div>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Sound Toggle -->
+          <div class="flex items-center justify-between bg-slate-900/70 rounded-xl p-3 border border-white/5 mb-4">
+            <span class="text-xs font-semibold">🔊 Звуковые эффекты</span>
+            <button onclick="toggleSound()" class="px-3 py-1 rounded-lg text-xs font-bold ${state.settings.sound ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-400'}">
+              ${state.settings.sound ? 'ВКЛ' : 'ВЫКЛ'}
+            </button>
+          </div>
+
+          <!-- Reset Career -->
+          <button onclick="confirmResetCareer()" class="w-full py-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-bold hover:bg-rose-500/25">
+            🗑️ Начать карьеру заново
+          </button>
+        </div>
+      `);
+    }
+
+    function toggleSound() {
+      state.settings.sound = !state.settings.sound;
+      saveState();
+      openSettingsModal();
+    }
+
+    function confirmResetCareer() {
+      openModal(`
+        <div class="w-full max-w-[360px] glass-panel p-5 text-center animate-in">
+          <div class="text-3xl mb-2">⚠️</div>
+          <h3 class="font-bold text-base">Сбросить весь прогресс?</h3>
+          <p class="text-xs text-slate-400 mt-1">Текущий футболист, трофеи и статистика будут удалены безвозвратно.</p>
+          <div class="grid grid-cols-2 gap-2.5 mt-5">
+            <button onclick="closeModal()" class="btn-secondary py-2.5 text-xs">Отмена</button>
+            <button onclick="executeResetCareer()" class="py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs">Да, заново</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function executeResetCareer() {
+      localStorage.removeItem(SAVE_KEY);
+      state = null;
+      closeModal();
+      render();
+    }
+
+    /*************************************************************************
+     * 14. MODAL UTILITIES
+     *************************************************************************/
+    function openModal(html) {
+      const layer = document.getElementById('modal-layer');
+      layer.innerHTML = html;
+      layer.classList.remove('hidden');
+      layer.classList.add('flex');
+    }
+
+    function closeModal() {
+      const layer = document.getElementById('modal-layer');
+      layer.classList.add('hidden');
+      layer.classList.remove('flex');
+      layer.innerHTML = '';
+    }
+
+    /*************************************************************************
+     * 15. SCREENS & TABS RENDERING
+     *************************************************************************/
+    let creationDraft = {
+      name: RANDOM_NAMES[0],
+      pos: 'FWD',
+      leagueId: 'epl'
+    };
+
+    function randomizeName() {
+      const n = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
+      creationDraft.name = n;
+      const inp = document.getElementById('create-name-input');
+      if (inp) inp.value = n;
+      haptic('light');
+    }
+
+    function selectCreatePos(pos) {
+      creationDraft.pos = pos;
+      haptic('light');
+      render();
+    }
+
+    function selectCreateLeague(lid) {
+      creationDraft.leagueId = lid;
+      haptic('light');
+      render();
+    }
+
+    function submitCreatePlayer() {
+      const inp = document.getElementById('create-name-input');
+      const finalName = inp ? inp.value : creationDraft.name;
+      createNewCareer(finalName, creationDraft.pos, creationDraft.leagueId);
+    }
+
+    function renderCreationScreen() {
+      return `
+        <div class="p-5 pb-10 flex flex-col gap-5 animate-in">
+          <div class="text-center pt-3">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-[11px] font-bold tracking-wider uppercase mb-2">
+              <span>⚽</span> Telegram Football Sim
+            </div>
+            <h1 class="font-sport text-4xl font-bold tracking-tight bg-gradient-to-r from-white via-emerald-200 to-amber-200 bg-clip-text text-transparent">
+              PRO CAREER: TOP 5
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">Путь от 17-летнего таланта до обладателя Золотого мяча</p>
+          </div>
+
+          <!-- Name Input -->
+          <div class="glass-panel p-4">
+            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Имя футболиста</label>
+            <div class="flex gap-2">
+              <input id="create-name-input" type="text" maxlength="22" value="${creationDraft.name}"
+                oninput="creationDraft.name = this.value"
+                class="flex-1 bg-slate-900/90 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-400"
+                placeholder="Введите имя..." />
+              <button onclick="randomizeName()" class="btn-secondary px-3.5 text-lg" title="Случайное имя">🎲</button>
+            </div>
+          </div>
+
+          <!-- Position Picker -->
+          <div class="glass-panel p-4">
+            <div class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">Позиция на поле</div>
+            <div class="grid grid-cols-3 gap-2">
+              ${Object.entries(POSITIONS).map(([key, pos]) => {
+                const active = creationDraft.pos === key;
+                return `
+                  <button onclick="selectCreatePos('${key}')" class="p-3 rounded-xl border text-center transition ${active ? 'bg-emerald-500/20 border-emerald-400 shadow-lg shadow-emerald-500/15' : 'bg-slate-900/70 border-white/10'}">
+                    <div class="text-2xl">${pos.icon}</div>
+                    <div class="font-sport text-base font-bold mt-1 ${active ? 'text-emerald-300' : 'text-white'}">${pos.code}</div>
+                    <div class="text-[10px] text-slate-400">${pos.name}</div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">${POSITIONS[creationDraft.pos].desc}</p>
+          </div>
+
+          <!-- Starting League Picker -->
+          <div class="glass-panel p-4">
+            <div class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">Стартовая лига (клуб-аутсайдер)</div>
+            <div class="grid grid-cols-1 gap-2">
+              ${LEAGUES.map(l => {
+                const active = creationDraft.leagueId === l.id;
+                const starter = [...l.clubs].sort((a, b) => a.ovr - b.ovr)[0];
+                return `
+                  <button onclick="selectCreateLeague('${l.id}')" class="p-3 rounded-xl border flex items-center justify-between transition ${active ? 'bg-emerald-500/20 border-emerald-400' : 'bg-slate-900/70 border-white/10'}">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-xl">${l.flag}</span>
+                      <div class="text-left">
+                        <div class="text-xs font-bold text-white">${l.name}</div>
+                        <div class="text-[10px] text-slate-400">Старт в: ${starter.name} (OVR ${starter.ovr})</div>
+                      </div>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border flex items-center justify-center ${active ? 'border-emerald-400 bg-emerald-400 text-slate-950 font-bold text-xs' : 'border-slate-600'}">
+                      ${active ? '✓' : ''}
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <button onclick="submitCreatePlayer()" class="btn-primary py-4 text-base tracking-wide">
+            🚀 НАЧАТЬ КАРЬЕРУ
+          </button>
+        </div>
+      `;
+    }
+
+    function renderHeader() {
+      const p = state.player;
+      const club = getClubById(p.clubId);
+      const seasonProgress = state.ucl.active && !state.ucl.finished
+        ? (state.ucl.stage === 'semi' ? 'ЛЧ 1/2' : 'ЛЧ Финал')
+        : `Тур ${Math.min(18, state.round + 1)}/18`;
+
+      return `
+        <header class="sticky top-0 z-30 px-4 py-3 bg-[#070b14]/90 backdrop-blur-md border-b border-white/5 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            ${renderClubCrest(club, 32)}
+            <div>
+              <div class="text-xs font-extrabold leading-tight flex items-center gap-1.5">
+                <span>${club.name}</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-medium">Сезон ${state.season} • ${seasonProgress}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-sport text-xs font-bold">
+              ${formatMoney(p.money)}
+            </div>
+            <button onclick="openSettingsModal()" class="w-8 h-8 rounded-xl bg-slate-800/90 border border-white/10 flex items-center justify-center text-sm active:scale-95">
+              ⚙️
+            </button>
+          </div>
+        </header>
+      `;
+    }
+
+    function renderStatusBar(label, val, colorClass, icon) {
+      return `
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-slate-300 font-medium">${icon} ${label}</span>
+            <span class="font-bold text-white">${val}%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full ${colorClass} rounded-full transition-all duration-300" style="width:${Math.max(3, Math.min(100, val))}%"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCareerTab() {
+      const p = state.player;
+      const club = getClubById(p.clubId);
+      const ovr = calcOVR(p.stats, p.pos);
+      const marketVal = calcMarketValue(p);
+      const role = getRoleLabel(p.trust);
+      const next = getNextPlayerMatch();
+      const oppClub = next ? getClubById(next.opponentId) : null;
+      const seasonFinished = state.round >= 18 && (!state.ucl.active || state.ucl.finished);
+
+      return `
+        <div class="p-4 space-y-4 animate-in">
+          <!-- FIFA / EA FC Player Card -->
+          <div class="fut-card ${getFutCardClass(ovr)}">
+            <div class="flex items-start justify-between relative z-10">
+              <div class="flex items-center gap-3">
+                <div class="flex flex-col items-center leading-none">
+                  <span class="font-sport text-5xl font-bold text-white drop-shadow">${ovr}</span>
+                  <span class="font-sport text-sm font-bold text-amber-300 mt-0.5">${POSITIONS[p.pos].code}</span>
+                </div>
+                <div class="h-12 w-px bg-white/15"></div>
+                <div>
+                  <div class="font-bold text-lg leading-tight text-white">${p.name}</div>
+                  <div class="text-xs text-slate-300 mt-0.5 flex items-center gap-1.5">
+                    <span>${club.leagueFlag} ${club.name}</span>
+                    <span>•</span>
+                    <span>${p.age} лет</span>
+                  </div>
+                  <div class="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-black/35 text-[11px] text-emerald-300 font-bold">
+                    <span>💎</span> ${formatMoney(marketVal)}
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col items-end">
+                ${renderClubCrest(club, 44)}
+                <span class="text-[10px] font-bold mt-1 ${role.color}">${role.label}</span>
+              </div>
+            </div>
+
+            <!-- 6 Core Stats -->
+            <div class="grid grid-cols-6 gap-1.5 mt-4 pt-3 border-t border-white/15 relative z-10 text-center">
+              ${STAT_META.map(s => `
+                <div class="bg-black/25 rounded-lg py-1.5">
+                  <div class="text-[9px] text-slate-300 font-bold">${s.label}</div>
+                  <div class="font-sport text-base font-bold ${getStatColor(p.stats[s.key])}">${p.stats[s.key]}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Injury Alert -->
+          ${p.injuryRounds > 0 ? `
+            <div class="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-between gap-3">
+              <div class="text-xs text-rose-200">
+                <div class="font-bold">🚑 Травма (${p.injuryRounds} тур)</div>
+                <div class="text-[11px] opacity-85">Вылечитесь или пропустите тур.</div>
+              </div>
+              <button onclick="openInjuryModal()" class="px-3 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold shrink-0">Решить</button>
+            </div>
+          ` : ''}
+
+          <!-- Next Match CTA Card -->
+          ${seasonFinished ? `
+            <div class="glass-panel p-4 text-center border-amber-400/40">
+              <div class="text-xs font-bold text-amber-300 uppercase">Сезон ${state.season} завершён!</div>
+              <p class="text-xs text-slate-300 mt-1 mb-3">Проверьте летние трансферы или переходите к новому сезону.</p>
+              <button onclick="openSeasonSummaryModal()" class="btn-gold w-full py-3.5 text-sm">🏆 Итоги сезона и переход</button>
+            </div>
+          ` : `
+            <div class="glass-panel p-4">
+              <div class="flex items-center justify-between text-[11px] mb-2.5">
+                <span class="font-bold uppercase tracking-wider ${next.type === 'ucl' ? 'text-amber-400' : 'text-emerald-400'}">
+                  ${next.type === 'ucl' ? (next.stage === 'semi' ? '🏆 ЛЧ • Полуфинал' : '🏆 ФИНАЛ ЛЧ') : `Следующий матч • Тур ${next.round}/18`}
+                </span>
+                <span class="text-slate-400">Слотов тренировок: <strong class="text-white">${state.weekActionsLeft}</strong></span>
+              </div>
+
+              <div class="flex items-center justify-between bg-slate-900/80 rounded-xl p-3 border border-white/5 mb-3">
+                <div class="flex items-center gap-2">
+                  ${renderClubCrest(oppClub, 34)}
+                  <div>
+                    <div class="text-xs font-bold text-white">${oppClub.name}</div>
+                    <div class="text-[10px] text-slate-400">${next.isHome ? 'Домашний матч' : 'Выездной матч'} • OVR ${oppClub.ovr}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-slate-400">Зарплата</div>
+                  <div class="text-xs font-bold text-emerald-400">${formatMoney(p.salary)}</div>
+                </div>
+              </div>
+
+              <button onclick="openPreMatchModal()" class="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2">
+                <span>⚽</span> ИГРАТЬ МАТЧ
+              </button>
+            </div>
+          `}
+
+          <!-- Player Condition Bars -->
+          <div class="glass-panel p-4 space-y-3">
+            ${renderStatusBar('Энергия', p.energy, p.energy < 35 ? 'bg-rose-500' : 'bg-emerald-500', '⚡')}
+            ${renderStatusBar('Форма и Мораль', p.form, 'bg-amber-400', '🔥')}
+            ${renderStatusBar('Доверие тренера', p.trust, 'bg-sky-400', '🤝')}
+            <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
+              <span class="text-slate-300">📣 Фанаты и медийность</span>
+              <span class="font-sport text-sm font-bold text-purple-300">${formatFans(p.fans)}</span>
+            </div>
+          </div>
+
+          <!-- Current Season Mini Stats -->
+          <div class="glass-panel p-3.5 grid grid-cols-4 gap-2 text-center">
+            <div>
+              <div class="text-[10px] text-slate-400">Матчи</div>
+              <div class="font-sport text-lg font-bold">${p.seasonStats.matches}</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400">Голы</div>
+              <div class="font-sport text-lg font-bold text-emerald-400">${p.seasonStats.goals}</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400">Ассисты</div>
+              <div class="font-sport text-lg font-bold text-sky-400">${p.seasonStats.assists}</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-slate-400">Ср. оц.</div>
+              <div class="font-sport text-lg font-bold text-amber-300">${p.seasonStats.matches > 0 ? (p.seasonStats.ratingSum / p.seasonStats.matches).toFixed(1) : '—'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTrainingTab() {
+      const p = state.player;
+      const bonuses = getPlayerGearBonuses();
+
+      return `
+        <div class="p-4 space-y-4 animate-in">
+          <div class="glass-panel p-4 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Подготовка к туру</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Слоты обновляются после каждого матча</div>
+            </div>
+            <div class="text-right">
+              <div class="font-sport text-2xl font-bold text-white">${state.weekActionsLeft} / 3</div>
+              <div class="text-[10px] text-slate-400">Слотов осталось</div>
+            </div>
+          </div>
+
+          <!-- Energy & Bonus summary -->
+          <div class="flex items-center justify-between px-1 text-xs">
+            <span class="text-slate-300">⚡ Энергия: <strong class="${p.energy < 35 ? 'text-rose-400' : 'text-emerald-400'}">${p.energy}%</strong></span>
+            <span class="text-slate-400">Бонус тренера/бутс: <strong class="text-amber-300">+${Math.round(bonuses.trainBonus * 100)}%</strong></span>
+          </div>
+
+          <!-- Team Training & Rest -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <button onclick="performTeamTraining()" class="glass-panel p-3.5 text-left active:scale-[0.98] transition border-sky-500/30">
+              <div class="flex justify-between items-start">
+                <span class="text-xl">🤝</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold">-12 ⚡</span>
+              </div>
+              <div class="text-xs font-bold mt-2">С командой</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">+7 Доверие, +6 Форма</div>
+            </button>
+
+            <button onclick="performRest()" class="glass-panel p-3.5 text-left active:scale-[0.98] transition border-emerald-500/30">
+              <div class="flex justify-between items-start">
+                <span class="text-xl">🛌</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold">+28 ⚡</span>
+              </div>
+              <div class="text-xs font-bold mt-2">Восстановление</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Отдых, спа и массаж</div>
+            </button>
+          </div>
+
+          <!-- 6 Stat Trainings -->
+          <div class="space-y-2">
+            ${STAT_META.map(s => {
+              const val = p.stats[s.key];
+              const chance = getTrainSuccessChance(val);
+              const disabled = state.weekActionsLeft <= 0 || p.energy < s.energy || val >= 99;
+              return `
+                <button onclick="performStatTraining('${s.key}')" class="w-full glass-panel p-3.5 flex items-center justify-between transition active:scale-[0.98] ${disabled ? 'opacity-50' : 'hover:border-emerald-500/40'}">
+                  <div class="flex items-center gap-3 text-left">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-lg">${s.icon}</div>
+                    <div>
+                      <div class="text-xs font-bold text-white flex items-center gap-2">
+                        <span>${s.trainTitle}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-sky-300 font-bold">${s.label} ${val}</span>
+                      </div>
+                      <div class="text-[10px] text-slate-400 mt-0.5">Шанс +1 к стату: <strong class="text-emerald-400">${chance}%</strong></div>
+                    </div>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/10 text-[11px] font-bold text-amber-300">-${s.energy} ⚡</span>
+                  </div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function setTableLeague(lid) {
+      selectedTableLeague = lid;
+      haptic('light');
+      render();
+    }
+
+    function renderTableTab() {
+      const p = state.player;
+      const lid = selectedTableLeague || p.leagueId;
+      const league = getLeagueById(lid);
+      const rows = sortTable(state.tables[lid]);
+
+      return `
+        <div class="p-4 space-y-3.5 animate-in">
+          <!-- League Selector Pills -->
+          <div class="flex gap-1.5 overflow-x-auto pb-1">
+            ${LEAGUES.map(l => {
+              const active = l.id === lid;
+              return `
+                <button onclick="setTableLeague('${l.id}')" class="px-3 py-2 rounded-xl text-xs font-bold shrink-0 border transition ${active ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' : 'bg-slate-900/80 border-white/10 text-slate-400'}">
+                  ${l.flag} ${l.name}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          ${state.ucl.active ? `
+            <div class="p-3 rounded-xl bg-gradient-to-r from-sky-900/60 to-indigo-900/60 border border-sky-400/40 text-xs flex items-center justify-between">
+              <div>
+                <div class="font-bold text-sky-200">🏆 Лига Чемпионов</div>
+                <div class="text-[11px] text-slate-300">
+                  ${state.ucl.finished ? (state.ucl.won ? 'Вы выиграли Лигу Чемпионов!' : 'Вылет из турнира') : `Стадия: ${state.ucl.stage === 'semi' ? 'Полуфинал' : 'Финал'}`}
+                </div>
+              </div>
+              <span class="text-lg">${state.ucl.won ? '🥇' : '⚽'}</span>
+            </div>
+          ` : ''}
+
+          <!-- Standings Table -->
+          <div class="glass-panel overflow-hidden">
+            <div class="px-3.5 py-2.5 bg-slate-900/80 border-b border-white/10 flex justify-between items-center">
+              <span class="text-xs font-bold">${league.flag} ${league.fullName}</span>
+              <span class="text-[10px] text-slate-400">18 туров</span>
+            </div>
+
+            <div class="grid grid-cols-12 text-[10px] font-bold text-slate-400 px-3 py-2 border-b border-white/5 uppercase">
+              <div class="col-span-1">#</div>
+              <div class="col-span-5">Клуб</div>
+              <div class="col-span-1 text-center">И</div>
+              <div class="col-span-2 text-center">В/Н/П</div>
+              <div class="col-span-1 text-center">РМ</div>
+              <div class="col-span-2 text-right">Очки</div>
+            </div>
+
+            <div class="divide-y divide-white/5">
+              ${rows.map((r, idx) => {
+                const club = getClubById(r.clubId);
+                const isMe = r.clubId === p.clubId;
+                const gd = r.gf - r.ga;
+                const zoneBar = idx < 2 ? 'border-l-2 border-l-emerald-400' : (idx >= 8 ? 'border-l-2 border-l-rose-500' : 'border-l-2 border-l-transparent');
+                return `
+                  <div class="grid grid-cols-12 items-center px-3 py-2.5 text-xs ${zoneBar} ${isMe ? 'bg-emerald-500/15' : ''}">
+                    <div class="col-span-1 font-sport font-bold ${idx < 2 ? 'text-emerald-400' : (idx >= 8 ? 'text-rose-400' : 'text-slate-400')}">${idx + 1}</div>
+                    <div class="col-span-5 flex items-center gap-1.5 min-w-0">
+                      ${renderClubCrest(club, 20)}
+                      <span class="truncate ${isMe ? 'font-extrabold text-emerald-300' : 'font-semibold text-slate-200'}">${club.name}</span>
+                    </div>
+                    <div class="col-span-1 text-center text-slate-400">${r.played}</div>
+                    <div class="col-span-2 text-center text-[10px] text-slate-400">${r.w}/${r.d}/${r.l}</div>
+                    <div class="col-span-1 text-center text-[11px] ${gd >= 0 ? 'text-slate-300' : 'text-rose-400'}">${gd > 0 ? '+' + gd : gd}</div>
+                    <div class="col-span-2 text-right font-sport font-bold text-sm text-white">${r.pts}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 px-1 text-[10px] text-slate-400">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Топ-2: Лига Чемпионов</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block"></span> Зона вылета</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTransfersTab() {
+      const p = state.player;
+      const myClub = getClubById(p.clubId);
+      const marketVal = calcMarketValue(p);
+      const currentAgent = AGENTS[p.agentId];
+
+      return `
+        <div class="p-4 space-y-4 animate-in">
+          <!-- Current Contract -->
+          <div class="glass-panel p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                ${renderClubCrest(myClub, 38)}
+                <div>
+                  <div class="text-xs font-bold text-white">${myClub.name}</div>
+                  <div class="text-[11px] text-slate-400">Зарплата: <span class="text-emerald-400 font-bold">${formatMoney(p.salary)}/матч</span></div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-[10px] text-slate-400">Цена на рынке</div>
+                <div class="font-sport text-base font-bold text-amber-300">${formatMoney(marketVal)}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transfer Offers Section -->
+          <div class="glass-panel p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Предложения клубов</div>
+                <div class="text-[10px] text-slate-400">${state.transferWindowOpen ? 'Трансферное окно открыто!' : 'Окна открываются после 9 и 18 тура'}</div>
+              </div>
+              <button onclick="requestAgentOffers()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-white/15 text-[11px] font-bold text-sky-300 active:scale-95">
+                🔍 Запросить
+              </button>
+            </div>
+
+            ${state.transferOffers.length === 0 ? `
+              <div class="text-center py-6 text-xs text-slate-400 bg-slate-900/50 rounded-xl border border-white/5">
+                Пока нет активных предложений.<br>Нажмите «Запросить» или дождитесь трансферного окна.
+              </div>
+            ` : `
+              <div class="space-y-3">
+                ${state.transferOffers.map(o => {
+                  const club = getClubById(o.clubId);
+                  if (o.collapsed) {
+                    return `
+                      <div class="p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 text-xs text-rose-300 flex items-center justify-between opacity-70">
+                        <span>${club.name} — сделка сорвалась</span>
+                        <span>❌</span>
+                      </div>
+                    `;
+                  }
+                  return `
+                    <div class="p-3.5 rounded-xl bg-slate-900/90 border border-white/10 space-y-2.5">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                          ${renderClubCrest(club, 36)}
+                          <div>
+                            <div class="text-xs font-bold text-white">${club.name}</div>
+                            <div class="text-[10px] text-slate-400">${club.leagueFlag} ${club.leagueName} • OVR ${club.ovr}</div>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <div class="text-xs font-bold text-emerald-400">${formatMoney(o.salary)}/матч</div>
+                          <div class="text-[10px] text-amber-300">${o.role}</div>
+                        </div>
+                      </div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <button onclick="acceptOffer('${o.offerId}')" class="btn-primary py-2 text-xs">✍️ Подписать</button>
+                        <button onclick="negotiateOffer('${o.offerId}')" ${o.negotiated ? 'disabled' : ''} class="btn-secondary py-2 text-xs ${o.negotiated ? 'opacity-40' : ''}">
+                          ${o.negotiated ? 'Торги окончены' : '💬 Торг (+22%)'}
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+
+          <!-- Agents Market -->
+          <div class="glass-panel p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2.5">Ваш футбольный агент</div>
+            <div class="space-y-2">
+              ${AGENTS.map(ag => {
+                const isCurrent = p.agentId === ag.id;
+                const owned = p.agentId >= ag.id;
+                return `
+                  <div class="p-3 rounded-xl border flex items-center justify-between gap-2 ${isCurrent ? 'bg-amber-500/15 border-amber-400/50' : 'bg-slate-900/70 border-white/5'}">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-2xl">${ag.emoji}</span>
+                      <div>
+                        <div class="text-xs font-bold text-white">${ag.name} ${isCurrent ? '<span class="text-amber-300">(Ваш)</span>' : ''}</div>
+                        <div class="text-[10px] text-slate-400 leading-snug">${ag.desc}</div>
+                      </div>
+                    </div>
+                    ${owned
+                      ? `<span class="text-xs font-bold text-emerald-400 shrink-0">✓</span>`
+                      : `<button onclick="hireAgent(${ag.id})" class="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-200 text-[11px] font-bold shrink-0">${formatMoney(ag.cost)}</button>`
+                    }
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLifeTab() {
+      const p = state.player;
+      const owned = p.ownedItems || [];
+
+      return `
+        <div class="p-4 space-y-4 animate-in">
+          <!-- Sponsors -->
+          <div class="glass-panel p-4">
+            <div class="flex items-center justify-between mb-2.5">
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400">📣 Спонсорские контракты</div>
+              <span class="text-[11px] text-purple-300 font-bold">${formatFans(p.fans)} фанов</span>
+            </div>
+            <div class="space-y-2">
+              ${SPONSORS.map(sp => {
+                const isActive = p.activeSponsorId === sp.id;
+                const unlocked = p.fans >= sp.reqFans;
+                return `
+                  <div class="p-3 rounded-xl border flex items-center justify-between gap-2 ${isActive ? 'bg-emerald-500/15 border-emerald-400/50' : 'bg-slate-900/75 border-white/5'}">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-2xl">${sp.icon}</span>
+                      <div>
+                        <div class="text-xs font-bold text-white">${sp.name}</div>
+                        <div class="text-[10px] text-emerald-300">+${formatMoney(sp.perMatch)}/матч • +${formatMoney(sp.perGoal)}/гол</div>
+                        <div class="text-[10px] text-slate-400">Требуется: ${formatFans(sp.reqFans)} фанов</div>
+                      </div>
+                    </div>
+                    ${isActive
+                      ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/25 text-emerald-300 text-[10px] font-bold shrink-0">Активен</span>`
+                      : `<button onclick="signSponsor('${sp.id}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold shrink-0 ${unlocked ? 'bg-sky-500/20 border border-sky-400/50 text-sky-200' : 'bg-slate-800 text-slate-500'}">${unlocked ? 'Выбрать' : '🔒'}</button>`
+                    }
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Gear & Staff -->
+          <div class="glass-panel p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2.5">⚡ Экипировка и персонал</div>
+            <div class="space-y-2">
+              ${GEAR_STAFF.map(item => {
+                const has = owned.includes(item.id);
+                return `
+                  <div class="p-3 rounded-xl bg-slate-900/75 border border-white/5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-2xl">${item.icon}</span>
+                      <div>
+                        <div class="text-xs font-bold text-white">${item.name}</div>
+                        <div class="text-[10px] text-slate-400 leading-snug">${item.desc}</div>
+                      </div>
+                    </div>
+                    ${has
+                      ? `<span class="text-emerald-400 text-xs font-bold shrink-0">Куплено ✓</span>`
+                      : `<button onclick="buyItem('${item.id}', 'gear')" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-bold shrink-0">${formatMoney(item.cost)}</button>`
+                    }
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Lifestyle -->
+          <div class="glass-panel p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2.5">✨ Лайфстайл и статус</div>
+            <div class="space-y-2">
+              ${LIFESTYLE_ITEMS.map(item => {
+                const has = owned.includes(item.id);
+                return `
+                  <div class="p-3 rounded-xl bg-slate-900/75 border border-white/5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-2xl">${item.icon}</span>
+                      <div>
+                        <div class="text-xs font-bold text-white">${item.name}</div>
+                        <div class="text-[10px] text-slate-400 leading-snug">${item.desc}</div>
+                      </div>
+                    </div>
+                    ${has
+                      ? `<span class="text-amber-300 text-xs font-bold shrink-0">В собственности ✓</span>`
+                      : `<button onclick="buyItem('${item.id}', 'lifestyle')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-200 text-[11px] font-bold shrink-0">${formatMoney(item.cost)}</button>`
+                    }
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      haptic('light');
+      playSfx('click');
+      render();
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function renderBottomNav() {
+      const items = [
+        { id: 'career', label: 'Карьера', icon: '⚽' },
+        { id: 'training', label: 'Тренировки', icon: '🏋️', badge: state.weekActionsLeft > 0 ? state.weekActionsLeft : null },
+        { id: 'table', label: 'Таблица', icon: '🏆' },
+        { id: 'transfers', label: 'Трансферы', icon: '💼', badge: state.transferOffers.filter(o => !o.collapsed).length || null },
+        { id: 'life', label: 'Жизнь', icon: '✨' }
+      ];
+
+      return `
+        <nav class="bottom-nav grid grid-cols-5">
+          ${items.map(it => `
+            <button onclick="switchTab('${it.id}')" class="nav-btn ${activeTab === it.id ? 'active' : ''}">
+              <div class="relative text-lg leading-none mb-1">
+                ${it.icon}
+                ${it.badge ? `<span class="absolute -top-1 -right-2.5 min-w-[15px] h-[15px] px-1 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-extrabold flex items-center justify-center">${it.badge}</span>` : ''}
+              </div>
+              <span>${it.label}</span>
+            </button>
+          `).join('')}
+        </nav>
+      `;
+    }
+
+    function render() {
+      const root = document.getElementById('root');
+      if (!state || !state.player) {
+        root.innerHTML = renderCreationScreen();
+        return;
+      }
+
+      let content = '';
+      if (activeTab === 'career') content = renderCareerTab();
+      else if (activeTab === 'training') content = renderTrainingTab();
+      else if (activeTab === 'table') content = renderTableTab();
+      else if (activeTab === 'transfers') content = renderTransfersTab();
+      else if (activeTab === 'life') content = renderLifeTab();
+
+      root.innerHTML = `
+        ${renderHeader()}
+        <main class="flex-1 pb-20">
+          ${content}
+        </main>
+        ${renderBottomNav()}
+      `;
+    }
+
+    /*************************************************************************
+     * 16. BOOTSTRAP
+     *************************************************************************/
+    window.addEventListener('DOMContentLoaded', () => {
+      initTelegram();
+      loadState();
+      render();
+    });
+  </script>
+</body>
+</html>
