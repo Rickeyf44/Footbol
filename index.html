@@ -1,0 +1,3707 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>PRO CAREER: TOP 5 + РПЛ</title>
+  <!-- Non-blocking SDKs -->
+  <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+  <script src="https://sad.adsgram.ai/js/sad.min.js" async></script>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS & BASE RESET (DARK STADIUM THEME)
+       ========================================================================= */
+    :root {
+      --bg-0: #060b14;
+      --bg-1: #0b1322;
+      --bg-2: #111c30;
+      --bg-card: rgba(15, 23, 42, 0.88);
+      --border: rgba(255, 255, 255, 0.09);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text-0: #f8fafc;
+      --text-1: #cbd5e1;
+      --text-2: #94a3b8;
+      --emerald: #10b981;
+      --emerald-bright: #34d399;
+      --gold: #f59e0b;
+      --gold-bright: #fbbf24;
+      --sky: #38bdf8;
+      --rose: #f43f5e;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: radial-gradient(circle at 50% -10%, #162a4a 0%, var(--bg-0) 55%, #04070d 100%);
+      color: var(--text-0);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    input, button, select {
+      font-family: inherit;
+      outline: none;
+    }
+
+    input {
+      user-select: text;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    button:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    /* =========================================================================
+       LAYOUT & SHELL
+       ========================================================================= */
+    #app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      margin: 0 auto;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 78px;
+    }
+
+    .hud {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(6, 11, 20, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .hud-club {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .hud-club-meta {
+      min-width: 0;
+    }
+
+    .hud-club-name {
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #fff;
+    }
+
+    .hud-sub {
+      font-size: 11px;
+      color: var(--text-2);
+      font-weight: 600;
+    }
+
+    .hud-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border-strong);
+      white-space: nowrap;
+    }
+
+    .pill-money {
+      color: var(--emerald-bright);
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.12);
+    }
+
+    .pill-energy-hi { color: var(--emerald-bright); border-color: rgba(16, 185, 129, 0.35); }
+    .pill-energy-md { color: var(--gold-bright); border-color: rgba(245, 158, 11, 0.4); }
+    .pill-energy-lo { color: #fb7185; border-color: rgba(244, 63, 94, 0.45); background: rgba(244, 63, 94, 0.12); }
+
+    .main-content {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 45;
+      background: rgba(7, 12, 22, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-strong);
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 5px 2px;
+      border-radius: 10px;
+      color: var(--text-2);
+      font-size: 10px;
+      font-weight: 700;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .nav-btn .ico {
+      font-size: 17px;
+      line-height: 1.1;
+    }
+
+    .nav-btn.active {
+      color: var(--emerald-bright);
+      background: rgba(16, 185, 129, 0.12);
+    }
+
+    .nav-dot {
+      position: absolute;
+      top: 4px;
+      right: 12px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald-bright);
+      box-shadow: 0 0 8px var(--emerald-bright);
+      animation: pulse 1.6s infinite;
+    }
+
+    /* =========================================================================
+       CARDS, TYPOGRAPHY & BUTTONS
+       ========================================================================= */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-highlight {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: linear-gradient(155deg, rgba(16, 185, 129, 0.13), rgba(15, 23, 42, 0.94));
+    }
+
+    .card-gold {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: linear-gradient(155deg, rgba(245, 158, 11, 0.14), rgba(15, 23, 42, 0.94));
+    }
+
+    .card-sky {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: linear-gradient(155deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.94));
+    }
+
+    .card-rose {
+      border-color: rgba(244, 63, 94, 0.42);
+      background: linear-gradient(155deg, rgba(244, 63, 94, 0.14), rgba(15, 23, 42, 0.95));
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--text-0);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .muted { color: var(--text-2); }
+    .small { font-size: 11px; }
+    .xs { font-size: 10px; }
+    .bold { font-weight: 800; }
+    .center { text-align: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 800;
+      font-size: 13px;
+      transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 7px 12px;
+      font-size: 12px;
+      width: auto;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #032217;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      color: #1f1102;
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28);
+    }
+
+    .btn-sky {
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      color: #041b2c;
+      box-shadow: 0 6px 18px rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      color: #ffffff;
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-sec {
+      background: rgba(30, 41, 59, 0.9);
+      color: var(--text-0);
+      border: 1px solid var(--border-strong);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.16);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    /* Segmented Sub-tabs */
+    .seg-tabs {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 4px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+    }
+
+    .seg-btn {
+      padding: 8px 6px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-2);
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .seg-btn.active {
+      background: var(--emerald);
+      color: #032217;
+      box-shadow: 0 3px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Badges & Progress */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-green { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-gold  { background: rgba(245, 158, 11, 0.2);  color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.45); }
+    .badge-rose  { background: rgba(244, 63, 94, 0.2);   color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.45); }
+    .badge-sky   { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-slate { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    .bar-track {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    /* =========================================================================
+       EA FC STYLE PLAYER CARD
+       ========================================================================= */
+    .fc-card {
+      position: relative;
+      border-radius: 22px;
+      padding: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.55);
+    }
+
+    .fc-bronze {
+      background: linear-gradient(145deg, #4b2e19 0%, #8c5a32 45%, #3b2211 100%);
+      border-color: #d49b6a;
+      color: #fff7ed;
+    }
+
+    .fc-silver {
+      background: linear-gradient(145deg, #334155 0%, #94a3b8 48%, #1e293b 100%);
+      border-color: #e2e8f0;
+      color: #ffffff;
+    }
+
+    .fc-gold {
+      background: linear-gradient(145deg, #784b06 0%, #eab308 46%, #452603 100%);
+      border-color: #fef08a;
+      color: #fffbeb;
+    }
+
+    .fc-elite {
+      background: linear-gradient(145deg, #064e3b 0%, #0ea5e9 45%, #312e81 100%);
+      border-color: #5eead4;
+      color: #ffffff;
+      box-shadow: 0 18px 40px rgba(14, 165, 233, 0.32);
+    }
+
+    .fc-shine {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 10%, rgba(255,255,255,0.28), transparent 55%);
+      pointer-events: none;
+    }
+
+    .fc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .fc-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 68px;
+    }
+
+    .fc-ovr {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.45);
+    }
+
+    .fc-pos {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+      opacity: 0.95;
+    }
+
+    .fc-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .fc-avatar {
+      width: 112px;
+      height: 112px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,0.45));
+    }
+
+    .fc-name-bar {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin: 10px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .fc-name {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .fc-clubline {
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.9;
+      margin-top: 2px;
+    }
+
+    .fc-stats {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px 10px;
+    }
+
+    .fc-stat {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.24);
+      padding: 5px 6px;
+      border-radius: 9px;
+    }
+
+    .fc-stat-val {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .fc-stat-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      opacity: 0.85;
+    }
+
+    /* =========================================================================
+       GRIDS, LISTS, TABLES & INPUTS
+       ========================================================================= */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .row-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .text-input {
+      width: 100%;
+      background: rgba(10, 17, 30, 0.95);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 11px 12px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .text-input:focus {
+      border-color: var(--emerald-bright);
+    }
+
+    .chip-btn {
+      padding: 8px 6px;
+      border-radius: 11px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn.selected {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--emerald-bright);
+      color: #fff;
+    }
+
+    .league-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .league-scroll::-webkit-scrollbar { display: none; }
+
+    .league-pill {
+      flex-shrink: 0;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      color: var(--text-1);
+    }
+    .league-pill.active {
+      background: var(--emerald);
+      color: #032217;
+      border-color: var(--emerald-bright);
+    }
+
+    /* Tables */
+    .tbl-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th {
+      text-align: left;
+      font-size: 10px;
+      color: var(--text-2);
+      text-transform: uppercase;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 7px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    tr.me-row {
+      background: rgba(16, 185, 129, 0.16);
+    }
+
+    /* 2D Pitch & Scoreboard */
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0b1629, #0f223d);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .sb-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 34%;
+      text-align: center;
+    }
+    .sb-score {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+    .sb-min {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--emerald-bright);
+      background: rgba(16, 185, 129, 0.15);
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .pitch-box {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+    }
+
+    .match-log {
+      max-height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 11px;
+    }
+
+    .log-item {
+      padding: 6px 9px;
+      border-radius: 9px;
+      background: rgba(15, 23, 42, 0.9);
+      border-left: 3px solid var(--sky);
+    }
+    .log-item.goal { border-left-color: var(--emerald-bright); background: rgba(16, 185, 129, 0.14); }
+    .log-item.opp  { border-left-color: var(--rose); background: rgba(244, 63, 94, 0.12); }
+
+    /* =========================================================================
+       MODALS & TOASTS
+       ========================================================================= */
+    #modal-root {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(2, 6, 14, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    #modal-root.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 430px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #0d1626;
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      animation: fadeUp 0.2s ease-out;
+    }
+
+    #toast-root {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 440px;
+      z-index: 120;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 10px 14px;
+      border-radius: 13px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid var(--border-strong);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+      animation: fadeUp 0.2s ease-out;
+    }
+    .toast-ok   { border-color: rgba(16, 185, 129, 0.6); color: #a7f3d0; }
+    .toast-gold { border-color: rgba(245, 158, 11, 0.65); color: #fde68a; }
+    .toast-err  { border-color: rgba(244, 63, 94, 0.65); color: #fecdd3; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.25); opacity: 0.65; }
+    }
+    @keyframes dicePop {
+      0%   { transform: scale(1) rotate(0deg); }
+      40%  { transform: scale(1.12) rotate(-12deg); }
+      75%  { transform: scale(0.95) rotate(8deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .anim { animation: fadeUp 0.2s ease-out; }
+    .dice-pop { animation: dicePop 0.3s ease-out; }
+  </style>
+</head>
+<body>
+  <div id="toast-root"></div>
+  <div id="app">
+    <div style="padding:48px 20px;text-align:center;color:#94a3b8;font-weight:700;">
+      ⚽ Загрузка PRO CAREER: TOP 5 + РПЛ...
+    </div>
+  </div>
+  <div id="modal-root"></div>
+
+  <script>
+    /* =========================================================================
+       1. CENTRAL CONFIGURATION (EXACT CREDENTIALS)
+       ========================================================================= */
+    const CONFIG = {
+      BOT_USERNAME: 'BooomBer_bot',
+      APP_SHORT_NAME: '',
+      ADSGRAM_BLOCK_ID: '60696',
+      REFERRAL_REWARD: 20000,
+      SUPABASE_URL: 'https://qarxtuqfhyjzdddpjjlj.supabase.co',
+      SUPABASE_ANON_KEY: 'sb_publishable_IEkcSO4AnZfsbnhRBXzABg_jVdNDEfh'
+    };
+
+    const STORAGE_KEY = 'pro_career_top5_rpl_v4';
+
+    /* =========================================================================
+       2. GLOBAL ERROR GUARD (PREVENTS BLACK SCREENS)
+       ========================================================================= */
+    window.onerror = function (msg, src, line) {
+      try {
+        const app = document.getElementById('app');
+        if (app && app.innerHTML.trim().length < 80) {
+          app.innerHTML =
+            '<div style="padding:24px;text-align:center;">' +
+            '<h3 style="color:#fb7185;margin-bottom:8px;">⚠️ Сбой запуска</h3>' +
+            '<p style="font-size:12px;color:#cbd5e1;margin-bottom:14px;">' + escapeHtml(String(msg)) + ' (стр. ' + line + ')</p>' +
+            '<button onclick="resetSaveHard()" style="padding:10px 16px;border-radius:10px;background:#10b981;color:#032217;font-weight:800;">Сбросить и перезапустить</button>' +
+            '</div>';
+        }
+      } catch (e) {}
+      return false;
+    };
+
+    /* =========================================================================
+       3. TELEGRAM SDK & HELPERS
+       ========================================================================= */
+    let tg = null;
+    let tgUser = { id: 'guest_' + Math.floor(100000 + Math.random() * 899999), firstName: '' };
+
+    function initTelegram() {
+      try {
+        if (window.Telegram && window.Telegram.WebApp) {
+          tg = window.Telegram.WebApp;
+          tg.ready();
+          tg.expand();
+          if (tg.setHeaderColor) tg.setHeaderColor('#060b14');
+          if (tg.setBackgroundColor) tg.setBackgroundColor('#060b14');
+          const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+          if (u && u.id) {
+            tgUser = {
+              id: String(u.id),
+              firstName: [u.first_name, u.last_name].filter(Boolean).join(' ').trim() || u.username || 'Футболист'
+            };
+            try { localStorage.setItem('pc_tg_id', tgUser.id); } catch (e) {}
+          }
+        }
+        // Fallback persistent guest ID if outside Telegram
+        if (tgUser.id.startsWith('guest_')) {
+          const savedId = localStorage.getItem('pc_tg_id');
+          if (savedId) tgUser.id = savedId;
+          else localStorage.setItem('pc_tg_id', tgUser.id);
+        }
+      } catch (e) {}
+    }
+
+    function haptic(type) {
+      try {
+        if (!tg || !tg.HapticFeedback) return;
+        if (type === 'success' || type === 'error' || type === 'warning') {
+          tg.HapticFeedback.notificationOccurred(type);
+        } else {
+          tg.HapticFeedback.impactOccurred(type || 'light');
+        }
+      } catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function fmtMoney(n) {
+      return Math.round(Number(n) || 0).toLocaleString('ru-RU') + ' €';
+    }
+
+    function fmtNum(n) {
+      return Math.round(Number(n) || 0).toLocaleString('ru-RU');
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function todayKey() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function showToast(text, kind) {
+      try {
+        const root = document.getElementById('toast-root');
+        if (!root) return;
+        const el = document.createElement('div');
+        el.className = 'toast ' + (kind === 'error' ? 'toast-err' : kind === 'gold' ? 'toast-gold' : 'toast-ok');
+        el.textContent = text;
+        root.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.25s ease';
+          setTimeout(() => el.remove(), 260);
+        }, 3200);
+      } catch (e) {}
+    }
+
+    function openModal(html) {
+      const root = document.getElementById('modal-root');
+      if (!root) return;
+      root.innerHTML = '<div class="modal-box">' + html + '</div>';
+      root.classList.add('open');
+    }
+
+    function closeModal() {
+      const root = document.getElementById('modal-root');
+      if (!root) return;
+      root.classList.remove('open');
+      root.innerHTML = '';
+    }
+
+    function copyTextSafe(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) {
+          showToast('Ссылка скопирована в буфер!', 'ok');
+          haptic('success');
+          return;
+        }
+      } catch (e) {}
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Ссылка скопирована!', 'ok');
+          haptic('success');
+        }).catch(() => showToast('Не удалось скопировать', 'error'));
+      }
+    }
+
+    /* =========================================================================
+       4. SUPABASE HEADERS RULE (NO Authorization FOR sb_publishable_)
+       ========================================================================= */
+    function getSupabaseHeaders(extra) {
+      const key = (CONFIG.SUPABASE_ANON_KEY || '').trim();
+      const headers = {
+        'apikey': key,
+        'Content-Type': 'application/json'
+      };
+      // Strictly ONLY add Authorization Bearer if key starts with eyJ
+      if (key.startsWith('eyJ')) {
+        headers['Authorization'] = 'Bearer ' + key;
+      }
+      if (extra) {
+        Object.keys(extra).forEach(k => { headers[k] = extra[k]; });
+      }
+      return headers;
+    }
+
+    /* =========================================================================
+       5. GAME DATA: 6 LEAGUES (60 CLUBS), 12 COUNTRIES, NAMES, POSITIONS
+       ========================================================================= */
+    const COUNTRIES = [
+      { id: 'RU', name: 'Россия',     flag: '🇷🇺', callUpOvr: 65, ovr: 76, c1: '#dc2626', c2: '#1d4ed8' },
+      { id: 'ES', name: 'Испания',    flag: '🇪🇸', callUpOvr: 72, ovr: 86, c1: '#dc2626', c2: '#facc15' },
+      { id: 'EN', name: 'Англия',     flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', callUpOvr: 72, ovr: 86, c1: '#ffffff', c2: '#dc2626' },
+      { id: 'FR', name: 'Франция',    flag: '🇫🇷', callUpOvr: 74, ovr: 88, c1: '#1d4ed8', c2: '#ef4444' },
+      { id: 'DE', name: 'Германия',   flag: '🇩🇪', callUpOvr: 71, ovr: 84, c1: '#111827', c2: '#facc15' },
+      { id: 'IT', name: 'Италия',     flag: '🇮🇹', callUpOvr: 70, ovr: 83, c1: '#2563eb', c2: '#ffffff' },
+      { id: 'BR', name: 'Бразилия',   flag: '🇧🇷', callUpOvr: 73, ovr: 87, c1: '#facc15', c2: '#16a34a' },
+      { id: 'AR', name: 'Аргентина',  flag: '🇦🇷', callUpOvr: 73, ovr: 88, c1: '#38bdf8', c2: '#ffffff' },
+      { id: 'PT', name: 'Португалия', flag: '🇵🇹', callUpOvr: 70, ovr: 85, c1: '#b91c1c', c2: '#15803d' },
+      { id: 'RS', name: 'Сербия',     flag: '🇷🇸', callUpOvr: 65, ovr: 79, c1: '#dc2626', c2: '#1e3a8a' },
+      { id: 'NL', name: 'Нидерланды', flag: '🇳🇱', callUpOvr: 69, ovr: 83, c1: '#f97316', c2: '#111827' },
+      { id: 'HR', name: 'Хорватия',   flag: '🇭🇷', callUpOvr: 67, ovr: 80, c1: '#ef4444', c2: '#ffffff' }
+    ];
+
+    const NAME_POOLS = {
+      RU: { first: ['Артём','Максим','Данил','Иван','Кирилл','Алексей','Дмитрий','Егор','Никита','Матвей'], last: ['Соколов','Волков','Морозов','Петров','Смирнов','Орлов','Кузнецов','Громов','Лебедев','Ковалёв'] },
+      ES: { first: ['Алехандро','Пабло','Карлос','Диего','Хавьер','Маркос','Альваро','Давид','Серхио','Икер'], last: ['Торрес','Наварро','Морено','Руис','Гарсия','Ромеро','Кастро','Дельгадо','Мендес','Васкес'] },
+      EN: { first: ['Джек','Оливер','Гарри','Джуд','Мейсон','Лиам','Коул','Каллум','Бен','Чарли'], last: ['Харрисон','Уорд','Тейлор','Уокер','Брукс','Фостер','Бернс','Кларк','Эванс','Палмер'] },
+      FR: { first: ['Люка','Тео','Антуан','Уго','Матео','Энцо','Килиан','Ромен','Жюль','Натан'], last: ['Моро','Лоран','Дюпон','Мерсье','Лефевр','Гарнье','Шевалье','Бернар','Фабр','Дюбуа'] },
+      DE: { first: ['Лукас','Флориан','Макс','Юлиан','Йонас','Тимо','Леон','Никлас','Янник','Феликс'], last: ['Вебер','Вагнер','Беккер','Шульц','Хоффманн','Шнайдер','Рихтер','Кох','Бауэр','Келлер'] },
+      IT: { first: ['Лоренцо','Маттео','Николо','Алессандро','Федерико','Марко','Давиде','Симоне','Андреа','Лука'], last: ['Росси','Конти','Феррари','Бьянки','Романо','Моретти','Галло','Риччи','Марино','Коста'] },
+      BR: { first: ['Габриэл','Лукас','Матеус','Рафаэл','Винисиус','Педро','Бруно','Кайо','Родриго','Тьяго'], last: ['Силва','Феррейра','Сантос','Оливейра','Коста','Алвес','Перейра','Родригес','Лима','Соуза'] },
+      AR: { first: ['Лаутаро','Хулиан','Энцо','Матиас','Томас','Франко','Сантьяго','Николас','Агустин','Лусиано'], last: ['Гомес','Фернандес','Диас','Альварес','Ромеро','Молина','Медина','Кастро','Суарес','Перес'] },
+      PT: { first: ['Жоау','Диогу','Бернарду','Гонсалу','Рубен','Нуну','Тиагу','Педру','Рафаэл','Андре'], last: ['Мендеш','Силва','Фернандеш','Кошта','Перейра','Оливейра','Мартинш','Соуза','Карвалью','Невеш'] },
+      RS: { first: ['Душан','Александар','Никола','Стефан','Милош','Неманья','Филип','Лука','Марко','Урош'], last: ['Йович','Петрович','Николич','Маркович','Стоянович','Илич','Павлович','Костич','Тадич','Джурич'] },
+      NL: { first: ['Дан','Свен','Тейн','Брайан','Коди','Йорис','Маттейс','Квинтен','Сэм','Ноа'], last: ['де Врис','ван Дейк','Баккер','Янсен','де Йонг','Виссер','Смит','Мейер','ван дер Берг','Де Бур'] },
+      HR: { first: ['Лука','Йошко','Матео','Марко','Иван','Бруно','Ловро','Анте','Доминик','Борна'], last: ['Ковачич','Брозович','Хорват','Новак','Бабич','Марич','Юрич','Вукович','Петрович','Кнежевич'] }
+    };
+
+    const POSITIONS = {
+      ST:  { code: 'ST',  name: 'Форвард',      icon: '⚡', base: { pac: 64, sho: 65, pas: 54, dri: 60, def: 35, phy: 59 }, w: { pac: 0.22, sho: 0.30, pas: 0.12, dri: 0.20, def: 0.03, phy: 0.13 } },
+      LW:  { code: 'LW',  name: 'Лев. вингер',  icon: '🌪️', base: { pac: 67, sho: 60, pas: 59, dri: 65, def: 36, phy: 52 }, w: { pac: 0.28, sho: 0.18, pas: 0.18, dri: 0.27, def: 0.03, phy: 0.06 } },
+      RW:  { code: 'RW',  name: 'Прав. вингер', icon: '🚀', base: { pac: 66, sho: 61, pas: 59, dri: 65, def: 36, phy: 52 }, w: { pac: 0.27, sho: 0.20, pas: 0.18, dri: 0.26, def: 0.03, phy: 0.06 } },
+      CAM: { code: 'CAM', name: 'Плеймейкер',   icon: '🎯', base: { pac: 60, sho: 60, pas: 66, dri: 64, def: 42, phy: 53 }, w: { pac: 0.14, sho: 0.18, pas: 0.30, dri: 0.26, def: 0.05, phy: 0.07 } },
+      CM:  { code: 'CM',  name: 'Полузащитник', icon: '⚙️', base: { pac: 59, sho: 57, pas: 64, dri: 60, def: 57, phy: 60 }, w: { pac: 0.12, sho: 0.12, pas: 0.28, dri: 0.20, def: 0.15, phy: 0.13 } },
+      CDM: { code: 'CDM', name: 'Опорник',      icon: '🔒', base: { pac: 56, sho: 50, pas: 62, dri: 55, def: 65, phy: 64 }, w: { pac: 0.12, sho: 0.05, pas: 0.24, dri: 0.10, def: 0.28, phy: 0.21 } },
+      CB:  { code: 'CB',  name: 'Защитник',     icon: '🛡️', base: { pac: 58, sho: 40, pas: 54, dri: 48, def: 66, phy: 65 }, w: { pac: 0.15, sho: 0.04, pas: 0.12, dri: 0.07, def: 0.36, phy: 0.26 } },
+      GK:  { code: 'GK',  name: 'Вратарь',      icon: '🧤', base: { pac: 54, sho: 42, pas: 58, dri: 50, def: 68, phy: 65 }, w: { pac: 0.12, sho: 0.03, pas: 0.16, dri: 0.07, def: 0.38, phy: 0.24 } }
+    };
+
+    const STAT_META = [
+      { key: 'pac', ru: 'СКР', name: 'Скорость' },
+      { key: 'sho', ru: 'УДР', name: 'Удар' },
+      { key: 'pas', ru: 'ПАС', name: 'Передача' },
+      { key: 'dri', ru: 'ДРБ', name: 'Дриблинг' },
+      { key: 'def', ru: 'ЗАЩ', name: 'Защита' },
+      { key: 'phy', ru: 'ФИЗ', name: 'Физика' }
+    ];
+
+    /* 6 LEAGUES (TOP 5 + РПЛ) — 60 REALISTIC CLUBS */
+    const LEAGUES = [
+      {
+        id: 'epl', name: 'АПЛ', country: 'Англия', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', prestige: 1.35,
+        clubs: [
+          { id: 'mci', name: 'Манчестер Сити', short: 'MCI', ovr: 88, color1: '#38bdf8', color2: '#0c4a6e' },
+          { id: 'ars', name: 'Арсенал',        short: 'ARS', ovr: 86, color1: '#dc2626', color2: '#ffffff' },
+          { id: 'liv', name: 'Ливерпуль',      short: 'LIV', ovr: 86, color1: '#b91c1c', color2: '#fbbf24' },
+          { id: 'che', name: 'Челси',          short: 'CHE', ovr: 82, color1: '#1d4ed8', color2: '#ffffff' },
+          { id: 'mun', name: 'Ман Юнайтед',    short: 'MUN', ovr: 81, color1: '#dc2626', color2: '#111827' },
+          { id: 'tot', name: 'Тоттенхэм',      short: 'TOT', ovr: 80, color1: '#f8fafc', color2: '#1e293b' },
+          { id: 'new', name: 'Ньюкасл',        short: 'NEW', ovr: 79, color1: '#111827', color2: '#e2e8f0' },
+          { id: 'bre', name: 'Брентфорд',      short: 'BRE', ovr: 68, color1: '#dc2626', color2: '#f8fafc', starter: true },
+          { id: 'eve', name: 'Эвертон',        short: 'EVE', ovr: 66, color1: '#2563eb', color2: '#ffffff', starter: true },
+          { id: 'sou', name: 'Саутгемптон',    short: 'SOU', ovr: 64, color1: '#ef4444', color2: '#111827', starter: true }
+        ]
+      },
+      {
+        id: 'laliga', name: 'Ла Лига', country: 'Испания', flag: '🇪🇸', prestige: 1.30,
+        clubs: [
+          { id: 'rma', name: 'Реал Мадрид',    short: 'RMA', ovr: 88, color1: '#f8fafc', color2: '#eab308' },
+          { id: 'bar', name: 'Барселона',      short: 'BAR', ovr: 86, color1: '#1d4ed8', color2: '#be123c' },
+          { id: 'atm', name: 'Атлетико',       short: 'ATM', ovr: 83, color1: '#dc2626', color2: '#1e3a8a' },
+          { id: 'ath', name: 'Атлетик',        short: 'ATH', ovr: 80, color1: '#dc2626', color2: '#ffffff' },
+          { id: 'rso', name: 'Реал Сосьедад',  short: 'RSO', ovr: 78, color1: '#2563eb', color2: '#ffffff' },
+          { id: 'vil', name: 'Вильярреал',     short: 'VIL', ovr: 77, color1: '#facc15', color2: '#1e3a8a' },
+          { id: 'bet', name: 'Бетис',          short: 'BET', ovr: 76, color1: '#16a34a', color2: '#ffffff' },
+          { id: 'get', name: 'Хетафе',         short: 'GET', ovr: 67, color1: '#2563eb', color2: '#dc2626', starter: true },
+          { id: 'ala', name: 'Алавес',         short: 'ALA', ovr: 65, color1: '#1d4ed8', color2: '#f8fafc', starter: true },
+          { id: 'lpa', name: 'Лас-Пальмас',    short: 'LPA', ovr: 63, color1: '#facc15', color2: '#2563eb', starter: true }
+        ]
+      },
+      {
+        id: 'seriea', name: 'Серия А', country: 'Италия', flag: '🇮🇹', prestige: 1.25,
+        clubs: [
+          { id: 'int', name: 'Интер',          short: 'INT', ovr: 86, color1: '#1d4ed8', color2: '#0f172a' },
+          { id: 'mil', name: 'Милан',          short: 'MIL', ovr: 84, color1: '#dc2626', color2: '#111827' },
+          { id: 'juv', name: 'Ювентус',        short: 'JUV', ovr: 83, color1: '#f8fafc', color2: '#0f172a' },
+          { id: 'nap', name: 'Наполи',         short: 'NAP', ovr: 82, color1: '#0284c7', color2: '#ffffff' },
+          { id: 'ata', name: 'Аталанта',       short: 'ATA', ovr: 81, color1: '#1d4ed8', color2: '#111827' },
+          { id: 'rom', name: 'Рома',           short: 'ROM', ovr: 79, color1: '#9f1239', color2: '#f59e0b' },
+          { id: 'laz', name: 'Лацио',          short: 'LAZ', ovr: 78, color1: '#38bdf8', color2: '#ffffff' },
+          { id: 'emp', name: 'Эмполи',         short: 'EMP', ovr: 67, color1: '#2563eb', color2: '#f8fafc', starter: true },
+          { id: 'lec', name: 'Лечче',          short: 'LEC', ovr: 65, color1: '#eab308', color2: '#dc2626', starter: true },
+          { id: 'ven', name: 'Венеция',        short: 'VEN', ovr: 63, color1: '#ea580c', color2: '#15803d', starter: true }
+        ]
+      },
+      {
+        id: 'bundesliga', name: 'Бундеслига', country: 'Германия', flag: '🇩🇪', prestige: 1.25,
+        clubs: [
+          { id: 'bay', name: 'Бавария',        short: 'BAY', ovr: 87, color1: '#dc2626', color2: '#ffffff' },
+          { id: 'lev', name: 'Байер',          short: 'LEV', ovr: 85, color1: '#b91c1c', color2: '#111827' },
+          { id: 'bvb', name: 'Боруссия Д',     short: 'BVB', ovr: 83, color1: '#facc15', color2: '#111827' },
+          { id: 'rbl', name: 'РБ Лейпциг',     short: 'RBL', ovr: 81, color1: '#f8fafc', color2: '#dc2626' },
+          { id: 'vfb', name: 'Штутгарт',       short: 'VFB', ovr: 79, color1: '#ffffff', color2: '#dc2626' },
+          { id: 'sge', name: 'Айнтрахт',       short: 'SGE', ovr: 78, color1: '#111827', color2: '#dc2626' },
+          { id: 'scf', name: 'Фрайбург',       short: 'SCF', ovr: 76, color1: '#dc2626', color2: '#111827' },
+          { id: 'aug', name: 'Аугсбург',       short: 'AUG', ovr: 67, color1: '#16a34a', color2: '#dc2626', starter: true },
+          { id: 'boc', name: 'Бохум',          short: 'BOC', ovr: 65, color1: '#2563eb', color2: '#ffffff', starter: true },
+          { id: 'stp', name: 'Санкт-Паули',    short: 'STP', ovr: 63, color1: '#78350f', color2: '#f8fafc', starter: true }
+        ]
+      },
+      {
+        id: 'ligue1', name: 'Лига 1', country: 'Франция', flag: '🇫🇷', prestige: 1.20,
+        clubs: [
+          { id: 'psg', name: 'ПСЖ',            short: 'PSG', ovr: 87, color1: '#1e3a8a', color2: '#dc2626' },
+          { id: 'mon', name: 'Монако',         short: 'MON', ovr: 81, color1: '#dc2626', color2: '#ffffff' },
+          { id: 'mar', name: 'Марсель',        short: 'MAR', ovr: 80, color1: '#38bdf8', color2: '#ffffff' },
+          { id: 'lil', name: 'Лилль',          short: 'LIL', ovr: 79, color1: '#dc2626', color2: '#1e3a8a' },
+          { id: 'lyo', name: 'Лион',           short: 'LYO', ovr: 78, color1: '#f8fafc', color2: '#1d4ed8' },
+          { id: 'nic', name: 'Ницца',          short: 'NIC', ovr: 76, color1: '#dc2626', color2: '#111827' },
+          { id: 'len', name: 'Ланс',           short: 'LEN', ovr: 75, color1: '#facc15', color2: '#dc2626' },
+          { id: 'nan', name: 'Нант',           short: 'NAN', ovr: 66, color1: '#facc15', color2: '#16a34a', starter: true },
+          { id: 'aux', name: 'Осер',           short: 'AUX', ovr: 64, color1: '#2563eb', color2: '#ffffff', starter: true },
+          { id: 'ang', name: 'Анже',           short: 'ANG', ovr: 62, color1: '#111827', color2: '#ffffff', starter: true }
+        ]
+      },
+      {
+        id: 'rpl', name: 'РПЛ', country: 'Россия', flag: '🇷🇺', prestige: 1.12,
+        clubs: [
+          { id: 'zen', name: 'Зенит',          short: 'ZEN', ovr: 81, color1: '#0284c7', color2: '#ffffff' },
+          { id: 'kra', name: 'Краснодар',      short: 'KRA', ovr: 79, color1: '#15803d', color2: '#111827' },
+          { id: 'spa', name: 'Спартак',        short: 'SPA', ovr: 78, color1: '#dc2626', color2: '#ffffff' },
+          { id: 'din', name: 'Динамо М',       short: 'DIN', ovr: 77, color1: '#2563eb', color2: '#ffffff' },
+          { id: 'csk', name: 'ЦСКА',           short: 'CSK', ovr: 77, color1: '#dc2626', color2: '#1d4ed8' },
+          { id: 'lok', name: 'Локомотив',      short: 'LOK', ovr: 76, color1: '#16a34a', color2: '#dc2626' },
+          { id: 'ros', name: 'Ростов',         short: 'ROS', ovr: 73, color1: '#facc15', color2: '#1d4ed8' },
+          { id: 'akh', name: 'Ахмат',          short: 'AKH', ovr: 66, color1: '#16a34a', color2: '#ffffff', starter: true },
+          { id: 'pnn', name: 'Пари НН',        short: 'PNN', ovr: 64, color1: '#0284c7', color2: '#1e3a8a', starter: true },
+          { id: 'fak', name: 'Факел',          short: 'FAK', ovr: 62, color1: '#1d4ed8', color2: '#f8fafc', starter: true }
+        ]
+      }
+    ];
+
+    // Quick lookup maps
+    const CLUB_MAP = {};
+    LEAGUES.forEach(lg => {
+      lg.clubs.forEach(c => {
+        c.leagueId = lg.id;
+        c.leagueName = lg.name;
+        c.leagueFlag = lg.flag;
+        c.prestige = lg.prestige;
+        CLUB_MAP[c.id] = c;
+      });
+    });
+
+    function getLeague(id) { return LEAGUES.find(l => l.id === id) || LEAGUES[0]; }
+    function getClub(id) { return CLUB_MAP[id] || LEAGUES[5].clubs[9]; }
+    function getCountry(id) { return COUNTRIES.find(c => c.id === id) || COUNTRIES[0]; }
+
+    /* LIFESTYLE ITEMS */
+    const LIFESTYLE_ITEMS = [
+      { id: 'apt',    icon: '🏢', name: 'Аренда квартиры',  cost: 12000,  happy: 8,  fans: 400,  rec: 2,  desc: '+8% настр., +2% пассив. восст.' },
+      { id: 'watch',  icon: '⌚', name: 'Швейцарские часы', cost: 22000,  happy: 10, fans: 1400, rec: 0,  desc: '+10% настр., +1 400 фанатов' },
+      { id: 'diet',   icon: '🥗', name: 'Личный диетолог',  cost: 35000,  happy: 6,  fans: 600,  rec: 6,  desc: '+6% энергии после каждого тура' },
+      { id: 'car',    icon: '🏎️', name: 'Спорткар',         cost: 65000,  happy: 16, fans: 4500, rec: 0,  desc: '+16% настр., +4 500 фанатов' },
+      { id: 'cryo',   icon: '❄️', name: 'Домашняя криокамера', cost: 110000, happy: 10, fans: 2000, rec: 10, desc: '+10% энергии после каждого тура' },
+      { id: 'villa',  icon: '🏡', name: 'Вилла у моря',     cost: 240000, happy: 25, fans: 12000, rec: 8, desc: 'Статус легенды: +25% настр., +8% ⚡' }
+    ];
+
+    /* FLASH INTERVIEW POOL (EVERY 3RD MATCH) */
+    const INTERVIEW_POOL = [
+      {
+        ctx: 'win_hero', journalist: 'Корреспондент Матч ТВ',
+        q: c => `Блестящая победа над «${c.opp}» (${c.score}) и твоё результативное действие! Чувствуешь себя лидером «${c.club}»?`,
+        a: {
+          team: { t: '«Это победа всей команды и тренера. Без партнёров я бы не отличился.»', r: 'Тренер с улыбкой пожал тебе руку в подтрибунке.' },
+          bold: { t: '«Я выхожу делать разницу. Фанаты приходят на стадион ради таких моментов!»', r: 'Цитата мгновенно разлетелась по всем футбольным каналам!' },
+          pro:  { t: '«Рад помочь клубу набрать 3 очка, но уже завтра готовимся к следующему туру.»', r: 'Эксперты в студии отметили твою зрелость.' }
+        }
+      },
+      {
+        ctx: 'win', journalist: 'Репортёр Sky Sports',
+        q: c => `Уверенные 3 очка против «${c.opp}» (${c.score}). Что стало ключом к успеху?`,
+        a: {
+          team: { t: '«Строгое выполнение плана тренера и характер всей раздевалки.»', r: 'Главный тренер остался в восторге от твоих слов.' },
+          bold: { t: '«Мы просто сильнее классом. Когда я в форме, нас тяжело остановить!»', r: 'Болельщики в восторге, а вот тренер слегка нахмурился.' },
+          pro:  { t: '«Контролировали темп и реализовали свои моменты. Хороший шаг вперёд.»', r: 'Спокойный профессиональный разбор.' }
+        }
+      },
+      {
+        ctx: 'loss', journalist: 'Журналист L’Équipe',
+        q: c => `Обидное поражение от «${c.opp}» (${c.score}). Что пошло не так сегодня?`,
+        a: {
+          team: { t: '«Мы проигрываем вместе. Нужно поддержать друг друга и тренера.»', r: 'В раздевалке оценили твою командную позицию.' },
+          bold: { t: '«Мне нужно больше мячей в атаке. Играй мы смелее — результат был бы другим!»', r: 'Фанаты поддержали твой голод до побед, но тренер недоволен.' },
+          pro:  { t: '«Соперник наказал за потерю концентрации. Сделаем выводы и вернёмся сильнее.»', r: 'Взвешенный ответ без лишней драмы.' }
+        }
+      },
+      {
+        ctx: 'draw', journalist: 'Корреспондент Kicker',
+        q: c => `Ничья с «${c.opp}» (${c.score}) — приобретённое очко или два потерянных?`,
+        a: {
+          team: { t: '«Ребята выложились до конца. Принимаем этот балл и двигаемся дальше.»', r: 'Тренер одобрительно кивнул.' },
+          bold: { t: '«Для меня существует только победа! Ничьи меня не устраивают.»', r: 'Харизматичное заявление собрало тысячи реакций!' },
+          pro:  { t: '«Матч был равным, моменты были у обеих команд. Важно, что не проиграли.»', r: 'Аналитики согласились с твоей оценкой.' }
+        }
+      },
+      {
+        ctx: 'bench', journalist: 'Репортёр Gazzetta',
+        q: c => `Ты начал матч с «${c.opp}» на скамейке запасных. Обидно не попадать в старт?`,
+        a: {
+          team: { t: '«Решает тренер. Моя задача — помогать команде хоть 90 минут, хоть 20.»', r: 'Идеальный ответ! Тренер сразу отметил твой профессионализм.' },
+          bold: { t: '«Игрок моего уровня обязан играть с 1-й минуты. Все видели, как ожила игра!»', r: 'Трибуны скандируют твоё имя, но тренер запомнил эти слова.' },
+          pro:  { t: '«Конкуренция делает сильнее. Подтяну физику и вернусь в основу.»', r: 'Умный и спокойный ответ.' }
+        }
+      },
+      {
+        ctx: 'reserves', journalist: 'Инсайдер в микст-зоне',
+        q: c => `Сегодня ты остался вне заявки против «${c.opp}». Конфликт с тренером или усталость?`,
+        a: {
+          team: { t: '«Никакого конфликта! Штаб бережёт меня, я полностью доверяю тренеру.»', r: 'Ты погасил слухи на корню — тренер это оценил.' },
+          bold: { t: '«Я был готов рвать! Не спрашивайте меня, почему я смотрел футбол с трибуны.»', r: 'Громкий заголовок взорвал медиа, но разозлил тренера.' },
+          pro:  { t: '«Нужно было перевести дух и восстановиться. Скоро вернусь на 100%.»', r: 'Пресса приняла объяснение.' }
+        }
+      }
+    ];
+
+    /* 12 CAREER & LIFE DILEMMAS (BETWEEN MATCHES) */
+    const CAREER_DILEMMAS = [
+      {
+        id: 'party', icon: '🎉', cat: 'Команда', title: 'Вечеринка перед туром',
+        desc: 'Одноклубники зовут отметить день рождения капитана в закрытом клубе за 2 дня до матча.',
+        choices: [
+          { label: 'Пойти и оторваться', sub: '+14% Настр. • -16% ⚡ • -7% Доверие', ef: { happy: 14, energy: -16, trust: -7 }, out: 'Ночь вышла шумной, но утром тренер заметил твою усталость.' },
+          { label: 'Остаться дома и выспаться', sub: '+12% ⚡ • +6% Доверие • -4% Настр.', ef: { energy: 12, trust: 6, happy: -4 }, out: 'Ты идеально восстановился — тренер поставил твой режим в пример.' },
+          { label: 'Заехать на час без алкоголя', sub: '+5% Настр. • -4% ⚡', ef: { happy: 5, energy: -4 }, out: 'Поздравил капитана и вовремя уехал отдыхать.' }
+        ]
+      },
+      {
+        id: 'shady_ad', icon: '💸', cat: 'Реклама', title: 'Сомнительная реклама',
+        desc: 'Агент принёс оффер от скандального бренда энергетиков. Платят щедро, но имидж пострадает.',
+        choices: [
+          { label: 'Подписать контракт (+12 000 €)', sub: '+12 000 € • -700 Фанатов • -5% Доверие', ef: { money: 12000, fans: -700, trust: -5 }, out: 'Деньги упали на счёт, но часть болельщиков раскритиковала рекламу.' },
+          { label: 'Вежливо отказаться', sub: '+600 Фанатов • +5% Доверие', ef: { fans: 600, trust: 5 }, out: 'Клуб и фанаты уважают твою принципиальность.' }
+        ]
+      },
+      {
+        id: 'young_fan', icon: '👟', cat: 'Фанаты', title: 'Юный фанат у базы',
+        desc: 'После тренировки под дождём мальчишка в твоей футболке робко просит бутсы на память.',
+        choices: [
+          { label: 'Подарить игровые бутсы', sub: '-1 500 € • +1 300 Фанатов • +10% Настр.', cost: 1500, ef: { money: -1500, fans: 1300, happy: 10 }, out: 'Видео с радостным мальчиком попало в соцсети клуба — трибуны в восторге!' },
+          { label: 'Сделать фото и автограф', sub: '+400 Фанатов • +4% Настр.', ef: { fans: 400, happy: 4 }, out: 'Тёплая встреча подняла настроение обоим.' },
+          { label: 'Пройти мимо — нет сил', sub: '+6% ⚡ • -500 Фанатов', ef: { energy: 6, fans: -500 }, out: 'Ты быстро уехал отдыхать, но момент попал в фанатский паблик.' }
+        ]
+      },
+      {
+        id: 'locker', icon: '🔥', cat: 'Раздевалка', title: 'Конфликт в раздевалке',
+        desc: 'После жёсткого подката на тренировке поссорились опытный ветеран и молодой новичок.',
+        choices: [
+          { label: 'Вступиться за новичка', sub: '+8% Настр. • +6% Доверие', ef: { happy: 8, trust: 6 }, out: 'Ты разрядил обстановку — тренер отметил твоё лидерство.' },
+          { label: 'Поддержать ветерана', sub: '+500 Фанатов • -4% Доверие', ef: { fans: 500, trust: -4 }, out: 'Ветеран пожал руку, но штабу не понравилось затягивание ссоры.' },
+          { label: 'Не вмешиваться', sub: '+4% ⚡', ef: { energy: 4 }, out: 'Ты сохранил нервы и спокойно подготовился к игре.' }
+        ]
+      },
+      {
+        id: 'physio', icon: '💆', cat: 'Здоровье', title: 'Частный физиотерапевт',
+        desc: 'Топовый физиотерапевт приехал в город и предлагает премиальный сеанс восстановления.',
+        choices: [
+          { label: 'Оплатить сеанс (2 500 €)', sub: '-2 500 € • +30% ⚡ • +6% Настр.', cost: 2500, ef: { money: -2500, energy: 30, happy: 6 }, out: 'Ноги как новые! Ты полностью готов рвать в следующем туре.' },
+          { label: 'Сэкономить', sub: 'Без изменений', ef: {}, out: 'Ты обошёлся обычным клубным восстановлением.' }
+        ]
+      },
+      {
+        id: 'rumor', icon: '📰', cat: 'Пресса', title: 'Слух в прессе',
+        desc: 'Инсайдер написал, что ты якобы недоволен тактикой тренера и хочешь сменить клуб.',
+        choices: [
+          { label: 'Публично поддержать тренера', sub: '+10% Доверие • -200 Фанатов', ef: { trust: 10, fans: -200 }, out: 'Тренер лично поблагодарил тебя перед всей командой!' },
+          { label: 'Промолчать', sub: '+500 Фанатов • -6% Доверие', ef: { fans: 500, trust: -6 }, out: 'Слухи подогрели интерес, но штаб насторожился.' },
+          { label: 'Жёстко опровергнуть в сторис', sub: '+950 Фанатов • +4% Настр.', ef: { fans: 950, happy: 4 }, out: 'Болельщики аплодируют твоей реакции!' }
+        ]
+      },
+      {
+        id: 'charity', icon: '❤️', cat: 'Общество', title: 'Благотворительный матч',
+        desc: 'Городской фонд зовёт сыграть выставочный матч в выходной ради детской больницы.',
+        choices: [
+          { label: 'Сыграть в матче', sub: '-12% ⚡ • +1 500 Фанатов • +10% Настр. • +5% Доверие', ef: { energy: -12, fans: 1500, happy: 10, trust: 5 }, out: 'Полные трибуны и огромный респект со всей страны!' },
+          { label: 'Перевести 2 000 € в фонд', sub: '-2 000 € • +900 Фанатов • +5% Настр.', cost: 2000, ef: { money: -2000, fans: 900, happy: 5 }, out: 'Сберёг силы перед туром и сделал доброе дело.' },
+          { label: 'Остаться отдыхать дома', sub: '+15% ⚡', ef: { energy: 15 }, out: 'Ты отлично перезагрузился перед тяжёлой неделей.' }
+        ]
+      },
+      {
+        id: 'shoot_camp', icon: '🎯', cat: 'Прогресс', title: 'Мастер-класс по ударам',
+        desc: 'Агент договорился о персональной тренировке с легендарным экс-форвардом.',
+        choices: [
+          { label: 'Оплатить и поработать (3 000 €)', sub: '-3 000 € • -10% ⚡ • +1 УДР навсегда', cost: 3000, ef: { money: -3000, energy: -10, stat: { sho: 1 } }, out: 'Два часа отработки техники — твой удар стал смертельно опасным!' },
+          { label: 'Отказаться и поберечь ноги', sub: '+6% ⚡', ef: { energy: 6 }, out: 'Ты решил не рисковать свежестью перед туром.' }
+        ]
+      },
+      {
+        id: 'viral', icon: '📱', cat: 'Медиа', title: 'Вирусный челлендж',
+        desc: 'Футбольные блогеры запустили челлендж на попадание в перекладину и тегают тебя.',
+        choices: [
+          { label: 'Снять ролик прямо на базе', sub: '+1 400 Фанатов • -5% Доверие', ef: { fans: 1400, trust: -5 }, out: 'Ролик залетел в тренды, но тренер напомнил о дисциплине.' },
+          { label: 'Снять в выходной день', sub: '+850 Фанатов • -5% ⚡', ef: { fans: 850, energy: -5 }, out: 'Отличный контент без лишних конфликтов с клубом.' },
+          { label: 'Проигнорировать', sub: '+4% Доверие', ef: { trust: 4 }, out: 'Полный фокус на футболе.' }
+        ]
+      },
+      {
+        id: 'late', icon: '⏰', cat: 'Дисциплина', title: 'Опоздание на тренировку',
+        desc: 'Из-за пробки ты опоздал на командный сбор на 8 минут. Помощник тренера выписал штраф.',
+        choices: [
+          { label: 'Оплатить 1 500 € и извиниться', sub: '-1 500 € • +5% Доверие', cost: 1500, ef: { money: -1500, trust: 5 }, out: 'Инцидент исчерпан мгновенно — уважение за дисциплину.' },
+          { label: 'Поспорить со штабом', sub: '-10% Доверие • +3% Настр.', ef: { trust: -10, happy: 3 }, out: 'Деньги сэкономил, но отношения с тренером охладели.' }
+        ]
+      },
+      {
+        id: 'sponsor_gift', icon: '🎁', cat: 'Спонсор', title: 'Подарок от спонсора',
+        desc: 'Партнёр клуба отметил твою яркую игру и предложил выбрать один из трёх бонусов.',
+        choices: [
+          { label: 'Денежная премия', sub: '+5 000 €', ef: { money: 5000 }, out: 'Отличная прибавка на счёт!' },
+          { label: 'Медиа-кампания', sub: '+1 100 Фанатов • +8% Настр.', ef: { fans: 1100, happy: 8 }, out: 'Твои баннеры висят по всему городу!' },
+          { label: 'VIP спа-восстановление', sub: '+25% ⚡ • +8% Настр.', ef: { energy: 25, happy: 8 }, out: 'Мощный заряд энергии перед важными турами!' }
+        ]
+      },
+      {
+        id: 'tactics_talk', icon: '👔', cat: 'Тренер', title: 'Тактический разбор',
+        desc: 'Главный тренер пригласил тебя в кабинет разобрать видео последних матчей.',
+        choices: [
+          { label: 'Остаться на 2 часа и разобрать пасы', sub: '+6% Доверие • -8% ⚡ • +1 ПАС навсегда', ef: { trust: 6, energy: -8, stat: { pas: 1 } }, out: 'Ты стал видеть поле заметно лучше (+1 ПАС)!' },
+          { label: 'Попросить снизить нагрузки', sub: '+12% ⚡ • -6% Доверие', ef: { energy: 12, trust: -6 }, out: 'Штаб дал передышку, но ждёт большей самоотдачи.' }
+        ]
+      }
+    ];
+
+    const SPARRING_BOTS = [
+      { tg_id: 'sp_1', name: 'Алекс (Спарринг)', club: 'АПЛ Про', position: 'ST', ovr: 68, tactic: 'press', rating: 1015, isSparring: true },
+      { tg_id: 'sp_2', name: 'Диего (Спарринг)', club: 'Ла Лига', position: 'CAM', ovr: 74, tactic: 'tiki', rating: 1085, isSparring: true },
+      { tg_id: 'sp_3', name: 'Марко (Спарринг)', club: 'Серия А', position: 'LW', ovr: 79, tactic: 'counter', rating: 1150, isSparring: true }
+    ];
+
+    /* =========================================================================
+       6. SVG GENERATORS (DYNAMIC CLUB SHIELD, PLAYER SILHOUETTE, 2D PITCH)
+       ========================================================================= */
+    function renderClubBadge(club, size) {
+      const s = size || 32;
+      const c1 = club.color1 || '#10b981';
+      const c2 = club.color2 || '#0f172a';
+      const txt = escapeHtml((club.short || 'FC').slice(0, 3));
+      const gid = 'g_' + (club.id || 'x') + '_' + s + '_' + Math.floor(Math.random() * 9999);
+      return `
+        <svg width="${s}" height="${s}" viewBox="0 0 48 48" style="flex-shrink:0;display:block;">
+          <defs>
+            <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="${c1}" />
+              <stop offset="100%" stop-color="${c2}" />
+            </linearGradient>
+          </defs>
+          <path d="M24 3 L42 9 V23 C42 34.5 33.8 42.2 24 45.5 C14.2 42.2 6 34.5 6 23 V9 Z"
+                fill="url(#${gid})" stroke="rgba(255,255,255,0.65)" stroke-width="2.2" />
+          <path d="M24 5 V43" stroke="rgba(255,255,255,0.16)" stroke-width="1.5" />
+          <rect x="9" y="18" width="30" height="12" rx="4" fill="rgba(2,6,23,0.62)" />
+          <text x="24" y="27.2" text-anchor="middle" fill="#ffffff" font-size="9.5" font-weight="900" font-family="sans-serif">${txt}</text>
+        </svg>
+      `;
+    }
+
+    function renderPlayerSilhouette(c1, c2) {
+      return `
+        <svg width="106" height="106" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="jerseyGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="${c1 || '#10b981'}" />
+              <stop offset="100%" stop-color="${c2 || '#0f172a'}" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="30" r="15" fill="#e2e8f0" opacity="0.92" />
+          <path d="M35 28 C35 16 65 16 65 28 C61 21 39 21 35 28 Z" fill="#1e293b" />
+          <path d="M22 86 C23 63 32 52 50 52 C68 52 77 63 78 86 Z" fill="url(#jerseyGrad)" stroke="rgba(255,255,255,0.5)" stroke-width="2" />
+          <path d="M43 52 L50 61 L57 52" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" />
+          <text x="50" y="79" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="14" font-weight="900">10</text>
+        </svg>
+      `;
+    }
+
+    function renderPitchSVG(ballX, ballY, pulseColor) {
+      const bx = clamp(ballX == null ? 160 : ballX, 20, 300);
+      const by = clamp(ballY == null ? 90 : ballY, 16, 164);
+      const col = pulseColor || '#34d399';
+      return `
+        <div class="pitch-box">
+          <svg viewBox="0 0 320 180" width="100%" style="display:block;background:#0b5d33;">
+            <!-- Alternating turf stripes -->
+            <rect x="0"   y="0" width="32" height="180" fill="#0d6b3b" />
+            <rect x="64"  y="0" width="32" height="180" fill="#0d6b3b" />
+            <rect x="128" y="0" width="32" height="180" fill="#0d6b3b" />
+            <rect x="192" y="0" width="32" height="180" fill="#0d6b3b" />
+            <rect x="256" y="0" width="32" height="180" fill="#0d6b3b" />
+            <!-- Pitch lines -->
+            <rect x="10" y="10" width="300" height="160" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.8" />
+            <line x1="160" y1="10" x2="160" y2="170" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" />
+            <circle cx="160" cy="90" r="24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" />
+            <circle cx="160" cy="90" r="2.5" fill="#ffffff" />
+            <!-- Left penalty box -->
+            <rect x="10" y="45" width="44" height="90" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" />
+            <rect x="10" y="68" width="16" height="44" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.4" />
+            <!-- Right penalty box -->
+            <rect x="266" y="45" width="44" height="90" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.6" />
+            <rect x="294" y="68" width="16" height="44" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.4" />
+            <!-- Goals -->
+            <rect x="4" y="75" width="6" height="30" fill="none" stroke="#fff" stroke-width="1.8" />
+            <rect x="310" y="75" width="6" height="30" fill="none" stroke="#fff" stroke-width="1.8" />
+            <!-- Animated event pulse & ball -->
+            <g style="transition: transform 0.55s cubic-bezier(.22,.9,.35,1);" transform="translate(${bx}, ${by})">
+              <circle cx="0" cy="0" r="15" fill="${col}" opacity="0.28">
+                <animate attributeName="r" values="9;19;9" dur="1.3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.42;0.06;0.42" dur="1.3s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="0" cy="0" r="6.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.6" />
+              <circle cx="-1.5" cy="-1.5" r="2" fill="#0f172a" />
+            </g>
+          </svg>
+        </div>
+      `;
+    }
+
+    /* =========================================================================
+       7. STATE MANAGEMENT & SCHEDULE GENERATOR (18 ROUNDS PER LEAGUE)
+       ========================================================================= */
+    let state = null;
+    let activeTab = 'career';
+    let careerSubTab = 'profile'; // 'profile' | 'friends'
+    let leagueViewId = 'rpl';
+    let onlineSubTab = 'pvp';     // 'pvp' | 'top'
+
+    // Onboarding draft
+    let onboard = {
+      step: 1,
+      name: '',
+      countryId: 'RU',
+      pos: 'ST',
+      leagueId: 'rpl',
+      offers: [],
+      selectedOffer: null
+    };
+
+    // Runtime states
+    let liveMatch = null;
+    let lastMatchCtx = null;
+    let activeInterview = null;
+    let activeDilemma = null;
+
+    // Online runtime state
+    let onlineState = {
+      status: 'idle', // 'idle' | 'syncing' | 'ok' | 'err'
+      errorText: '',
+      leaderboard: [],
+      selectedOpp: null,
+      scoutedId: null,
+      myTactic: 'press',
+      lastSyncedAt: 0
+    };
+
+    function calcOvr(stats, posCode) {
+      const pos = POSITIONS[posCode] || POSITIONS.ST;
+      const w = pos.w;
+      const val =
+        stats.pac * w.pac +
+        stats.sho * w.sho +
+        stats.pas * w.pas +
+        stats.dri * w.dri +
+        stats.def * w.def +
+        stats.phy * w.phy;
+      return clamp(Math.round(val), 45, 99);
+    }
+
+    function getSquadStatus(energy) {
+      if (energy >= 50) return { key: 'starter',  label: '🟢 Основа',  desc: 'Выходишь с 1-й минуты (3 момента)', cls: 'badge-green' };
+      if (energy >= 25) return { key: 'bench',    label: '🟡 Лавка',   desc: 'Усталость: выход на 68-й мин. (1 момент)', cls: 'badge-gold' };
+      return                  { key: 'reserves', label: '🔴 Резерв',  desc: 'Вне заявки из-за усталости (-5 Доверие, +18% ⚡)', cls: 'badge-rose' };
+    }
+
+    function buildLeagueTable(league) {
+      return league.clubs.map(c => ({
+        clubId: c.id, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0
+      }));
+    }
+
+    // 18-round double round-robin for 10 clubs
+    function buildLeagueSchedule(league) {
+      const ids = league.clubs.map(c => c.id);
+      const n = ids.length; // 10
+      const arr = ids.slice();
+      const firstHalf = [];
+      for (let r = 0; r < n - 1; r++) {
+        const pairs = [];
+        for (let i = 0; i < n / 2; i++) {
+          const home = (r % 2 === 0) ? arr[i] : arr[n - 1 - i];
+          const away = (r % 2 === 0) ? arr[n - 1 - i] : arr[i];
+          pairs.push([home, away]);
+        }
+        firstHalf.push(pairs);
+        const last = arr.pop();
+        arr.splice(1, 0, last);
+      }
+      const secondHalf = firstHalf.map(round => round.map(([h, a]) => [a, h]));
+      return firstHalf.concat(secondHalf); // 18 rounds
+    }
+
+    function buildAllTables() {
+      const obj = {};
+      LEAGUES.forEach(lg => { obj[lg.id] = buildLeagueTable(lg); });
+      return obj;
+    }
+
+    function buildAllSchedules() {
+      const obj = {};
+      LEAGUES.forEach(lg => { obj[lg.id] = buildLeagueSchedule(lg); });
+      return obj;
+    }
+
+    function saveState() {
+      try {
+        if (state) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.player || !parsed.player.stats) return null;
+        // Ensure integrity for any missing fields
+        parsed.season = parsed.season || 1;
+        parsed.round = Number(parsed.round) || 0;
+        parsed.trainLeft = typeof parsed.trainLeft === 'number' ? parsed.trainLeft : 2;
+        parsed.adEnergyRound = typeof parsed.adEnergyRound === 'number' ? parsed.adEnergyRound : -1;
+        parsed.adTrainRound = typeof parsed.adTrainRound === 'number' ? parsed.adTrainRound : -1;
+        parsed.lastInterviewRound = typeof parsed.lastInterviewRound === 'number' ? parsed.lastInterviewRound : -1;
+        parsed.lastDilemmaRound = typeof parsed.lastDilemmaRound === 'number' ? parsed.lastDilemmaRound : -1;
+        parsed.lastDilemmaId = parsed.lastDilemmaId || '';
+        parsed.intlDoneRounds = Array.isArray(parsed.intlDoneRounds) ? parsed.intlDoneRounds : [];
+        parsed.pendingIntl = parsed.pendingIntl || null;
+        parsed.lastRenewalWinKey = parsed.lastRenewalWinKey || '';
+        parsed.lastTransferWinKey = parsed.lastTransferWinKey || '';
+        parsed.transferOffersWinKey = parsed.transferOffersWinKey || '';
+        parsed.transferOffers = Array.isArray(parsed.transferOffers) ? parsed.transferOffers : [];
+        parsed.ownedItems = Array.isArray(parsed.ownedItems) ? parsed.ownedItems : [];
+        parsed.referrals = parsed.referrals || { verifiedCount: 0, totalEarned: 0 };
+        parsed.online = parsed.online || { rating: 1000, wins: 0, draws: 0, losses: 0, lastDay: '', playedToday: 0, extraAdDay: '' };
+        if (!parsed.tables) parsed.tables = buildAllTables();
+        if (!parsed.schedules) parsed.schedules = buildAllSchedules();
+        if (!parsed.player.intl) parsed.player.intl = { caps: 0, goals: 0, trophies: 0 };
+        return parsed;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function resetSaveHard() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      state = null;
+      onboard = { step: 1, name: tgUser.firstName || '', countryId: 'RU', pos: 'ST', leagueId: 'rpl', offers: [], selectedOffer: null };
+      closeModal();
+      render();
+    }
+
+    /* =========================================================================
+       8. TRANSFER & CONTRACT WINDOW RULES (STRICT!)
+       ========================================================================= */
+    function getWindowInfo() {
+      const season = state ? state.season : 1;
+      const nextTour = state ? (state.round + 1) : 1; // 1..19
+
+      if (season <= 1) {
+        return {
+          open: false,
+          key: '',
+          name: 'Заблокировано в 1-м сезоне',
+          countdown: 'Откроется в начале 2-го сезона (1-й тур)'
+        };
+      }
+      if (nextTour >= 1 && nextTour <= 2) {
+        return {
+          open: true,
+          key: 'S' + season + '_SUMMER',
+          name: 'Летнее окно (туры 1–2)',
+          countdown: 'Открыто сейчас!'
+        };
+      }
+      if (nextTour >= 9 && nextTour <= 10) {
+        return {
+          open: true,
+          key: 'S' + season + '_WINTER',
+          name: 'Зимнее окно (туры 9–10)',
+          countdown: 'Открыто сейчас!'
+        };
+      }
+      if (nextTour < 9) {
+        return {
+          open: false,
+          key: '',
+          name: 'Окно закрыто',
+          countdown: 'Откроется в середине сезона (9-й тур)'
+        };
+      }
+      return {
+        open: false,
+        key: '',
+        name: 'Окно закрыто',
+        countdown: 'Откроется в начале ' + (season + 1) + '-го сезона'
+      };
+    }
+
+    function ensureTransferOffersForWindow() {
+      if (!state) return;
+      const win = getWindowInfo();
+      if (!win.open) return;
+      if (state.transferOffersWinKey === win.key && state.transferOffers.length > 0) return;
+
+      const p = state.player;
+      const ovr = calcOvr(p.stats, p.pos);
+      const allClubs = Object.values(CLUB_MAP).filter(c => c.id !== p.clubId);
+      // Match clubs around player OVR (-4 to +9)
+      let candidates = allClubs.filter(c => c.ovr >= ovr - 4 && c.ovr <= ovr + 9);
+      if (candidates.length < 4) candidates = allClubs;
+      // Shuffle & pick 4
+      const shuffled = candidates.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+
+      state.transferOffers = shuffled.map(c => {
+        const baseSal = Math.round((3600 + Math.max(0, ovr - 60) * 520 + Math.max(0, c.ovr - 64) * 280) * c.prestige / 100) * 100;
+        const salary = Math.max(p.salary + 400, baseSal);
+        const bonus = Math.round(salary * (2.2 + Math.random() * 1.4) / 100) * 100;
+        return { clubId: c.id, salary, bonus };
+      });
+      state.transferOffersWinKey = win.key;
+      saveState();
+    }
+
+    function renewContract() {
+      const win = getWindowInfo();
+      if (!win.open) return showToast(win.countdown, 'error');
+      if (state.lastRenewalWinKey === win.key) return showToast('В этом окне контракт уже переподписан!', 'error');
+
+      const p = state.player;
+      const ovr = calcOvr(p.stats, p.pos);
+      const club = getClub(p.clubId);
+      const formFactor = p.seasonApps > 0 ? (p.seasonRatingSum / p.seasonApps) : 6.8;
+      const raise = Math.max(600, Math.round((700 + Math.max(0, ovr - 60) * 160 + (formFactor - 6.5) * 450) * club.prestige / 100) * 100);
+      const bonus = Math.round(raise * 1.5);
+
+      p.salary += raise;
+      p.money += bonus;
+      p.coachTrust = clamp(p.coachTrust + 6, 5, 100);
+      state.lastRenewalWinKey = win.key;
+      saveState();
+      haptic('success');
+      showToast(`✍️ Контракт обновлён! +${fmtMoney(raise)} к ЗП и бонус ${fmtMoney(bonus)}`, 'gold');
+      render();
+    }
+
+    function acceptTransfer(clubId) {
+      const win = getWindowInfo();
+      if (!win.open) return showToast(win.countdown, 'error');
+      if (state.lastTransferWinKey === win.key) return showToast('Лимит: 1 трансфер за окно!', 'error');
+
+      const off = state.transferOffers.find(o => o.clubId === clubId);
+      if (!off) return;
+      const newClub = getClub(clubId);
+      const p = state.player;
+
+      p.clubId = newClub.id;
+      p.leagueId = newClub.leagueId;
+      p.salary = off.salary;
+      p.money += off.bonus;
+      p.coachTrust = 58;
+      p.fans += Math.round(2500 * newClub.prestige);
+      state.lastTransferWinKey = win.key;
+      leagueViewId = newClub.leagueId;
+      saveState();
+      haptic('success');
+      showToast(`✈️ Трансфер в «${newClub.name}»! Подписной бонус +${fmtMoney(off.bonus)}`, 'gold');
+      render();
+    }
+
+    /* =========================================================================
+       9. ONBOARDING (4 STEPS)
+       ========================================================================= */
+    function pickRandomName() {
+      const pool = NAME_POOLS[onboard.countryId] || NAME_POOLS.RU;
+      let res = onboard.name;
+      for (let i = 0; i < 6; i++) {
+        const fn = pool.first[Math.floor(Math.random() * pool.first.length)];
+        const ln = pool.last[Math.floor(Math.random() * pool.last.length)];
+        res = fn + ' ' + ln;
+        if (res !== onboard.name) break;
+      }
+      onboard.name = res;
+      haptic('light');
+      const inp = document.getElementById('ob-name-inp');
+      const btn = document.getElementById('ob-dice-btn');
+      if (inp) inp.value = res;
+      if (btn) {
+        btn.classList.remove('dice-pop');
+        void btn.offsetWidth;
+        btn.classList.add('dice-pop');
+      }
+    }
+
+    function buildStarterOffers(leagueId) {
+      const lg = getLeague(leagueId);
+      const weak = lg.clubs.slice().sort((a, b) => a.ovr - b.ovr).slice(0, 3);
+      const salaries = [3100, 3500, 3900];
+      const trusts = [64, 56, 48];
+      const roles = ['Игрок основы', 'Ближняя ротация', 'Конкуренция за старт'];
+      return weak.map((c, idx) => ({
+        clubId: c.id,
+        salary: salaries[idx],
+        trust: trusts[idx],
+        role: roles[idx]
+      }));
+    }
+
+    function setOnboardStep(step) {
+      if (step === 3) {
+        onboard.offers = buildStarterOffers(onboard.leagueId);
+      }
+      onboard.step = step;
+      haptic('light');
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function chooseStarterOffer(clubId) {
+      const off = onboard.offers.find(o => o.clubId === clubId) || onboard.offers[0];
+      onboard.selectedOffer = off;
+      setOnboardStep(4);
+    }
+
+    function finishOnboarding() {
+      const off = onboard.selectedOffer || buildStarterOffers(onboard.leagueId)[0];
+      const club = getClub(off.clubId);
+      const pos = POSITIONS[onboard.pos] || POSITIONS.ST;
+      const cleanName = (onboard.name || tgUser.firstName || 'Артём Волков').trim().slice(0, 22);
+
+      state = {
+        season: 1,
+        round: 0,
+        trainLeft: 2,
+        adEnergyRound: -1,
+        adTrainRound: -1,
+        lastInterviewRound: -1,
+        lastDilemmaRound: -1,
+        lastDilemmaId: '',
+        intlDoneRounds: [],
+        pendingIntl: null,
+        lastRenewalWinKey: '',
+        lastTransferWinKey: '',
+        transferOffersWinKey: '',
+        transferOffers: [],
+        ownedItems: [],
+        tables: buildAllTables(),
+        schedules: buildAllSchedules(),
+        referrals: { verifiedCount: 0, totalEarned: 0 },
+        online: { rating: 1000, wins: 0, draws: 0, losses: 0, lastDay: '', playedToday: 0, extraAdDay: '' },
+        player: {
+          name: cleanName,
+          countryId: onboard.countryId,
+          pos: pos.code,
+          clubId: club.id,
+          leagueId: club.leagueId,
+          age: 18,
+          salary: off.salary,
+          money: 4000,
+          energy: 100,
+          happiness: 75,
+          coachTrust: off.trust,
+          fans: 1200,
+          stats: Object.assign({}, pos.base),
+          seasonApps: 0,
+          seasonGoals: 0,
+          seasonAssists: 0,
+          seasonRatingSum: 0,
+          careerApps: 0,
+          careerGoals: 0,
+          careerAssists: 0,
+          trophies: 0,
+          intl: { caps: 0, goals: 0, trophies: 0 }
+        }
+      };
+
+      leagueViewId = club.leagueId;
+      activeTab = 'career';
+      saveState();
+      haptic('success');
+      showToast(`✍️ Добро пожаловать в «${club.name}»!`, 'gold');
+      render();
+      syncOnlineProfile(true);
+    }
+
+    /* =========================================================================
+       10. TRAINING, LIFESTYLE & ADSGRAM MONETIZATION
+       ========================================================================= */
+    function runRewardedAd(rewardLabel, onReward) {
+      try {
+        if (window.Adsgram && typeof window.Adsgram.init === 'function' && CONFIG.ADSGRAM_BLOCK_ID) {
+          const controller = window.Adsgram.init({ blockId: String(CONFIG.ADSGRAM_BLOCK_ID) });
+          controller.show().then(() => {
+            onReward();
+          }).catch(() => {
+            showToast('Реклама не досмотрена — награда не начислена', 'error');
+          });
+          return;
+        }
+      } catch (e) {}
+
+      // Clean 5-second demo fallback for browser preview
+      let sec = 5;
+      openModal(`
+        <div class="center stack" style="gap:14px;">
+          <div class="badge badge-gold" style="margin:0 auto;">🎬 ADSGRAM DEMO</div>
+          <div style="font-size:16px;font-weight:900;">Просмотр спонсорского ролика</div>
+          <div class="small muted">Награда: <b style="color:#34d399;">${escapeHtml(rewardLabel)}</b></div>
+          <div id="ad-timer" style="font-size:36px;font-weight:900;color:#fbbf24;">5</div>
+          <button id="ad-claim-btn" disabled class="btn btn-primary">Подождите 5 сек...</button>
+        </div>
+      `);
+      const iv = setInterval(() => {
+        sec--;
+        const tEl = document.getElementById('ad-timer');
+        const bEl = document.getElementById('ad-claim-btn');
+        if (!tEl || !bEl) { clearInterval(iv); return; }
+        if (sec > 0) {
+          tEl.textContent = String(sec);
+          bEl.textContent = 'Подождите ' + sec + ' сек...';
+        } else {
+          clearInterval(iv);
+          tEl.textContent = '✓';
+          bEl.disabled = false;
+          bEl.textContent = 'Забрать награду!';
+          bEl.onclick = () => {
+            closeModal();
+            onReward();
+          };
+        }
+      }, 1000);
+    }
+
+    function trainStat(statKey) {
+      const p = state.player;
+      if (state.trainLeft <= 0) return showToast('Лимит тренировок перед туром исчерпан!', 'error');
+      if (p.energy < 18) return showToast('Слишком мало энергии (нужно 18% ⚡)!', 'error');
+      const cur = p.stats[statKey];
+      if (cur >= 99) return showToast('Характеристика уже на максимуме (99)!', 'gold');
+      const fee = 500 + Math.max(0, cur - 60) * 65;
+      if (p.money < fee) return showToast('Не хватает денег (' + fmtMoney(fee) + ')!', 'error');
+
+      p.money -= fee;
+      p.energy = clamp(p.energy - 18, 0, 100);
+      p.stats[statKey] = clamp(cur + 1, 1, 99);
+      p.coachTrust = clamp(p.coachTrust + 2, 0, 100);
+      state.trainLeft--;
+      saveState();
+      haptic('medium');
+      const meta = STAT_META.find(s => s.key === statKey);
+      showToast(`💪 +1 ${meta ? meta.ru : statKey.toUpperCase()} (${p.stats[statKey]})!`, 'ok');
+      render();
+    }
+
+    function restPlayer() {
+      const p = state.player;
+      if (state.trainLeft <= 0) return showToast('Вы уже использовали слоты подготовки перед туром!', 'error');
+      p.energy = clamp(p.energy + 35, 0, 100);
+      p.happiness = clamp(p.happiness + 4, 0, 100);
+      state.trainLeft--;
+      saveState();
+      haptic('light');
+      showToast('🛌 Отдых завершён: +35% ⚡ и +4% настроения!', 'ok');
+      render();
+    }
+
+    function watchAdEnergy() {
+      if (state.adEnergyRound === state.round) return showToast('Уже использовано перед этим туром!', 'error');
+      runRewardedAd('100% энергии ⚡', () => {
+        state.player.energy = 100;
+        state.adEnergyRound = state.round;
+        saveState();
+        haptic('success');
+        showToast('⚡ Энергия полностью восстановлена (100%)!', 'gold');
+        render();
+      });
+    }
+
+    function watchAdSpecialTrain() {
+      if (state.adTrainRound === state.round) return showToast('Спец-тренировка уже пройдена перед этим туром!', 'error');
+      runRewardedAd('+1 ко всем ключевым статам (+1 OVR)', () => {
+        const p = state.player;
+        const pos = POSITIONS[p.pos] || POSITIONS.ST;
+        // Boost top 2 weighted stats for position
+        const topStats = Object.keys(pos.w).sort((a, b) => pos.w[b] - pos.w[a]).slice(0, 3);
+        topStats.forEach(k => { p.stats[k] = clamp(p.stats[k] + 1, 1, 99); });
+        state.adTrainRound = state.round;
+        saveState();
+        haptic('success');
+        showToast('🔥 Спец-тренировка пройдена! Рейтинг OVR вырос!', 'gold');
+        render();
+      });
+    }
+
+    function buyLifestyleItem(itemId) {
+      const item = LIFESTYLE_ITEMS.find(i => i.id === itemId);
+      if (!item) return;
+      if (state.ownedItems.includes(itemId)) return showToast('Уже куплено!', 'ok');
+      if (state.player.money < item.cost) return showToast('Недостаточно средств!', 'error');
+
+      state.player.money -= item.cost;
+      state.player.happiness = clamp(state.player.happiness + item.happy, 0, 100);
+      state.player.fans += item.fans;
+      state.ownedItems.push(itemId);
+      saveState();
+      haptic('success');
+      showToast(`${item.icon} Куплено: ${item.name}!`, 'gold');
+      render();
+    }
+
+    function getPassiveEnergyRecovery() {
+      return state.ownedItems.reduce((sum, id) => {
+        const it = LIFESTYLE_ITEMS.find(i => i.id === id);
+        return sum + (it ? it.rec : 0);
+      }, 0);
+    }
+
+    /* =========================================================================
+       11. 2D SVG PITCH INTERACTIVE MATCH ENGINE (LEAGUE & INTERNATIONAL)
+       ========================================================================= */
+    function getNextLeagueFixture() {
+      const lgId = state.player.leagueId;
+      const sched = state.schedules[lgId];
+      if (!sched || state.round >= 18) return null;
+      const pairs = sched[state.round];
+      const pair = pairs.find(([h, a]) => h === state.player.clubId || a === state.player.clubId);
+      if (!pair) return null;
+      const isHome = pair[0] === state.player.clubId;
+      return {
+        isHome,
+        home: getClub(pair[0]),
+        away: getClub(pair[1]),
+        opp: getClub(isHome ? pair[1] : pair[0])
+      };
+    }
+
+    function simulateOtherMatchesInRound(roundIdx, skipClubId) {
+      LEAGUES.forEach(lg => {
+        const pairs = state.schedules[lg.id][roundIdx];
+        const tbl = state.tables[lg.id];
+        if (!pairs || !tbl) return;
+        pairs.forEach(([hId, aId]) => {
+          if (hId === skipClubId || aId === skipClubId) return;
+          const hc = getClub(hId), ac = getClub(aId);
+          const diff = (hc.ovr - ac.ovr) * 0.045 + 0.2;
+          const hg = clamp(Math.round(Math.max(0, 1.15 + diff + (Math.random() - 0.5) * 2.2)), 0, 5);
+          const ag = clamp(Math.round(Math.max(0, 1.0 - diff + (Math.random() - 0.5) * 2.2)), 0, 5);
+          recordTableResult(tbl, hId, aId, hg, ag);
+        });
+      });
+    }
+
+    function recordTableResult(tbl, hId, aId, hg, ag) {
+      const hr = tbl.find(r => r.clubId === hId);
+      const ar = tbl.find(r => r.clubId === aId);
+      if (!hr || !ar) return;
+      hr.p++; ar.p++;
+      hr.gf += hg; hr.ga += ag;
+      ar.gf += ag; ar.ga += hg;
+      if (hg > ag) { hr.w++; hr.pts += 3; ar.l++; }
+      else if (hg < ag) { ar.w++; ar.pts += 3; hr.l++; }
+      else { hr.d++; ar.d++; hr.pts++; ar.pts++; }
+    }
+
+    function startLeagueMatch() {
+      if (state.round >= 18) return openSeasonEndModal();
+      const fix = getNextLeagueFixture();
+      if (!fix) return;
+
+      const p = state.player;
+      const sq = getSquadStatus(p.energy);
+
+      // CASE: RESERVES (Energy < 25%) — Left out of matchday squad!
+      if (sq.key === 'reserves') {
+        const myClub = getClub(p.clubId);
+        const oppClub = fix.opp;
+        const diff = (myClub.ovr - oppClub.ovr) * 0.04 + (fix.isHome ? 0.2 : -0.1);
+        const ms = clamp(Math.round(Math.max(0, 1.0 + diff + (Math.random() - 0.5) * 2.1)), 0, 4);
+        const os = clamp(Math.round(Math.max(0, 1.1 - diff + (Math.random() - 0.5) * 2.1)), 0, 4);
+        const hg = fix.isHome ? ms : os;
+        const ag = fix.isHome ? os : ms;
+
+        recordTableResult(state.tables[p.leagueId], fix.home.id, fix.away.id, hg, ag);
+        simulateOtherMatchesInRound(state.round, p.clubId);
+
+        state.round++;
+        state.trainLeft = 2;
+        const pay = Math.round(p.salary * 0.5);
+        p.money += pay;
+        p.energy = clamp(p.energy + 18 + getPassiveEnergyRecovery(), 0, 100);
+        p.coachTrust = clamp(p.coachTrust - 5, 5, 100);
+
+        lastMatchCtx = {
+          won: ms > os, draw: ms === os, score: `${ms}:${os}`,
+          pg: 0, pa: 0, squad: 'reserves', club: myClub.name, opp: oppClub.name
+        };
+        checkWindowOpeningToast();
+        saveState();
+        haptic('warning');
+
+        openModal(`
+          <div class="center stack" style="gap:12px;">
+            <div class="badge badge-rose" style="margin:0 auto;">🔴 ВНЕ ЗАЯВКИ (РЕЗЕРВ)</div>
+            <div style="font-size:18px;font-weight:900;">Ты смотрел матч с трибуны</div>
+            <div class="small muted">Энергия была ниже 25%, и тренер оставил тебя в резерве.</div>
+            <div class="card" style="padding:12px;">
+              <div class="row" style="justify-content:center;gap:14px;">
+                <div class="center">${renderClubBadge(fix.home, 34)}<div class="xs bold" style="margin-top:4px;">${escapeHtml(fix.home.short)}</div></div>
+                <div style="font-size:26px;font-weight:900;">${hg} : ${ag}</div>
+                <div class="center">${renderClubBadge(fix.away, 34)}<div class="xs bold" style="margin-top:4px;">${escapeHtml(fix.away.short)}</div></div>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="card center" style="padding:8px;"><div class="xs muted">50% ЗП</div><div class="bold" style="color:#34d399;">+${fmtMoney(pay)}</div></div>
+              <div class="card center" style="padding:8px;"><div class="xs muted">Доверие</div><div class="bold" style="color:#fb7185;">-5%</div></div>
+              <div class="card center" style="padding:8px;"><div class="xs muted">Энергия</div><div class="bold" style="color:#38bdf8;">+18% ⚡</div></div>
+            </div>
+            <button onclick="afterLeagueMatchModal()" class="btn btn-primary">Продолжить →</button>
+          </div>
+        `);
+        render();
+        return;
+      }
+
+      // CASE: STARTER (3 moments) OR BENCH (1 moment at 68')
+      const myClub = getClub(p.clubId);
+      const moments = sq.key === 'starter' ? [22, 54, 81] : [76];
+      liveMatch = {
+        mode: 'league',
+        isHome: fix.isHome,
+        home: fix.home,
+        away: fix.away,
+        myClub,
+        oppClub: fix.opp,
+        squad: sq.key,
+        minute: sq.key === 'starter' ? 1 : 68,
+        ms: 0,
+        os: 0,
+        pg: 0,
+        pa: 0,
+        rating: sq.key === 'starter' ? 6.5 : 6.2,
+        moments,
+        momentIdx: 0,
+        awaitingChoice: false,
+        ballX: 160,
+        ballY: 90,
+        pulseColor: '#34d399',
+        log: [
+          sq.key === 'starter'
+            ? { t: '1\' Стартовый свисток! Ты в основном составе.', cls: '' }
+            : { t: '68\' Выход на замену со скамейки запасных!', cls: '' }
+        ]
+      };
+
+      // If bench, pre-simulate score up to 68'
+      if (sq.key === 'bench') {
+        const preDiff = (myClub.ovr - fix.opp.ovr) * 0.03;
+        if (Math.random() < 0.35 + preDiff) liveMatch.ms++;
+        if (Math.random() < 0.38 - preDiff) liveMatch.os++;
+        liveMatch.log.unshift({ t: `К 68-й минуте счёт ${liveMatch.ms}:${liveMatch.os}.`, cls: '' });
+      }
+
+      activeTab = 'match';
+      render();
+      advanceLiveMatch();
+    }
+
+    function startInternationalMatch() {
+      const intl = state.pendingIntl;
+      if (!intl) return;
+      const myNat = getCountry(state.player.countryId);
+      const oppNat = getCountry(intl.oppId);
+      const myBadge = { id: 'nat_' + myNat.id, name: myNat.name, short: myNat.id, ovr: myNat.ovr, color1: myNat.c1, color2: myNat.c2 };
+      const oppBadge = { id: 'nat_' + oppNat.id, name: oppNat.name, short: oppNat.id, ovr: oppNat.ovr, color1: oppNat.c1, color2: oppNat.c2 };
+
+      liveMatch = {
+        mode: 'intl',
+        stage: intl.stage,
+        isHome: true,
+        home: myBadge,
+        away: oppBadge,
+        myClub: myBadge,
+        oppClub: oppBadge,
+        squad: 'starter',
+        minute: 1,
+        ms: 0,
+        os: 0,
+        pg: 0,
+        pa: 0,
+        rating: 6.6,
+        moments: [25, 58, 84],
+        momentIdx: 0,
+        awaitingChoice: false,
+        ballX: 160,
+        ballY: 90,
+        pulseColor: '#fbbf24',
+        log: [{ t: `1' ${intl.stage}: ${myNat.flag} ${myNat.name} против ${oppNat.flag} ${oppNat.name}!`, cls: '' }]
+      };
+
+      closeModal();
+      activeTab = 'match';
+      render();
+      advanceLiveMatch();
+    }
+
+    function advanceLiveMatch() {
+      if (!liveMatch) return;
+      const lm = liveMatch;
+
+      if (lm.momentIdx < lm.moments.length) {
+        const targetMin = lm.moments[lm.momentIdx];
+        // Random background goal chance between moments
+        const diff = (lm.myClub.ovr - lm.oppClub.ovr) * 0.015;
+        if (Math.random() < 0.16 + diff) {
+          lm.ms++;
+          lm.log.unshift({ t: `${Math.max(lm.minute, targetMin - 8)}' ⚽ Партнёр по команде открыл момент и забил!`, cls: 'goal' });
+        } else if (Math.random() < 0.17 - diff) {
+          lm.os++;
+          lm.log.unshift({ t: `${Math.max(lm.minute, targetMin - 5)}' ❌ Соперник реализовал контратаку.`, cls: 'opp' });
+        }
+        lm.minute = targetMin;
+        lm.ballX = 215 + Math.floor(Math.random() * 55);
+        lm.ballY = 38 + Math.floor(Math.random() * 104);
+        lm.pulseColor = '#fbbf24';
+        lm.awaitingChoice = true;
+        lm.currentPrompt = buildMomentPrompt(lm.minute);
+        render();
+        return;
+      }
+
+      // Finish match at 90'
+      lm.minute = 90;
+      lm.ballX = 160;
+      lm.ballY = 90;
+      lm.awaitingChoice = false;
+      finishLiveMatch();
+    }
+
+    function buildMomentPrompt(min) {
+      const p = state.player;
+      const isDef = p.pos === 'CB' || p.pos === 'GK' || p.pos === 'CDM';
+      if (isDef && Math.random() < 0.5) {
+        return {
+          title: `${min}' Опасная атака соперника!`,
+          options: [
+            { label: '🛡️ Жёсткий перехват', stat: 'def', kind: 'def', desc: `ЗАЩ ${p.stats.def}` },
+            { label: '⚡ Начать контратаку пасом', stat: 'pas', kind: 'pass', desc: `ПАС ${p.stats.pas}` },
+            { label: '🔒 Сыграть надёжно позиционно', stat: 'phy', kind: 'safe', desc: `ФИЗ ${p.stats.phy}` }
+          ]
+        };
+      }
+      return {
+        title: `${min}' Ключевой момент у штрафной!`,
+        options: [
+          { label: '🎯 Пробить в девятку', stat: 'sho', kind: 'shoot', desc: `УДР ${p.stats.sho}` },
+          { label: '👟 Отдать пас вразрез', stat: 'pas', kind: 'pass', desc: `ПАС ${p.stats.pas}` },
+          { label: '🌪️ Пойти в дриблинг', stat: 'dri', kind: 'drib', desc: `ДРБ ${p.stats.dri}` },
+          { label: '🤝 Сыграть надёжно', stat: 'pac', kind: 'safe', desc: 'Стабильно' }
+        ]
+      };
+    }
+
+    function pickMatchAction(idx) {
+      if (!liveMatch || !liveMatch.awaitingChoice) return;
+      const lm = liveMatch;
+      const opt = lm.currentPrompt.options[idx];
+      if (!opt) return;
+
+      const p = state.player;
+      const statVal = p.stats[opt.stat] || 60;
+      const oppFactor = (lm.oppClub.ovr - 65) * 0.008;
+      const chance = clamp(0.36 + (statVal - 55) * 0.014 - oppFactor, 0.22, 0.86);
+      const roll = Math.random();
+
+      if (opt.kind === 'shoot') {
+        if (roll < chance) {
+          lm.ms++; lm.pg++; lm.rating = clamp(lm.rating + 1.1, 5, 10);
+          lm.ballX = 304; lm.ballY = 90; lm.pulseColor = '#34d399';
+          lm.log.unshift({ t: `${lm.minute}' ⚽ ГОООЛ! Ты неотразимо пробил в угол!`, cls: 'goal' });
+          haptic('success');
+        } else {
+          lm.rating = clamp(lm.rating - 0.2, 5, 10);
+          lm.ballX = 290; lm.ballY = 42; lm.pulseColor = '#f43f5e';
+          lm.log.unshift({ t: `${lm.minute}' Вратарь в прыжке потащил твой удар.`, cls: '' });
+          haptic('light');
+        }
+      } else if (opt.kind === 'pass') {
+        if (roll < chance + 0.06) {
+          lm.ms++; lm.pa++; lm.rating = clamp(lm.rating + 0.85, 5, 10);
+          lm.ballX = 300; lm.ballY = 94; lm.pulseColor = '#34d399';
+          lm.log.unshift({ t: `${lm.minute}' 👟 АССИСТ! Твой разрезающий пас стал голевым!`, cls: 'goal' });
+          haptic('success');
+        } else {
+          lm.ballX = 225; lm.ballY = 120; lm.pulseColor = '#38bdf8';
+          lm.log.unshift({ t: `${lm.minute}' Защитник успел перехватить передачу.`, cls: '' });
+          haptic('light');
+        }
+      } else if (opt.kind === 'drib') {
+        if (roll < chance - 0.04) {
+          lm.ms++; lm.pg++; lm.rating = clamp(lm.rating + 1.25, 5, 10);
+          lm.ballX = 302; lm.ballY = 86; lm.pulseColor = '#fbbf24';
+          lm.log.unshift({ t: `${lm.minute}' 🔥 ШЕДЕВР! Прошёл двоих на дриблинге и забил!`, cls: 'goal' });
+          haptic('success');
+        } else {
+          lm.rating = clamp(lm.rating - 0.35, 5, 10);
+          lm.ballX = 180; lm.ballY = 135; lm.pulseColor = '#f43f5e';
+          lm.log.unshift({ t: `${lm.minute}' Соперник чисто выбил мяч в подкате.`, cls: '' });
+          haptic('warning');
+        }
+      } else if (opt.kind === 'def') {
+        if (roll < chance + 0.08) {
+          lm.rating = clamp(lm.rating + 0.8, 5, 10);
+          lm.ballX = 75; lm.ballY = 90; lm.pulseColor = '#34d399';
+          lm.log.unshift({ t: `${lm.minute}' 🛡️ Блестящий отбор! Спас команду от гола.`, cls: 'goal' });
+          haptic('success');
+        } else {
+          lm.os++; lm.rating = clamp(lm.rating - 0.5, 5, 10);
+          lm.ballX = 18; lm.ballY = 90; lm.pulseColor = '#f43f5e';
+          lm.log.unshift({ t: `${lm.minute}' ❌ Соперник ушёл от опеки и забил.`, cls: 'opp' });
+          haptic('error');
+        }
+      } else {
+        // Safe play
+        lm.rating = clamp(lm.rating + 0.25, 5, 10);
+        lm.ballX = 165; lm.ballY = 90; lm.pulseColor = '#38bdf8';
+        lm.log.unshift({ t: `${lm.minute}' Уверенный контроль мяча без риска.`, cls: '' });
+        haptic('light');
+      }
+
+      lm.awaitingChoice = false;
+      lm.momentIdx++;
+      render();
+      setTimeout(() => advanceLiveMatch(), 420);
+    }
+
+    function finishLiveMatch() {
+      const lm = liveMatch;
+      const p = state.player;
+      const won = lm.ms > lm.os;
+      const draw = lm.ms === lm.os;
+      const finalRating = Number(clamp(lm.rating + (won ? 0.3 : draw ? 0 : -0.25), 5.0, 10.0).toFixed(1));
+
+      if (lm.mode === 'intl') {
+        p.intl.caps++;
+        p.intl.goals += lm.pg;
+        const wonCup = won && lm.stage === 'Финал Кубка Сборных';
+        if (wonCup) p.intl.trophies++;
+        const bonus = won ? 6000 : draw ? 3000 : 1500;
+        const fansAdd = Math.round(1800 + lm.pg * 2200 + (wonCup ? 8000 : 0));
+        p.money += bonus;
+        p.fans += fansAdd;
+        p.energy = clamp(p.energy - 16, 0, 100);
+        state.pendingIntl = null;
+        liveMatch = null;
+        saveState();
+
+        openModal(`
+          <div class="center stack" style="gap:12px;">
+            <div class="badge badge-gold" style="margin:0 auto;">🌍 ${escapeHtml(lm.stage)}</div>
+            <div style="font-size:20px;font-weight:900;">${won ? 'ПОБЕДА СБОРНОЙ!' : draw ? 'БОЕВАЯ НИЧЬЯ' : 'ПОРАЖЕНИЕ СБОРНОЙ'}</div>
+            <div class="card" style="padding:12px;">
+              <div class="row" style="justify-content:center;gap:16px;">
+                <div>${renderClubBadge(lm.home, 38)}<div class="xs bold" style="margin-top:4px;">${escapeHtml(lm.home.name)}</div></div>
+                <div style="font-size:28px;font-weight:900;">${lm.ms} : ${lm.os}</div>
+                <div>${renderClubBadge(lm.away, 38)}<div class="xs bold" style="margin-top:4px;">${escapeHtml(lm.away.name)}</div></div>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="card center" style="padding:8px;"><div class="xs muted">Оценка</div><div class="bold" style="color:#fbbf24;">${finalRating}</div></div>
+              <div class="card center" style="padding:8px;"><div class="xs muted">Гол / Пас</div><div class="bold">${lm.pg} / ${lm.pa}</div></div>
+              <div class="card center" style="padding:8px;"><div class="xs muted">Премия</div><div class="bold" style="color:#34d399;">+${fmtMoney(bonus)}</div></div>
+            </div>
+            ${wonCup ? '<div class="badge badge-gold" style="margin:0 auto;">🏆 КУБОК СБОРНЫХ ЗАВОЁВАН!</div>' : ''}
+            <button onclick="afterIntlMatchModal()" class="btn btn-primary">Вернуться в клуб →</button>
+          </div>
+        `);
+        render();
+        return;
+      }
+
+      // LEAGUE MATCH FINISH
+      const hg = lm.isHome ? lm.ms : lm.os;
+      const ag = lm.isHome ? lm.os : lm.ms;
+      recordTableResult(state.tables[p.leagueId], lm.home.id, lm.away.id, hg, ag);
+      simulateOtherMatchesInRound(state.round, p.clubId);
+
+      const energyCost = lm.squad === 'starter' ? 24 : 11;
+      const passiveRec = getPassiveEnergyRecovery();
+      const pay = p.salary + (lm.pg * 500) + (lm.pa * 300) + (won ? 400 : 0);
+      const fansAdd = Math.round((450 + lm.pg * 1400 + lm.pa * 700 + (won ? 600 : 100)) * lm.myClub.prestige);
+      const trustDelta = finalRating >= 7.5 ? 5 : finalRating >= 6.5 ? 2 : -4;
+
+      p.money += pay;
+      p.fans += fansAdd;
+      p.energy = clamp(p.energy - energyCost + passiveRec, 0, 100);
+      p.coachTrust = clamp(p.coachTrust + trustDelta, 5, 100);
+      p.happiness = clamp(p.happiness + (won ? 4 : draw ? 0 : -3), 10, 100);
+
+      p.seasonApps++; p.careerApps++;
+      p.seasonGoals += lm.pg; p.careerGoals += lm.pg;
+      p.seasonAssists += lm.pa; p.careerAssists += lm.pa;
+      p.seasonRatingSum += finalRating;
+
+      state.round++;
+      state.trainLeft = 2;
+
+      lastMatchCtx = {
+        won, draw, score: `${lm.ms}:${lm.os}`,
+        pg: lm.pg, pa: lm.pa, squad: lm.squad,
+        club: lm.myClub.name, opp: lm.oppClub.name
+      };
+
+      liveMatch = null;
+      checkWindowOpeningToast();
+      saveState();
+
+      openModal(`
+        <div class="center stack" style="gap:12px;">
+          <div class="badge ${won ? 'badge-green' : draw ? 'badge-gold' : 'badge-rose'}" style="margin:0 auto;">
+            ${won ? '🏆 ПОБЕДА • ТУР ' + state.round : draw ? '🤝 НИЧЬЯ • ТУР ' + state.round : '❌ ПОРАЖЕНИЕ • ТУР ' + state.round}
+          </div>
+          <div class="card" style="padding:12px;">
+            <div class="row" style="justify-content:center;gap:14px;">
+              <div class="center">${renderClubBadge(lm.home, 36)}<div class="xs bold" style="margin-top:4px;">${escapeHtml(lm.home.short)}</div></div>
+              <div style="font-size:28px;font-weight:900;">${hg} : ${ag}</div>
+              <div class="center">${renderClubBadge(lm.away, 36)}<div class="xs bold" style="margin-top:4px;">${escapeHtml(lm.away.short)}</div></div>
+            </div>
+          </div>
+          <div class="grid-3">
+            <div class="card center" style="padding:8px;"><div class="xs muted">Оценка</div><div class="bold" style="color:#fbbf24;font-size:16px;">${finalRating}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Гол / Пас</div><div class="bold" style="font-size:16px;">${lm.pg} / ${lm.pa}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Зарплата</div><div class="bold" style="color:#34d399;">+${fmtMoney(pay)}</div></div>
+          </div>
+          <div class="row small muted" style="justify-content:center;gap:12px;">
+            <span>👥 +${fmtNum(fansAdd)} фанатов</span>
+            <span>⚡ -${energyCost}%${passiveRec ? ' (+' + passiveRec + '% дом)' : ''}</span>
+          </div>
+          <button onclick="afterLeagueMatchModal()" class="btn btn-primary">Продолжить →</button>
+        </div>
+      `);
+      render();
+    }
+
+    function checkWindowOpeningToast() {
+      if (state.season >= 2 && state.round === 8) {
+        ensureTransferOffersForWindow();
+        showToast('🟢 Открылось Зимнее трансферное и контрактное окно (туры 9–10)!', 'gold');
+      }
+    }
+
+    /* =========================================================================
+       12. POST-MATCH CHAIN: INTERVIEWS (EVERY 3RD), DILEMMAS, INTL, SEASON END
+       ========================================================================= */
+    function afterLeagueMatchModal() {
+      closeModal();
+
+      // 1) Every 3rd match -> Post-Match Flash Interview
+      if (state.round > 0 && state.round % 3 === 0 && state.lastInterviewRound !== state.round && lastMatchCtx) {
+        openFlashInterview();
+        return;
+      }
+
+      // 2) Non-interview rounds -> ~40% chance for Career/Life Dilemma
+      if (state.round > 0 && state.round % 3 !== 0 && state.lastDilemmaRound !== state.round && Math.random() < 0.40) {
+        openCareerDilemma();
+        return;
+      }
+
+      afterInterviewOrDilemma();
+    }
+
+    function afterInterviewOrDilemma() {
+      // 3) Check National Team Call-up at rounds 6, 12, 18
+      if ([6, 12, 18].includes(state.round) && !state.intlDoneRounds.includes(state.round)) {
+        state.intlDoneRounds.push(state.round);
+        const p = state.player;
+        const nat = getCountry(p.countryId);
+        const ovr = calcOvr(p.stats, p.pos);
+        const avgRat = p.seasonApps > 0 ? (p.seasonRatingSum / p.seasonApps) : 6.5;
+
+        if (ovr >= nat.callUpOvr || avgRat >= 7.4) {
+          const opps = COUNTRIES.filter(c => c.id !== nat.id);
+          const opp = opps[Math.floor(Math.random() * opps.length)];
+          const stage = state.round === 6 ? 'Товарищеский матч' : state.round === 12 ? 'Отбор на турнир' : 'Финал Кубка Сборных';
+          state.pendingIntl = { oppId: opp.id, stage };
+          saveState();
+          openModal(`
+            <div class="center stack" style="gap:12px;">
+              <div class="badge badge-gold" style="margin:0 auto;">🌍 ВЫЗОВ В СБОРНУЮ!</div>
+              <div style="font-size:36px;">${nat.flag}</div>
+              <div style="font-size:18px;font-weight:900;">Сборная ${nat.name} вызывает тебя!</div>
+              <div class="small muted">${stage} против ${opp.flag} <b>${opp.name}</b> (OVR ${opp.ovr}).</div>
+              <button onclick="startInternationalMatch()" class="btn btn-gold">⚽ Сыграть за сборную</button>
+              <button onclick="skipInternationalMatch()" class="btn btn-sec">Отказаться (остаться в клубе)</button>
+            </div>
+          `);
+          render();
+          return;
+        }
+        saveState();
+      }
+
+      // 4) Season End after round 18
+      if (state.round >= 18) {
+        openSeasonEndModal();
+        return;
+      }
+
+      render();
+    }
+
+    function skipInternationalMatch() {
+      state.pendingIntl = null;
+      saveState();
+      closeModal();
+      if (state.round >= 18) openSeasonEndModal();
+      else render();
+    }
+
+    function afterIntlMatchModal() {
+      closeModal();
+      if (state.round >= 18) openSeasonEndModal();
+      else render();
+    }
+
+    function applyDeltas(ef) {
+      const p = state.player;
+      if (ef.money)  p.money = Math.max(0, p.money + ef.money);
+      if (ef.energy) p.energy = clamp(p.energy + ef.energy, 5, 100);
+      if (ef.happy)  p.happiness = clamp(p.happiness + ef.happy, 10, 100);
+      if (ef.trust)  p.coachTrust = clamp(p.coachTrust + ef.trust, 5, 100);
+      if (ef.fans)   p.fans = Math.max(0, p.fans + ef.fans);
+      if (ef.stat) {
+        Object.keys(ef.stat).forEach(k => {
+          if (typeof p.stats[k] === 'number') p.stats[k] = clamp(p.stats[k] + ef.stat[k], 1, 99);
+        });
+      }
+    }
+
+    function renderDeltaChips(ef) {
+      const arr = [];
+      if (ef.money)  arr.push(`<span class="badge ${ef.money > 0 ? 'badge-green' : 'badge-rose'}">${ef.money > 0 ? '+' : ''}${fmtMoney(ef.money)}</span>`);
+      if (ef.trust)  arr.push(`<span class="badge ${ef.trust > 0 ? 'badge-sky' : 'badge-rose'}">${ef.trust > 0 ? '+' : ''}${ef.trust}% Доверие</span>`);
+      if (ef.fans)   arr.push(`<span class="badge ${ef.fans > 0 ? 'badge-gold' : 'badge-rose'}">${ef.fans > 0 ? '+' : ''}${fmtNum(ef.fans)} Фанатов</span>`);
+      if (ef.happy)  arr.push(`<span class="badge ${ef.happy > 0 ? 'badge-green' : 'badge-rose'}">${ef.happy > 0 ? '+' : ''}${ef.happy}% Настр.</span>`);
+      if (ef.energy) arr.push(`<span class="badge ${ef.energy > 0 ? 'badge-sky' : 'badge-rose'}">${ef.energy > 0 ? '+' : ''}${ef.energy}% ⚡</span>`);
+      if (ef.stat) {
+        Object.keys(ef.stat).forEach(k => {
+          const m = STAT_META.find(s => s.key === k);
+          arr.push(`<span class="badge badge-gold">+${ef.stat[k]} ${m ? m.ru : k.toUpperCase()}</span>`);
+        });
+      }
+      if (!arr.length) arr.push('<span class="badge badge-slate">Без изменений</span>');
+      return `<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">${arr.join('')}</div>`;
+    }
+
+    /* FLASH INTERVIEW */
+    function openFlashInterview() {
+      const c = lastMatchCtx;
+      let ctx = 'draw';
+      if (c.squad === 'reserves') ctx = 'reserves';
+      else if (c.squad === 'bench') ctx = 'bench';
+      else if (c.won && (c.pg > 0 || c.pa > 0)) ctx = 'win_hero';
+      else if (c.won) ctx = 'win';
+      else if (!c.draw) ctx = 'loss';
+
+      const qObj = INTERVIEW_POOL.find(q => q.ctx === ctx) || INTERVIEW_POOL[0];
+      const sponsorBonus = Math.random() < 0.65 ? (1500 + Math.floor(Math.random() * 4) * 500) : 0;
+
+      activeInterview = {
+        journalist: qObj.journalist,
+        question: qObj.q(c),
+        picked: null,
+        options: [
+          {
+            badge: '🤝 Командный', cls: 'badge-green',
+            text: qObj.a.team.t, reaction: qObj.a.team.r,
+            ef: { trust: 8, happy: 5, fans: 250 }
+          },
+          {
+            badge: '🔥 Дерзкий', cls: 'badge-gold',
+            text: qObj.a.bold.t, reaction: qObj.a.bold.r,
+            ef: { fans: 1400, trust: -6, ...(sponsorBonus ? { money: sponsorBonus } : {}) }
+          },
+          {
+            badge: '🧠 Дипломатичный', cls: 'badge-sky',
+            text: qObj.a.pro.t, reaction: qObj.a.pro.r,
+            ef: { trust: 4, fans: 650, happy: 3 }
+          }
+        ]
+      };
+      state.lastInterviewRound = state.round;
+      saveState();
+      renderInterviewModal();
+    }
+
+    function pickInterview(idx) {
+      if (!activeInterview || activeInterview.picked) return;
+      const opt = activeInterview.options[idx];
+      applyDeltas(opt.ef);
+      activeInterview.picked = opt;
+      saveState();
+      haptic('success');
+      renderInterviewModal();
+    }
+
+    function finishInterview() {
+      activeInterview = null;
+      closeModal();
+      afterInterviewOrDilemma();
+    }
+
+    function renderInterviewModal() {
+      const iv = activeInterview;
+      openModal(`
+        <div class="stack" style="gap:12px;">
+          <div class="row">
+            <span class="badge badge-sky">🎙️ ФЛЕШ-ИНТЕРВЬЮ</span>
+            <span class="xs muted">Тур ${state.round}/18</span>
+          </div>
+          <div class="card" style="padding:12px;">
+            <div class="xs bold" style="color:#fbbf24;margin-bottom:4px;">${escapeHtml(iv.journalist)}:</div>
+            <div style="font-size:13px;font-weight:600;">«${escapeHtml(iv.question)}»</div>
+          </div>
+          ${!iv.picked ? `
+            <div class="stack">
+              ${iv.options.map((o, i) => `
+                <button onclick="pickInterview(${i})" class="card" style="text-align:left;padding:11px;">
+                  <div class="badge ${o.cls}" style="margin-bottom:6px;">${o.badge}</div>
+                  <div style="font-size:12px;color:#f1f5f9;">${escapeHtml(o.text)}</div>
+                </button>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="stack anim" style="gap:10px;">
+              <div class="card center" style="padding:12px;">
+                <div class="badge ${iv.picked.cls}" style="margin-bottom:8px;">${iv.picked.badge}</div>
+                <div class="small" style="color:#e2e8f0;">${escapeHtml(iv.picked.reaction)}</div>
+              </div>
+              ${renderDeltaChips(iv.picked.ef)}
+              <button onclick="finishInterview()" class="btn btn-primary">Продолжить →</button>
+            </div>
+          `}
+        </div>
+      `);
+    }
+
+    /* CAREER DILEMMA */
+    function openCareerDilemma() {
+      const pool = CAREER_DILEMMAS.filter(d => d.id !== state.lastDilemmaId);
+      const ev = pool[Math.floor(Math.random() * pool.length)] || CAREER_DILEMMAS[0];
+      activeDilemma = { ev, picked: null };
+      state.lastDilemmaRound = state.round;
+      state.lastDilemmaId = ev.id;
+      saveState();
+      renderDilemmaModal();
+    }
+
+    function pickDilemma(idx) {
+      if (!activeDilemma || activeDilemma.picked) return;
+      const ch = activeDilemma.ev.choices[idx];
+      if (ch.cost && state.player.money < ch.cost) return showToast('Не хватает денег!', 'error');
+      applyDeltas(ch.ef || {});
+      activeDilemma.picked = ch;
+      saveState();
+      haptic('success');
+      renderDilemmaModal();
+    }
+
+    function finishDilemma() {
+      activeDilemma = null;
+      closeModal();
+      afterInterviewOrDilemma();
+    }
+
+    function renderDilemmaModal() {
+      const { ev, picked } = activeDilemma;
+      openModal(`
+        <div class="stack" style="gap:12px;">
+          <div class="row">
+            <span class="badge badge-gold">⚡ СИТУАЦИЯ В КАРЬЕРЕ</span>
+            <span class="xs muted">${escapeHtml(ev.cat)}</span>
+          </div>
+          <div class="center">
+            <div style="font-size:38px;">${ev.icon}</div>
+            <div style="font-size:17px;font-weight:900;margin-top:4px;">${escapeHtml(ev.title)}</div>
+            <div class="small muted" style="margin-top:6px;">${escapeHtml(ev.desc)}</div>
+          </div>
+          ${!picked ? `
+            <div class="stack">
+              ${ev.choices.map((ch, i) => {
+                const locked = ch.cost && state.player.money < ch.cost;
+                return `
+                  <button onclick="pickDilemma(${i})" ${locked ? 'disabled' : ''} class="card" style="text-align:left;padding:11px;">
+                    <div class="row">
+                      <span class="bold" style="font-size:12px;">${escapeHtml(ch.label)}</span>
+                      ${locked ? '<span class="xs" style="color:#fb7185;">Мало €</span>' : ''}
+                    </div>
+                    <div class="xs muted" style="margin-top:4px;">${escapeHtml(ch.sub)}</div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          ` : `
+            <div class="stack anim" style="gap:10px;">
+              <div class="card center small" style="padding:12px;">${escapeHtml(picked.out)}</div>
+              ${renderDeltaChips(picked.ef || {})}
+              <button onclick="finishDilemma()" class="btn btn-primary">Продолжить →</button>
+            </div>
+          `}
+        </div>
+      `);
+    }
+
+    /* SEASON END */
+    function openSeasonEndModal() {
+      const p = state.player;
+      const tbl = getSortedTable(p.leagueId);
+      const posIdx = tbl.findIndex(r => r.clubId === p.clubId) + 1;
+      const isChamp = posIdx === 1;
+      const avgRat = p.seasonApps > 0 ? (p.seasonRatingSum / p.seasonApps).toFixed(2) : '6.50';
+      const prize = isChamp ? 25000 : posIdx <= 3 ? 12000 : 5000;
+
+      openModal(`
+        <div class="center stack" style="gap:12px;">
+          <div class="badge badge-gold" style="margin:0 auto;">🏁 ИТОГИ СЕЗОНА ${state.season}</div>
+          <div style="font-size:38px;">${isChamp ? '🏆' : posIdx <= 3 ? '🥈' : '⚽'}</div>
+          <div style="font-size:20px;font-weight:900;">${isChamp ? 'ЧЕМПИОН ЛИГИ!' : posIdx + '-е место в лиге'}</div>
+          <div class="grid-3">
+            <div class="card center" style="padding:8px;"><div class="xs muted">Матчи</div><div class="bold">${p.seasonApps}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Гол + Пас</div><div class="bold">${p.seasonGoals} + ${p.seasonAssists}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Ср. оценка</div><div class="bold" style="color:#fbbf24;">${avgRat}</div></div>
+          </div>
+          <div class="small" style="color:#34d399;font-weight:800;">Призовые за сезон: +${fmtMoney(prize)}</div>
+          <button onclick="startNextSeason(${prize}, ${isChamp})" class="btn btn-primary">Начать Сезон ${state.season + 1} (Открыть Летнее окно) →</button>
+        </div>
+      `);
+    }
+
+    function startNextSeason(prize, isChamp) {
+      const p = state.player;
+      p.money += prize;
+      if (isChamp) p.trophies++;
+      p.age++;
+      p.energy = 100;
+      p.seasonApps = 0;
+      p.seasonGoals = 0;
+      p.seasonAssists = 0;
+      p.seasonRatingSum = 0;
+
+      state.season++;
+      state.round = 0;
+      state.trainLeft = 2;
+      state.intlDoneRounds = [];
+      state.pendingIntl = null;
+      state.tables = buildAllTables();
+      state.schedules = buildAllSchedules();
+
+      ensureTransferOffersForWindow();
+      saveState();
+      closeModal();
+      haptic('success');
+      showToast(`🟢 Сезон ${state.season}: Летнее трансферное и контрактное окно ОТКРЫТЫ!`, 'gold');
+      render();
+    }
+
+    /* =========================================================================
+       13. HONEST REFERRAL SYSTEM (SUPABASE `referrals` TABLE)
+       ========================================================================= */
+    function getReferralLink() {
+      const param = 'ref_' + tgUser.id;
+      if (CONFIG.APP_SHORT_NAME && CONFIG.APP_SHORT_NAME.trim()) {
+        return `https://t.me/${CONFIG.BOT_USERNAME}/${CONFIG.APP_SHORT_NAME.trim()}?startapp=${param}`;
+      }
+      return `https://t.me/${CONFIG.BOT_USERNAME}?start=${param}`;
+    }
+
+    function shareReferralLink() {
+      const link = getReferralLink();
+      const text = '⚽ Погнали в PRO CAREER: TOP 5 + РПЛ! Построй карьеру с нуля в Европе и забери бонус!';
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+      haptic('light');
+      try {
+        if (tg && typeof tg.openTelegramLink === 'function') {
+          tg.openTelegramLink(shareUrl);
+        } else {
+          window.open(shareUrl, '_blank');
+        }
+      } catch (e) {
+        copyTextSafe(link);
+      }
+      showToast('Приглашение отправлено! Бонус начислится, когда друг реально запустит бота.', 'ok');
+    }
+
+    async function registerIncomingReferralIfAny() {
+      try {
+        let startParam = '';
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+          startParam = String(tg.initDataUnsafe.start_param);
+        } else {
+          const sp = new URLSearchParams(window.location.search);
+          startParam = sp.get('start') || sp.get('startapp') || '';
+        }
+        if (!startParam.startsWith('ref_')) return;
+        const referrerId = startParam.slice(4).trim();
+        if (!referrerId || referrerId === tgUser.id) return;
+
+        await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/referrals`, {
+          method: 'POST',
+          headers: getSupabaseHeaders({ 'Prefer': 'resolution=ignore-duplicates,return=minimal' }),
+          body: JSON.stringify({
+            referred_tg_id: tgUser.id,
+            referrer_tg_id: referrerId,
+            referred_name: tgUser.firstName || 'Игрок',
+            claimed: false
+          })
+        });
+      } catch (e) {}
+    }
+
+    async function checkAndClaimReferrals() {
+      const btn = document.getElementById('ref-check-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Проверка базы Supabase...'; }
+      try {
+        const res = await fetch(
+          `${CONFIG.SUPABASE_URL}/rest/v1/referrals?referrer_tg_id=eq.${encodeURIComponent(tgUser.id)}&claimed=eq.false&select=referred_tg_id,referred_name`,
+          { method: 'GET', headers: getSupabaseHeaders() }
+        );
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const rows = await res.json();
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          showToast('Новых подтверждённых друзей пока нет. Попроси друга открыть бота по твоей ссылке!', 'ok');
+          render();
+          return;
+        }
+
+        // Mark as claimed in Supabase
+        const patch = await fetch(
+          `${CONFIG.SUPABASE_URL}/rest/v1/referrals?referrer_tg_id=eq.${encodeURIComponent(tgUser.id)}&claimed=eq.false`,
+          {
+            method: 'PATCH',
+            headers: getSupabaseHeaders({ 'Prefer': 'return=minimal' }),
+            body: JSON.stringify({ claimed: true })
+          }
+        );
+        if (!patch.ok) throw new Error('PATCH HTTP ' + patch.status);
+
+        const reward = rows.length * CONFIG.REFERRAL_REWARD;
+        state.player.money += reward;
+        state.referrals.verifiedCount += rows.length;
+        state.referrals.totalEarned += reward;
+        saveState();
+        haptic('success');
+        showToast(`🎉 Подтверждено друзей: ${rows.length}! Начислено +${fmtMoney(reward)}`, 'gold');
+        render();
+      } catch (err) {
+        showToast('Ошибка проверки рефералов: ' + err.message, 'error');
+        render();
+      }
+    }
+
+    /* =========================================================================
+       14. ONLINE MODE ("PRO LEAGUE LIVE" + SUPABASE `players`)
+       ========================================================================= */
+    async function syncOnlineProfile(silent) {
+      if (!state) return;
+      onlineState.status = 'syncing';
+      if (!silent) render();
+
+      const p = state.player;
+      const club = getClub(p.clubId);
+      const ovr = calcOvr(p.stats, p.pos);
+      const payload = {
+        tg_id: tgUser.id,
+        name: p.name,
+        club: club.name,
+        position: p.pos,
+        ovr: ovr,
+        tactic: onlineState.myTactic,
+        rating: state.online.rating,
+        wins: state.online.wins,
+        draws: state.online.draws,
+        losses: state.online.losses,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const upRes = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/players?on_conflict=tg_id`, {
+          method: 'POST',
+          headers: getSupabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify(payload)
+        });
+        if (!upRes.ok) {
+          const txt = await upRes.text();
+          throw new Error(`HTTP ${upRes.status}: ${txt.slice(0, 90)}`);
+        }
+
+        const lbRes = await fetch(
+          `${CONFIG.SUPABASE_URL}/rest/v1/players?select=tg_id,name,club,position,ovr,tactic,rating,wins,draws,losses&order=rating.desc&limit=50`,
+          { method: 'GET', headers: getSupabaseHeaders() }
+        );
+        if (!lbRes.ok) {
+          const txt = await lbRes.text();
+          throw new Error(`HTTP ${lbRes.status}: ${txt.slice(0, 90)}`);
+        }
+        const rows = await lbRes.json();
+        onlineState.leaderboard = Array.isArray(rows) ? rows : [];
+        onlineState.status = 'ok';
+        onlineState.errorText = '';
+        onlineState.lastSyncedAt = Date.now();
+        pickOnlineOpponent();
+        if (!silent) render();
+      } catch (err) {
+        onlineState.status = 'err';
+        onlineState.errorText = err.message || 'Нет связи';
+        pickOnlineOpponent();
+        if (!silent) render();
+      }
+    }
+
+    function pickOnlineOpponent() {
+      const others = onlineState.leaderboard.filter(r => r.tg_id !== tgUser.id);
+      const pool = others.length > 0 ? others : SPARRING_BOTS;
+      onlineState.selectedOpp = pool[Math.floor(Math.random() * pool.length)];
+      onlineState.scoutedId = null;
+    }
+
+    function rerollOnlineOpponent() {
+      pickOnlineOpponent();
+      haptic('light');
+      render();
+    }
+
+    function getOnlineDailyInfo() {
+      const td = todayKey();
+      if (state.online.lastDay !== td) {
+        state.online.lastDay = td;
+        state.online.playedToday = 0;
+      }
+      const maxToday = state.online.extraAdDay === td ? 2 : 1;
+      return { played: state.online.playedToday, max: maxToday, canPlay: state.online.playedToday < maxToday };
+    }
+
+    function getMidnightCountdown() {
+      const now = new Date();
+      const mid = new Date(now);
+      mid.setHours(24, 0, 0, 0);
+      const sec = Math.max(0, Math.floor((mid - now) / 1000));
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      return `${h}ч ${m}м`;
+    }
+
+    function watchAdScout() {
+      if (!onlineState.selectedOpp) return;
+      runRewardedAd('Разведка тактики соперника', () => {
+        onlineState.scoutedId = onlineState.selectedOpp.tg_id;
+        haptic('success');
+        showToast('🕵️ Скаут раскрыл тактику соперника!', 'gold');
+        render();
+      });
+    }
+
+    function watchAdExtraPvP() {
+      const td = todayKey();
+      if (state.online.extraAdDay === td) return showToast('Доп. PvP-матч на сегодня уже получен!', 'error');
+      runRewardedAd('+1 рейтинговый PvP-матч сегодня', () => {
+        state.online.extraAdDay = td;
+        saveState();
+        haptic('success');
+        showToast('⚔️ Открыт +1 дополнительный PvP-матч!', 'gold');
+        render();
+      });
+    }
+
+    function tacticLabel(t) {
+      if (t === 'press') return '🔥 Прессинг';
+      if (t === 'counter') return '⚡ Контратаки';
+      return '🎯 Тики-така';
+    }
+
+    function playOnlinePvP() {
+      const daily = getOnlineDailyInfo();
+      if (!daily.canPlay) return showToast('Лимит PvP на сегодня исчерпан! Новый тур в 00:00.', 'error');
+      if (!onlineState.selectedOpp) pickOnlineOpponent();
+      const opp = onlineState.selectedOpp;
+      const myOvr = calcOvr(state.player.stats, state.player.pos);
+
+      // Rock-paper-scissors: press > tiki > counter > press (±12%)
+      let tacMult = 1.0;
+      let tacText = 'Равная тактическая борьба';
+      const mt = onlineState.myTactic;
+      const ot = opp.tactic || 'press';
+      if ((mt === 'press' && ot === 'tiki') || (mt === 'tiki' && ot === 'counter') || (mt === 'counter' && ot === 'press')) {
+        tacMult = 1.12;
+        tacText = '✅ Твоя тактика переиграла соперника (+12%)!';
+      } else if (mt !== ot) {
+        tacMult = 0.88;
+        tacText = '⚠️ Соперник поймал тебя контр-тактикой (-12%)';
+      }
+
+      const myPow = myOvr * tacMult + (Math.random() * 10 - 5);
+      const oppPow = (opp.ovr || 68) + (Math.random() * 10 - 5);
+      let ms = clamp(Math.round(1.2 + (myPow - oppPow) * 0.08 + Math.random() * 1.4), 0, 5);
+      let os = clamp(Math.round(1.2 + (oppPow - myPow) * 0.08 + Math.random() * 1.4), 0, 5);
+      if (myPow > oppPow + 2 && ms <= os) ms = os + 1;
+      if (oppPow > myPow + 2 && os <= ms) os = ms + 1;
+
+      const won = ms > os, draw = ms === os;
+      const eloDelta = won ? 24 : draw ? 4 : -16;
+      const prize = won ? 4500 : draw ? 2000 : 800;
+
+      state.online.rating = Math.max(600, state.online.rating + eloDelta);
+      if (won) state.online.wins++; else if (draw) state.online.draws++; else state.online.losses++;
+      state.online.playedToday++;
+      state.player.money += prize;
+      saveState();
+      haptic(won ? 'success' : 'medium');
+
+      openModal(`
+        <div class="center stack" style="gap:12px;">
+          <div class="badge ${won ? 'badge-green' : draw ? 'badge-gold' : 'badge-rose'}" style="margin:0 auto;">
+            ${won ? '🏆 ПОБЕДА В PRO LEAGUE LIVE' : draw ? '🤝 НИЧЬЯ В PvP' : '❌ ПОРАЖЕНИЕ В PvP'}
+          </div>
+          <div style="font-size:28px;font-weight:900;">${ms} : ${os}</div>
+          <div class="small muted">Против <b>${escapeHtml(opp.name)}</b> (OVR ${opp.ovr} • ${tacticLabel(ot)})</div>
+          <div class="card small" style="padding:10px;">${tacText}</div>
+          <div class="grid-2">
+            <div class="card center" style="padding:8px;"><div class="xs muted">Рейтинг ELO</div><div class="bold" style="color:${eloDelta >= 0 ? '#34d399' : '#fb7185'};">${eloDelta >= 0 ? '+' : ''}${eloDelta} (${state.online.rating})</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Призовые</div><div class="bold" style="color:#fbbf24;">+${fmtMoney(prize)}</div></div>
+          </div>
+          <button onclick="closeModal(); syncOnlineProfile(false);" class="btn btn-primary">Обновить таблицу мира →</button>
+        </div>
+      `);
+      syncOnlineProfile(true);
+    }
+
+    /* =========================================================================
+       15. RENDERERS (ONBOARDING + 6 TABS)
+       ========================================================================= */
+    function getSortedTable(leagueId) {
+      const tbl = (state.tables[leagueId] || []).slice();
+      tbl.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+      return tbl;
+    }
+
+    function renderOnboarding() {
+      if (!onboard.name) onboard.name = tgUser.firstName || 'Артём Волков';
+      const curCountry = getCountry(onboard.countryId);
+
+      const progress = `
+        <div style="display:flex;gap:6px;margin-bottom:4px;">
+          ${[1, 2, 3, 4].map(s => `<div style="flex:1;height:5px;border-radius:99px;background:${s <= onboard.step ? '#34d399' : '#1e293b'};"></div>`).join('')}
+        </div>
+      `;
+
+      let body = '';
+      if (onboard.step === 1) {
+        body = `
+          <div class="card stack">
+            <div class="section-title" style="margin-bottom:2px;">
+              <span>1. Гражданство и сборная</span>
+              <span class="xs" style="color:#fbbf24;">${curCountry.flag} Вызов: OVR ${curCountry.callUpOvr}+</span>
+            </div>
+            <div class="grid-3" style="max-height:175px;overflow-y:auto;">
+              ${COUNTRIES.map(c => `
+                <button onclick="onboard.countryId='${c.id}'; render();" class="chip-btn ${onboard.countryId === c.id ? 'selected' : ''}">
+                  <div style="font-size:16px;">${c.flag}</div>
+                  <div class="xs bold truncate" style="margin-top:2px;">${c.name}</div>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="card stack">
+            <div class="section-title" style="margin-bottom:2px;"><span>Имя футболиста</span></div>
+            <div style="display:flex;gap:8px;">
+              <input id="ob-name-inp" class="text-input" maxlength="22" value="${escapeHtml(onboard.name)}"
+                     oninput="onboard.name=this.value" placeholder="Имя и фамилия..." />
+              <button id="ob-dice-btn" type="button" onclick="pickRandomName()" class="btn btn-gold btn-sm" style="white-space:nowrap;">
+                🎲 Случайное имя
+              </button>
+            </div>
+            <div class="xs muted">Генерирует реалистичное имя под страну ${curCountry.flag} ${curCountry.name}.</div>
+          </div>
+
+          <div class="card stack">
+            <div class="section-title" style="margin-bottom:2px;"><span>Позиция на поле</span></div>
+            <div class="grid-4">
+              ${Object.values(POSITIONS).map(p => `
+                <button onclick="onboard.pos='${p.code}'; render();" class="chip-btn ${onboard.pos === p.code ? 'selected' : ''}">
+                  <div style="font-size:16px;">${p.icon}</div>
+                  <div class="small bold" style="color:#fbbf24;">${p.code}</div>
+                  <div class="xs muted truncate">${p.name}</div>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <button onclick="setOnboardStep(2)" class="btn btn-primary">Далее: Выбор лиги →</button>
+        `;
+      } else if (onboard.step === 2) {
+        body = `
+          <div class="card stack">
+            <div class="section-title" style="margin-bottom:2px;"><span>2. Стартовая лига (Топ-5 + РПЛ)</span></div>
+            <div class="small muted">3 слабых клуба выбранной лиги предложат тебе первый профессиональный контракт.</div>
+            <div class="grid-2">
+              ${LEAGUES.map(lg => `
+                <button onclick="onboard.leagueId='${lg.id}'; render();" class="chip-btn ${onboard.leagueId === lg.id ? 'selected' : ''}" style="text-align:left;padding:12px;">
+                  <div style="font-size:24px;">${lg.flag}</div>
+                  <div class="bold" style="font-size:14px;margin-top:4px;">${lg.name}</div>
+                  <div class="xs muted">${lg.country}</div>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          <div class="grid-2">
+            <button onclick="setOnboardStep(1)" class="btn btn-sec">← Назад</button>
+            <button onclick="setOnboardStep(3)" class="btn btn-primary">Смотреть офферы →</button>
+          </div>
+        `;
+      } else if (onboard.step === 3) {
+        const lg = getLeague(onboard.leagueId);
+        body = `
+          <div class="card stack">
+            <div class="section-title" style="margin-bottom:2px;"><span>3. Офферы • ${lg.flag} ${lg.name}</span></div>
+            <div class="small muted">Выбери 1 из 3 слабых клубов лиги (стартовая ЗП 3 100 – 3 900 €):</div>
+            <div class="stack" style="gap:10px;margin-top:4px;">
+              ${onboard.offers.map(o => {
+                const c = getClub(o.clubId);
+                return `
+                  <div class="card" style="padding:12px;background:rgba(10,17,30,0.9);">
+                    <div class="row" style="margin-bottom:10px;">
+                      <div class="row-left">
+                        ${renderClubBadge(c, 42)}
+                        <div style="min-width:0;">
+                          <div class="bold truncate" style="font-size:14px;">${escapeHtml(c.name)}</div>
+                          <div class="xs muted">Сила: <b style="color:#fbbf24;">OVR ${c.ovr}</b> • ${o.role}</div>
+                        </div>
+                      </div>
+                      <div style="text-align:right;flex-shrink:0;">
+                        <div class="xs muted">Зарплата / тур</div>
+                        <div class="bold" style="color:#34d399;font-size:15px;">${fmtMoney(o.salary)}</div>
+                      </div>
+                    </div>
+                    <button onclick="chooseStarterOffer('${c.id}')" class="btn btn-primary btn-sm" style="width:100%;">Выбрать «${escapeHtml(c.name)}» →</button>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          <button onclick="setOnboardStep(2)" class="btn btn-sec">← Другая лига</button>
+        `;
+      } else {
+        const off = onboard.selectedOffer || onboard.offers[0] || buildStarterOffers(onboard.leagueId)[0];
+        const club = getClub(off.clubId);
+        const pos = POSITIONS[onboard.pos] || POSITIONS.ST;
+        const startOvr = calcOvr(pos.base, pos.code);
+
+        body = `
+          <div class="card card-highlight center stack" style="gap:12px;">
+            <div class="badge badge-green" style="margin:0 auto;">4. ДОБРО ПОЖАЛОВАТЬ В ПРОФИ</div>
+            <div style="margin:0 auto;">${renderClubBadge(club, 64)}</div>
+            <div style="font-size:21px;font-weight:900;">${escapeHtml((onboard.name || 'Футболист').trim())}</div>
+            <div class="small muted">${curCountry.flag} ${curCountry.name} • <b style="color:#fbbf24;">${pos.code}</b> (OVR ${startOvr})</div>
+            <div class="card stack small" style="text-align:left;padding:12px;background:rgba(6,11,20,0.75);">
+              <div class="row"><span class="muted">Клуб</span><b>${club.leagueFlag} ${escapeHtml(club.name)} (${club.leagueName})</b></div>
+              <div class="row"><span class="muted">Стартовая зарплата</span><b style="color:#34d399;">${fmtMoney(off.salary)} / тур</b></div>
+              <div class="row"><span class="muted">Доверие тренера</span><b style="color:#38bdf8;">${off.trust}%</b></div>
+              <div class="row"><span class="muted">Трансферы и контракты</span><b style="color:#fbbf24;">Откроются со 2-го сезона</b></div>
+            </div>
+            <button onclick="finishOnboarding()" class="btn btn-primary">✍️ Подписать и начать карьеру!</button>
+          </div>
+          <button onclick="setOnboardStep(3)" class="btn btn-sec">← Выбрать другой клуб</button>
+        `;
+      }
+
+      return `
+        <div class="main-content anim" style="padding-top:16px;">
+          <div class="center">
+            <div class="badge badge-green" style="margin-bottom:6px;">⚽ PRO CAREER SIMULATOR</div>
+            <div style="font-size:24px;font-weight:900;letter-spacing:0.03em;">TOP 5 ЛИГ + РПЛ</div>
+          </div>
+          ${progress}
+          ${body}
+        </div>
+      `;
+    }
+
+    function renderCareerTab() {
+      const p = state.player;
+      const club = getClub(p.clubId);
+      const nat = getCountry(p.countryId);
+      const ovr = calcOvr(p.stats, p.pos);
+      const tierCls = ovr >= 85 ? 'fc-elite' : ovr >= 75 ? 'fc-gold' : ovr >= 65 ? 'fc-silver' : 'fc-bronze';
+      const sq = getSquadStatus(p.energy);
+      const win = getWindowInfo();
+      const alreadyRenewed = win.open && state.lastRenewalWinKey === win.key;
+
+      const subNav = `
+        <div class="seg-tabs">
+          <button onclick="careerSubTab='profile'; render();" class="seg-btn ${careerSubTab === 'profile' ? 'active' : ''}">👤 Профиль</button>
+          <button onclick="careerSubTab='friends'; render();" class="seg-btn ${careerSubTab === 'friends' ? 'active' : ''}">🎁 Друзья +20к</button>
+        </div>
+      `;
+
+      if (careerSubTab === 'friends') {
+        const refLink = getReferralLink();
+        return `
+          ${subNav}
+          <div class="card card-gold stack" style="gap:10px;">
+            <div class="row">
+              <span class="badge badge-gold">🤝 ЧЕСТНАЯ РЕФЕРАЛКА</span>
+              <span class="bold" style="color:#34d399;">+${fmtMoney(CONFIG.REFERRAL_REWARD)}</span>
+            </div>
+            <div style="font-size:17px;font-weight:900;">Пригласи друга — получи 20 000 €</div>
+            <div class="small muted">Награда НЕ выдаётся за простой клик. Как только друг реально запустит бота по твоей ссылке, он запишется в базу Supabase — нажми кнопку проверки и забери деньги!</div>
+            <div class="grid-2">
+              <div class="card center" style="padding:10px;"><div class="xs muted">Подтверждено друзей</div><div style="font-size:20px;font-weight:900;color:#fbbf24;">${state.referrals.verifiedCount}</div></div>
+              <div class="card center" style="padding:10px;"><div class="xs muted">Заработано</div><div style="font-size:16px;font-weight:900;color:#34d399;">${fmtMoney(state.referrals.totalEarned)}</div></div>
+            </div>
+            <button onclick="shareReferralLink()" class="btn btn-primary">📨 Пригласить друга в Telegram</button>
+            <button onclick="copyTextSafe('${escapeHtml(refLink)}')" class="btn btn-sec">📋 Скопировать ссылку</button>
+            <button id="ref-check-btn" onclick="checkAndClaimReferrals()" class="btn btn-gold">🔍 Проверить друзей и забрать бонус</button>
+          </div>
+        `;
+      }
+
+      return `
+        ${subNav}
+
+        <!-- EA FC Style Player Card -->
+        <div class="fc-card ${tierCls} anim">
+          <div class="fc-shine"></div>
+          <div class="fc-top">
+            <div class="fc-left">
+              <div class="fc-ovr">${ovr}</div>
+              <div class="fc-pos">${p.pos}</div>
+              <div class="fc-icons">
+                <span style="font-size:20px;">${nat.flag}</span>
+                ${renderClubBadge(club, 28)}
+              </div>
+            </div>
+            <div class="fc-avatar">
+              ${renderPlayerSilhouette(club.color1, club.color2)}
+            </div>
+          </div>
+          <div class="fc-name-bar">
+            <div class="fc-name">${escapeHtml(p.name)}</div>
+            <div class="fc-clubline">${club.leagueFlag} ${escapeHtml(club.name)} • ${p.age} лет • ${fmtMoney(p.salary)}/тур</div>
+          </div>
+          <div class="fc-stats">
+            ${STAT_META.map(s => `
+              <div class="fc-stat">
+                <span class="fc-stat-val">${p.stats[s.key]}</span>
+                <span class="fc-stat-lbl">${s.ru}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Squad Status & Morale -->
+        <div class="card stack">
+          <div class="row">
+            <span class="bold small">Статус в составе:</span>
+            <span class="badge ${sq.cls}">${sq.label}</span>
+          </div>
+          <div class="xs muted">${sq.desc}</div>
+          <div class="grid-3" style="margin-top:4px;">
+            <div>
+              <div class="row xs"><span>⚡ Энергия</span><b>${p.energy}%</b></div>
+              <div class="bar-track" style="margin-top:4px;"><div class="bar-fill" style="width:${p.energy}%;background:${p.energy >= 50 ? '#34d399' : p.energy >= 25 ? '#fbbf24' : '#fb7185'};"></div></div>
+            </div>
+            <div>
+              <div class="row xs"><span>👔 Доверие</span><b>${p.coachTrust}%</b></div>
+              <div class="bar-track" style="margin-top:4px;"><div class="bar-fill" style="width:${p.coachTrust}%;background:#38bdf8;"></div></div>
+            </div>
+            <div>
+              <div class="row xs"><span>😊 Настр.</span><b>${p.happiness}%</b></div>
+              <div class="bar-track" style="margin-top:4px;"><div class="bar-fill" style="width:${p.happiness}%;background:#a855f7;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contract Renewal Window Card -->
+        <div class="card ${win.open ? 'card-highlight' : ''}">
+          <div class="section-title">
+            <span>✍️ Контракт с «${escapeHtml(club.name)}»</span>
+            <span class="badge ${win.open ? 'badge-green' : 'badge-slate'}">${win.open ? 'Открыто' : 'Закрыто'}</span>
+          </div>
+          <div class="small muted" style="margin-bottom:10px;">
+            Текущая ЗП: <b style="color:#34d399;">${fmtMoney(p.salary)} / тур</b>. ${win.open ? win.name : win.countdown}.
+          </div>
+          ${win.open
+            ? `<button onclick="renewContract()" ${alreadyRenewed ? 'disabled' : ''} class="btn btn-gold">${alreadyRenewed ? '✓ Переподписан в этом окне' : '✍️ Переподписать контракт (Повысить ЗП)'}</button>`
+            : `<button disabled class="btn btn-sec">🔒 ${escapeHtml(win.countdown)}</button>`
+          }
+        </div>
+
+        <!-- Career & National Team Stats -->
+        <div class="card stack">
+          <div class="section-title" style="margin-bottom:2px;"><span>📊 Статистика и Сборная</span><span class="xs muted">👥 ${fmtNum(p.fans)}</span></div>
+          <div class="grid-4">
+            <div class="card center" style="padding:8px;"><div class="xs muted">Матчи</div><div class="bold">${p.careerApps}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Голы</div><div class="bold" style="color:#34d399;">${p.careerGoals}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Ассисты</div><div class="bold" style="color:#38bdf8;">${p.careerAssists}</div></div>
+            <div class="card center" style="padding:8px;"><div class="xs muted">Трофеи</div><div class="bold" style="color:#fbbf24;">🏆 ${p.trophies}</div></div>
+          </div>
+          <div class="row small" style="padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.04);">
+            <span>${nat.flag} Сборная ${nat.name} (порог OVR ${nat.callUpOvr})</span>
+            <b>${p.intl.caps}м • ${p.intl.goals}г • 🏆${p.intl.trophies}</b>
+          </div>
+        </div>
+
+        <!-- Referral Banner -->
+        <button onclick="careerSubTab='friends'; render();" class="card card-gold row" style="text-align:left;padding:12px;">
+          <div>
+            <div class="bold" style="color:#fde68a;">🎁 Пригласи друга → +20 000 €</div>
+            <div class="xs muted">Честная проверка через Supabase</div>
+          </div>
+          <span style="font-size:18px;">→</span>
+        </button>
+
+        <button onclick="openResetConfirm()" class="btn btn-danger btn-sm" style="margin:4px auto 0;">🔄 Начать новую карьеру</button>
+      `;
+    }
+
+    function openResetConfirm() {
+      openModal(`
+        <div class="center stack" style="gap:12px;">
+          <div style="font-size:18px;font-weight:900;">Сбросить текущую карьеру?</div>
+          <div class="small muted">Весь локальный прогресс сезона и футболиста будет удалён.</div>
+          <div class="grid-2">
+            <button onclick="closeModal()" class="btn btn-sec">Отмена</button>
+            <button onclick="resetSaveHard()" class="btn btn-danger">Сбросить</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function renderTrainingTab() {
+      const p = state.player;
+      const adEnergyDone = state.adEnergyRound === state.round;
+      const adTrainDone = state.adTrainRound === state.round;
+
+      return `
+        <div class="card stack">
+          <div class="section-title" style="margin-bottom:2px;">
+            <span>🏋️ Тренировочная база</span>
+            <span class="badge badge-sky">Слоты: ${state.trainLeft}/2</span>
+          </div>
+          <div class="small muted">Прокачивай характеристики перед туром. Каждая тренировка тратит <b>18% ⚡</b>.</div>
+          <div class="grid-2" style="margin-top:4px;">
+            ${STAT_META.map(s => {
+              const val = p.stats[s.key];
+              const fee = 500 + Math.max(0, val - 60) * 65;
+              return `
+                <button onclick="trainStat('${s.key}')" ${state.trainLeft <= 0 || val >= 99 ? 'disabled' : ''} class="card" style="padding:10px;text-align:left;">
+                  <div class="row">
+                    <span class="bold">${s.ru}</span>
+                    <span class="bold" style="color:#34d399;font-size:16px;">${val}</span>
+                  </div>
+                  <div class="xs muted">${s.name}</div>
+                  <div class="xs" style="color:#fbbf24;margin-top:5px;">-18% ⚡ • ${fmtMoney(fee)}</div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <button onclick="restPlayer()" ${state.trainLeft <= 0 ? 'disabled' : ''} class="btn btn-sky">🛌 День отдыха (+35% ⚡ и +4% настр.)</button>
+        </div>
+
+        <div class="card card-gold stack">
+          <div class="section-title" style="margin-bottom:2px;"><span>🎬 Бонусы за рекламу (AdsGram)</span></div>
+          <button onclick="watchAdEnergy()" ${adEnergyDone ? 'disabled' : ''} class="btn btn-gold">
+            ${adEnergyDone ? '✓ Энергия восстановлена перед туром' : '🎬 Восстановить 100% энергии ⚡'}
+          </button>
+          <button onclick="watchAdSpecialTrain()" ${adTrainDone ? 'disabled' : ''} class="btn btn-purple">
+            ${adTrainDone ? '✓ Спец-тренировка пройдена' : '🎬 Бесплатная спец-тренировка (+1 OVR)'}
+          </button>
+        </div>
+      `;
+    }
+
+    function renderMatchTab() {
+      // Active Live Match View (2D SVG Pitch)
+      if (liveMatch) {
+        const lm = liveMatch;
+        const hg = lm.isHome ? lm.ms : lm.os;
+        const ag = lm.isHome ? lm.os : lm.ms;
+        return `
+          <div class="scoreboard anim">
+            <div class="sb-team">
+              ${renderClubBadge(lm.home, 38)}
+              <div class="xs bold truncate" style="width:100%;">${escapeHtml(lm.home.name)}</div>
+            </div>
+            <div class="center">
+              <div class="sb-score">${hg} : ${ag}</div>
+              <div class="sb-min">${lm.minute}' • ★ ${lm.rating.toFixed(1)}</div>
+            </div>
+            <div class="sb-team">
+              ${renderClubBadge(lm.away, 38)}
+              <div class="xs bold truncate" style="width:100%;">${escapeHtml(lm.away.name)}</div>
+            </div>
+          </div>
+
+          ${renderPitchSVG(lm.ballX, lm.ballY, lm.pulseColor)}
+
+          ${lm.awaitingChoice && lm.currentPrompt ? `
+            <div class="card card-gold stack anim">
+              <div class="bold" style="color:#fde68a;font-size:14px;">⚡ ${escapeHtml(lm.currentPrompt.title)}</div>
+              <div class="grid-2">
+                ${lm.currentPrompt.options.map((o, idx) => `
+                  <button onclick="pickMatchAction(${idx})" class="card" style="padding:10px;text-align:left;background:rgba(15,23,42,0.95);border-color:rgba(251,191,36,0.35);">
+                    <div class="bold" style="font-size:12px;">${o.label}</div>
+                    <div class="xs muted" style="margin-top:3px;">${o.desc}</div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="card center small muted">⚽ Идёт розыгрыш мяча...</div>
+          `}
+
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;"><span>📺 Текстовая трансляция</span></div>
+            <div class="match-log">
+              ${lm.log.map(l => `<div class="log-item ${l.cls}">${escapeHtml(l.t)}</div>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // Pre-match screen
+      const p = state.player;
+      const sq = getSquadStatus(p.energy);
+      const fix = getNextLeagueFixture();
+
+      if (state.pendingIntl) {
+        const nat = getCountry(p.countryId);
+        const opp = getCountry(state.pendingIntl.oppId);
+        return `
+          <div class="card card-gold center stack" style="gap:12px;">
+            <div class="badge badge-gold" style="margin:0 auto;">🌍 МЕЖДУНАРОДНАЯ ПАУЗА</div>
+            <div style="font-size:32px;">${nat.flag} 🆚 ${opp.flag}</div>
+            <div style="font-size:18px;font-weight:900;">${escapeHtml(state.pendingIntl.stage)}</div>
+            <div class="small muted">Сборная ${nat.name} против ${opp.name} (OVR ${opp.ovr})</div>
+            <button onclick="startInternationalMatch()" class="btn btn-gold">⚽ Выйти на поле за сборную</button>
+          </div>
+        `;
+      }
+
+      if (!fix || state.round >= 18) {
+        return `
+          <div class="card card-gold center stack" style="gap:12px;">
+            <div style="font-size:36px;">🏁</div>
+            <div style="font-size:18px;font-weight:900;">Все 18 туров сезона сыграны!</div>
+            <button onclick="openSeasonEndModal()" class="btn btn-primary">Подвести итоги Сезона ${state.season} →</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card card-highlight stack" style="gap:12px;">
+          <div class="row">
+            <span class="badge badge-green">⚽ СЕЗОН ${state.season} • ТУР ${state.round + 1}/18</span>
+            <span class="badge ${sq.cls}">${sq.label}</span>
+          </div>
+
+          <div class="scoreboard">
+            <div class="sb-team">
+              ${renderClubBadge(fix.home, 46)}
+              <div class="small bold truncate" style="width:100%;">${escapeHtml(fix.home.name)}</div>
+              <div class="xs muted">OVR ${fix.home.ovr}</div>
+            </div>
+            <div class="center">
+              <div style="font-size:18px;font-weight:900;color:#fbbf24;">VS</div>
+              <div class="xs muted">${fix.isHome ? 'Дома' : 'В гостях'}</div>
+            </div>
+            <div class="sb-team">
+              ${renderClubBadge(fix.away, 46)}
+              <div class="small bold truncate" style="width:100%;">${escapeHtml(fix.away.name)}</div>
+              <div class="xs muted">OVR ${fix.away.ovr}</div>
+            </div>
+          </div>
+
+          ${renderPitchSVG(160, 90, '#34d399')}
+
+          <div class="small muted center">${sq.desc}</div>
+          <button onclick="startLeagueMatch()" class="btn btn-primary">
+            ${sq.key === 'reserves' ? '👀 Смотреть матч с трибуны (Резерв)' : '⚽ Начать матч (Тур ' + (state.round + 1) + ')'}
+          </button>
+        </div>
+
+        <div class="card small muted">
+          💡 После каждого <b>3-го тура</b> (3, 6, 9, 12, 15, 18) тебя ждёт флеш-интервью прессе, а после 6, 12 и 18 туров — возможный вызов в сборную!
+        </div>
+      `;
+    }
+
+    function renderLifestyleTab() {
+      const p = state.player;
+      const passRec = getPassiveEnergyRecovery();
+      return `
+        <div class="card card-sky row">
+          <div>
+            <div class="bold">💎 Твой стиль жизни</div>
+            <div class="xs muted">Пассивное восстановление после туров: <b style="color:#34d399;">+${passRec}% ⚡</b></div>
+          </div>
+          <span class="badge badge-sky">${state.ownedItems.length}/${LIFESTYLE_ITEMS.length}</span>
+        </div>
+
+        <div class="stack">
+          ${LIFESTYLE_ITEMS.map(it => {
+            const owned = state.ownedItems.includes(it.id);
+            const canBuy = !owned && p.money >= it.cost;
+            return `
+              <div class="card row">
+                <div class="row-left">
+                  <div style="font-size:28px;">${it.icon}</div>
+                  <div style="min-width:0;">
+                    <div class="bold truncate">${it.name}</div>
+                    <div class="xs muted">${it.desc}</div>
+                  </div>
+                </div>
+                ${owned
+                  ? '<span class="badge badge-green">Куплено</span>'
+                  : `<button onclick="buyLifestyleItem('${it.id}')" ${canBuy ? '' : 'disabled'} class="btn btn-gold btn-sm">${fmtMoney(it.cost)}</button>`
+                }
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderLeaguesTab() {
+      const win = getWindowInfo();
+      if (win.open) ensureTransferOffersForWindow();
+      const tbl = getSortedTable(leagueViewId);
+      const alreadyTransferred = win.open && state.lastTransferWinKey === win.key;
+
+      return `
+        <!-- Transfer Window Panel -->
+        <div class="card ${win.open ? 'card-gold' : ''} stack">
+          <div class="section-title" style="margin-bottom:2px;">
+            <span>✈️ Трансферное окно</span>
+            <span class="badge ${win.open ? 'badge-gold' : 'badge-slate'}">${win.open ? win.name : 'Закрыто'}</span>
+          </div>
+          ${!win.open ? `
+            <div class="small muted">🔒 ${escapeHtml(win.countdown)}. В 1-м сезоне переходы закрыты, далее 2 окна за сезон: туры 1–2 и туры 9–10.</div>
+          ` : alreadyTransferred ? `
+            <div class="small" style="color:#34d399;">✓ Вы уже совершили трансфер в этом окне. Следующее окно откроется позже.</div>
+          ` : `
+            <div class="xs muted">Доступные предложения от клубов Топ-5 + РПЛ (1 переход за окно):</div>
+            <div class="stack">
+              ${state.transferOffers.map(o => {
+                const c = getClub(o.clubId);
+                return `
+                  <div class="card row" style="padding:10px;background:rgba(10,17,30,0.9);">
+                    <div class="row-left">
+                      ${renderClubBadge(c, 34)}
+                      <div style="min-width:0;">
+                        <div class="bold small truncate">${c.leagueFlag} ${escapeHtml(c.name)}</div>
+                        <div class="xs muted">OVR ${c.ovr} • ЗП ${fmtMoney(o.salary)} • Бонус +${fmtMoney(o.bonus)}</div>
+                      </div>
+                    </div>
+                    <button onclick="acceptTransfer('${c.id}')" class="btn btn-primary btn-sm">Перейти</button>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- League Selector & Standings -->
+        <div class="league-scroll">
+          ${LEAGUES.map(lg => `
+            <button onclick="leagueViewId='${lg.id}'; render();" class="league-pill ${leagueViewId === lg.id ? 'active' : ''}">
+              ${lg.flag} ${lg.name}
+            </button>
+          `).join('')}
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <span>🏆 Таблица • ${getLeague(leagueViewId).name}</span>
+            <span class="xs muted">Тур ${state.round}/18</span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Клуб</th><th>И</th><th>В</th><th>Н</th><th>П</th><th>РМ</th><th>О</th></tr>
+              </thead>
+              <tbody>
+                ${tbl.map((r, i) => {
+                  const c = getClub(r.clubId);
+                  const isMe = c.id === state.player.clubId;
+                  return `
+                    <tr class="${isMe ? 'me-row' : ''}">
+                      <td class="bold">${i + 1}</td>
+                      <td><div class="row-left" style="gap:6px;">${renderClubBadge(c, 20)}<span class="truncate ${isMe ? 'bold' : ''}">${escapeHtml(c.name)}</span></div></td>
+                      <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
+                      <td>${r.gf - r.ga}</td>
+                      <td class="bold" style="color:#34d399;">${r.pts}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderOnlineTab() {
+      const daily = getOnlineDailyInfo();
+      const opp = onlineState.selectedOpp || SPARRING_BOTS[0];
+      const scouted = onlineState.scoutedId === opp.tg_id;
+      const myRank = onlineState.leaderboard.findIndex(r => r.tg_id === tgUser.id) + 1;
+
+      const statusBanner = onlineState.status === 'ok'
+        ? `<div class="badge badge-green">🟢 Облако Supabase: синхронизировано (${onlineState.leaderboard.length} игр.)</div>`
+        : onlineState.status === 'syncing'
+        ? `<div class="badge badge-sky">⏳ Синхронизация с Supabase...</div>`
+        : onlineState.status === 'err'
+        ? `<div class="card card-rose xs">🔴 Ошибка облака: ${escapeHtml(onlineState.errorText)}</div>`
+        : `<div class="badge badge-slate">⚪ Нажми «Обновить» для связи с облаком</div>`;
+
+      return `
+        <div class="row">
+          <div>
+            <div style="font-size:18px;font-weight:900;">🌍 PRO LEAGUE LIVE</div>
+            <div class="xs muted">ELO: <b style="color:#fbbf24;">${state.online.rating}</b> • ${state.online.wins}В-${state.online.draws}Н-${state.online.losses}П ${myRank > 0 ? '• #' + myRank + ' в мире' : ''}</div>
+          </div>
+          <button onclick="syncOnlineProfile(false)" class="btn btn-sec btn-sm">🔄 Обновить</button>
+        </div>
+
+        ${statusBanner}
+
+        <div class="seg-tabs">
+          <button onclick="onlineSubTab='pvp'; render();" class="seg-btn ${onlineSubTab === 'pvp' ? 'active' : ''}">⚔️ PvP Матч</button>
+          <button onclick="onlineSubTab='top'; render();" class="seg-btn ${onlineSubTab === 'top' ? 'active' : ''}">🏆 Топ-50 мира</button>
+        </div>
+
+        ${onlineSubTab === 'pvp' ? `
+          <div class="card card-highlight row">
+            <div>
+              <div class="bold">${daily.canPlay ? '⚔️ Ежедневный PvP-тур открыт!' : '⏳ Лимит на сегодня исчерпан'}</div>
+              <div class="xs muted">${daily.canPlay ? '1 реальный день = 1 рейтинговый матч' : 'Обновление через ' + getMidnightCountdown()}</div>
+            </div>
+            <div style="font-size:18px;font-weight:900;color:#34d399;">${daily.played}/${daily.max}</div>
+          </div>
+
+          <div class="card stack">
+            <div class="row">
+              <span class="bold small">Соперник на матч</span>
+              <button onclick="rerollOnlineOpponent()" class="xs bold" style="color:#38bdf8;">🔄 Другой соперник</button>
+            </div>
+            <div class="card row" style="padding:12px;background:rgba(10,17,30,0.9);">
+              <div style="min-width:0;">
+                <div class="bold truncate">${escapeHtml(opp.name)} <span class="xs" style="color:#fbbf24;">${escapeHtml(opp.position || 'ST')}</span></div>
+                <div class="xs muted">${escapeHtml(opp.club || 'Клуб')} • 🏆 ${opp.rating || 1000} ELO</div>
+                <div class="xs" style="margin-top:4px;">Тактика: <b>${scouted ? tacticLabel(opp.tactic) : '❓ Скрыта'}</b></div>
+              </div>
+              <div class="center">
+                <div class="xs muted">OVR</div>
+                <div style="font-size:24px;font-weight:900;color:#fbbf24;">${opp.ovr || 68}</div>
+              </div>
+            </div>
+            ${!scouted ? `<button onclick="watchAdScout()" class="btn btn-purple btn-sm" style="width:100%;">🕵️ Разведка скаута — узнать тактику (AdsGram)</button>` : ''}
+          </div>
+
+          <div class="card stack">
+            <div class="bold small">Выбери тактику (Камень-ножницы-бумага ±12%):</div>
+            <div class="grid-3">
+              ${[
+                { id: 'press',   lbl: '🔥 Прессинг',  sub: 'бьёт Тики-таку' },
+                { id: 'counter', lbl: '⚡ Контра',    sub: 'бьёт Прессинг' },
+                { id: 'tiki',    lbl: '🎯 Тики-така', sub: 'бьёт Контру' }
+              ].map(t => `
+                <button onclick="onlineState.myTactic='${t.id}'; render();" class="chip-btn ${onlineState.myTactic === t.id ? 'selected' : ''}">
+                  <div class="xs bold">${t.lbl}</div>
+                  <div style="font-size:9px;color:#94a3b8;margin-top:2px;">${t.sub}</div>
+                </button>
+              `).join('')}
+            </div>
+            <button onclick="playOnlinePvP()" ${daily.canPlay ? '' : 'disabled'} class="btn btn-primary">
+              ${daily.canPlay ? '⚔️ Сыграть рейтинговый PvP-матч' : '⏳ Новый тур через ' + getMidnightCountdown()}
+            </button>
+            ${!daily.canPlay && state.online.extraAdDay !== todayKey()
+              ? `<button onclick="watchAdExtraPvP()" class="btn btn-gold">🎬 +1 доп. PvP-матч сегодня (AdsGram)</button>`
+              : ''
+            }
+          </div>
+        ` : `
+          <div class="card">
+            <div class="section-title"><span>🏆 Глобальный Топ-50 мира</span><span class="xs muted">Supabase Live</span></div>
+            ${onlineState.leaderboard.length === 0 ? `
+              <div class="center small muted" style="padding:20px 0;">Таблица загружается или пока пуста. Нажми «Обновить».</div>
+            ` : `
+              <div class="tbl-wrap">
+                <table>
+                  <thead><tr><th>#</th><th>Игрок</th><th>OVR</th><th>В-Н-П</th><th>ELO</th></tr></thead>
+                  <tbody>
+                    ${onlineState.leaderboard.map((r, idx) => {
+                      const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
+                      const isMe = r.tg_id === tgUser.id;
+                      return `
+                        <tr class="${isMe ? 'me-row' : ''}">
+                          <td class="bold">${medal}</td>
+                          <td>
+                            <div class="bold truncate" style="max-width:135px;">${escapeHtml(r.name)}</div>
+                            <div class="xs muted truncate" style="max-width:135px;">${escapeHtml(r.club || '')} • ${escapeHtml(r.position || '')}</div>
+                          </td>
+                          <td class="bold" style="color:#fbbf24;">${r.ovr}</td>
+                          <td class="xs">${r.wins || 0}-${r.draws || 0}-${r.losses || 0}</td>
+                          <td class="bold" style="color:#34d399;">${r.rating}</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        `}
+      `;
+    }
+
+    function setTab(tab) {
+      if (liveMatch && tab !== 'match') {
+        showToast('Сначала заверши текущий матч!', 'error');
+        return;
+      }
+      activeTab = tab;
+      haptic('light');
+      if (tab === 'online' && (onlineState.status === 'idle' || Date.now() - onlineState.lastSyncedAt > 45000)) {
+        syncOnlineProfile(false);
+        return;
+      }
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function render() {
+      try {
+        const app = document.getElementById('app');
+        if (!app) return;
+
+        if (!state) {
+          app.innerHTML = renderOnboarding();
+          return;
+        }
+
+        const p = state.player;
+        const club = getClub(p.clubId);
+        const eCls = p.energy >= 50 ? 'pill-energy-hi' : p.energy >= 25 ? 'pill-energy-md' : 'pill-energy-lo';
+        const pvpCanPlay = getOnlineDailyInfo().canPlay;
+
+        let content = '';
+        if (activeTab === 'career') content = renderCareerTab();
+        else if (activeTab === 'train') content = renderTrainingTab();
+        else if (activeTab === 'match') content = renderMatchTab();
+        else if (activeTab === 'life') content = renderLifestyleTab();
+        else if (activeTab === 'leagues') content = renderLeaguesTab();
+        else if (activeTab === 'online') content = renderOnlineTab();
+
+        app.innerHTML = `
+          <header class="hud">
+            <div class="hud-club">
+              ${renderClubBadge(club, 32)}
+              <div class="hud-club-meta">
+                <div class="hud-club-name">${escapeHtml(club.name)}</div>
+                <div class="hud-sub">Сезон ${state.season} • Тур ${Math.min(18, state.round + 1)}/18</div>
+              </div>
+            </div>
+            <div class="hud-pills">
+              <div class="pill ${eCls}">⚡ ${p.energy}%</div>
+              <div class="pill pill-money">${fmtMoney(p.money)}</div>
+            </div>
+          </header>
+
+          <main class="main-content anim">${content}</main>
+
+          <nav class="bottom-nav">
+            <button onclick="setTab('career')"  class="nav-btn ${activeTab === 'career'  ? 'active' : ''}"><span class="ico">👤</span><span>Карьера</span></button>
+            <button onclick="setTab('train')"   class="nav-btn ${activeTab === 'train'   ? 'active' : ''}"><span class="ico">🏋️</span><span>Тренир.</span></button>
+            <button onclick="setTab('match')"   class="nav-btn ${activeTab === 'match'   ? 'active' : ''}"><span class="ico">⚽</span><span>Матч</span></button>
+            <button onclick="setTab('life')"    class="nav-btn ${activeTab === 'life'    ? 'active' : ''}"><span class="ico">💎</span><span>Лайфстайл</span></button>
+            <button onclick="setTab('leagues')" class="nav-btn ${activeTab === 'leagues' ? 'active' : ''}"><span class="ico">🏆</span><span>Лиги</span></button>
+            <button onclick="setTab('online')"  class="nav-btn ${activeTab === 'online'  ? 'active' : ''}">
+              <span class="ico">🌍</span><span>Онлайн</span>
+              ${pvpCanPlay ? '<span class="nav-dot"></span>' : ''}
+            </button>
+          </nav>
+        `;
+      } catch (err) {
+        const app = document.getElementById('app');
+        if (app) {
+          app.innerHTML = '<div style="padding:24px;text-align:center;"><p style="color:#fb7185;">Ошибка рендера: ' + escapeHtml(err.message) + '</p><button onclick="resetSaveHard()" class="btn btn-primary" style="margin-top:12px;">Перезапустить</button></div>';
+        }
+      }
+    }
+
+    /* =========================================================================
+       16. SAFE INITIALIZATION ON LOAD
+       ========================================================================= */
+    function bootApp() {
+      try {
+        initTelegram();
+        state = loadState();
+        if (state) {
+          leagueViewId = state.player.leagueId || 'rpl';
+        }
+        render();
+        registerIncomingReferralIfAny();
+      } catch (e) {
+        render();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootApp);
+    } else {
+      bootApp();
+    }
+  </script>
+</body>
+</html>
