@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PRO CAREER: TOP 5 — Футбольный симулятор</title>
+  <script async src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script async src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #060913; --card: #101726; --green: #10b981; --gold: #f59e0b; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; background: #02040a; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
+    .font-sport { font-family: 'Oswald', sans-serif; letter-spacing: 0.02em; }
+    #app-shell { max-width: 480px; margin: 0 auto; min-height: 100vh; background: radial-gradient(circle at top, #122442 0%, var(--bg) 52%); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 60px rgba(0,0,0,0.85); }
+    .glass { background: rgba(16,23,38,0.86); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
+    .fut-card { position: relative; border-radius: 20px; padding: 16px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.18); box-shadow: 0 14px 36px rgba(0,0,0,0.55); }
+    .fut-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 82% 8%, rgba(255,255,255,0.18) 0%, transparent 55%); pointer-events: none; }
+    .fut-bronze { background: linear-gradient(145deg, #5e3b22, #3d2413 50%, #211208); border-color: rgba(217,152,95,0.5); }
+    .fut-silver { background: linear-gradient(145deg, #4b5a70, #273244 50%, #141b26); border-color: rgba(203,213,225,0.5); }
+    .fut-gold { background: linear-gradient(145deg, #8a6013, #523809 50%, #241804); border-color: rgba(251,191,36,0.65); }
+    .fut-hero { background: linear-gradient(145deg, #4c1d95, #1e1b4b 50%, #7c2d12); border-color: rgba(192,132,252,0.75); }
+    .fut-toty { background: linear-gradient(145deg, #1d4ed8, #0f172a 48%, #047857); border-color: rgba(52,211,153,0.85); box-shadow: 0 14px 40px rgba(16,185,129,0.3); }
+    .btn-primary { background: linear-gradient(135deg, #10b981, #059669); color: #02140d; font-weight: 800; border-radius: 14px; transition: transform 0.12s; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #1c1002; font-weight: 800; border-radius: 14px; transition: transform 0.12s; }
+    .btn-gold:active { transform: scale(0.97); }
+    .btn-ad { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-weight: 700; border-radius: 14px; transition: transform 0.12s; }
+    .btn-ad:active { transform: scale(0.97); }
+    .btn-sec { background: rgba(30,41,59,0.9); color: #e2e8f0; border: 1px solid rgba(148,163,184,0.2); font-weight: 600; border-radius: 14px; transition: transform 0.12s; }
+    .btn-sec:active { transform: scale(0.97); }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: rgba(8,12,22,0.96); backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,0.08); z-index: 40; padding-bottom: env(safe-area-inset-bottom, 6px); }
+    .nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px; color: #64748b; font-size: 9px; font-weight: 700; position: relative; }
+    .nav-btn.active { color: #34d399; }
+    .nav-btn.active::after { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: #10b981; border-radius: 0 0 4px 4px; }
+    .goal-net { background: linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(180deg, #064e3b, #022c22); border: 5px solid #f8fafc; border-bottom: 0; border-radius: 10px 10px 0 0; }
+    @keyframes pulseDot { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.6; } }
+    .online-dot { animation: pulseDot 1.5s infinite; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .anim { animation: fadeUp 0.2s ease-out; }
+  </style>
+</head>
+<body>
+  <div id="error-banner" class="hidden fixed top-0 left-0 right-0 z-[200] bg-rose-700 text-white text-xs p-3 font-mono break-all"></div>
+  <div id="app-shell">
+    <div id="toast-box" class="fixed top-3 left-1/2 -translate-x-1/2 z-[120] pointer-events-none w-[92%] max-w-[440px] flex flex-col gap-1.5 items-center"></div>
+    <div id="root" class="flex-1 flex flex-col"></div>
+    <div id="modal-layer" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3"></div>
+    <div id="ad-layer" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/92 backdrop-blur-md p-4"></div>
+  </div>
+
+  <script>
+    window.onerror = function(msg, src, line, col) {
+      var b = document.getElementById('error-banner');
+      if (b) {
+        b.classList.remove('hidden');
+        b.textContent = 'Ошибка: ' + msg + ' (строка ' + line + ':' + col + ')';
+      }
+      return false;
+    };
+
+    const CONFIG = {
+      BOT_USERNAME: 'BooomBer_bot',
+      APP_SHORT_NAME: '',
+      ADSGRAM_BLOCK_ID: '60696',
+      REFERRAL_REWARD: 20000,
+      SUPABASE_URL: 'https://qarxtuqfhyjzdddpjjlj.supabase.co',
+      SUPABASE_ANON_KEY: 'sb_publishable_IEkcSO4AnZfsbnhRBXzABg_jVdNDEfh'
+    };
+
+    const SAVE_KEY = 'pro_career_top5_v3';
+    let tgUser = { id: 'demo_1001', firstName: 'Игрок' };
+
+    function initTelegram() {
+      try {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg) return;
+        tg.ready();
+        tg.expand();
+        if (tg.setHeaderColor) tg.setHeaderColor('#060913');
+        if (tg.setBackgroundColor) tg.setBackgroundColor('#060913');
+        const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+        if (u) {
+          tgUser = {
+            id: String(u.id || 'demo_1001'),
+            firstName: [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || 'Игрок'
+          };
+        }
+      } catch (_) {}
+    }
+
+    function haptic(type = 'light') {
+      try {
+        const hf = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback;
+        if (!hf) return;
+        if (type === 'success' || type === 'error' || type === 'warning') hf.notificationOccurred(type);
+        else hf.impactOccurred(type);
+      } catch (_) {}
+    }
+
+    function showToast(msg, type = 'info') {
+      const box = document.getElementById('toast-box');
+      if (!box) return;
+      const cls = {
+        success: 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200',
+        error: 'bg-rose-950/95 border-rose-500/60 text-rose-200',
+        gold: 'bg-amber-950/95 border-amber-400/70 text-amber-200',
+        info: 'bg-slate-900/95 border-slate-600/60 text-slate-100'
+      }[type] || 'bg-slate-900/95 border-slate-600/60 text-slate-100';
+      const el = document.createElement('div');
+      el.className = `px-4 py-2 rounded-xl border text-xs font-semibold shadow-xl text-center anim ${cls}`;
+      el.textContent = msg;
+      box.appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.25s'; setTimeout(() => el.remove(), 260); }, 2300);
+    }
+
+    function copySafe(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (_) { return false; }
+    }
+
+    /* ================= ADSGRAM + DEMO PLAYER ================= */
+    let demoAdTimer = null;
+    async function showRewardedAd(rewardType, onReward) {
+      haptic('light');
+      const hasReal = Boolean(CONFIG.ADSGRAM_BLOCK_ID && window.Adsgram && typeof window.Adsgram.init === 'function');
+      if (hasReal) {
+        try {
+          const ctrl = window.Adsgram.init({ blockId: CONFIG.ADSGRAM_BLOCK_ID.trim() });
+          await ctrl.show();
+          haptic('success');
+          if (typeof onReward === 'function') onReward();
+          return;
+        } catch (_) {
+          // Если тест вне Telegram или реклама не загрузилась — падаем в демо-плеер только если нет Telegram WebApp
+          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+            showToast('Реклама не досмотрена или временно недоступна.', 'error');
+            return;
+          }
+        }
+      }
+      const titles = {
+        double_salary: 'Удвоить зарплату за матч (x2)',
+        free_training: '+1 бесплатная тренировка',
+        heal_injury: 'Ускорить лечение (-1 тур)',
+        refresh_offers: 'Обновить трансферные офферы',
+        scout_opponent: 'Разведка скаута (тактика соперника)',
+        extra_pvp_match: '+1 доп. PvP-матч сегодня'
+      };
+      const layer = document.getElementById('ad-layer');
+      let sec = 5;
+      const draw = () => {
+        layer.innerHTML = `
+          <div class="w-full max-w-[380px] glass p-5 border-indigo-400/50 text-center anim">
+            <div class="text-[10px] font-bold uppercase text-indigo-300 mb-2">🎬 AdsGram Demo (5 сек)</div>
+            <div class="h-28 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 border border-white/10 flex flex-col items-center justify-center p-3">
+              <div class="text-3xl mb-1">📺</div>
+              <div class="text-xs font-bold text-white">${titles[rewardType] || 'Награда'}</div>
+            </div>
+            <div class="mt-3 text-xs font-bold text-indigo-300">${sec > 0 ? 'Осталось ' + sec + ' сек...' : 'Награда готова!'}</div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5">
+              <div class="h-full bg-indigo-500 transition-all duration-1000" style="width:${((5 - sec) / 5) * 100}%"></div>
+            </div>
+            <div class="mt-4">
+              ${sec > 0
+                ? `<button onclick="closeDemoAd()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold">Закрыть без награды</button>`
+                : `<button id="ad-claim-btn" class="btn-primary w-full py-3 text-sm">🎁 Забрать награду</button>`}
+            </div>
+          </div>`;
+        if (sec <= 0) {
+          const btn = document.getElementById('ad-claim-btn');
+          if (btn) btn.onclick = () => { closeDemoAd(); haptic('success'); if (typeof onReward === 'function') onReward(); };
+        }
+      };
+      layer.classList.remove('hidden');
+      layer.classList.add('flex');
+      draw();
+      clearInterval(demoAdTimer);
+      demoAdTimer = setInterval(() => { sec--; draw(); if (sec <= 0) clearInterval(demoAdTimer); }, 1000);
+    }
+    function closeDemoAd() {
+      clearInterval(demoAdTimer);
+      const l = document.getElementById('ad-layer');
+      l.classList.add('hidden'); l.classList.remove('flex'); l.innerHTML = '';
+    }
+
+    /* ================= STATIC GAME DATA ================= */
+    const LEAGUES = [
+      { id: 'epl', name: 'АПЛ', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', prestige: 1.15, clubs: [
+        { id: 'mci', name: 'Манчестер Сити', short: 'MCI', ovr: 90, c1: '#6CABDD', c2: '#1C2C5B', tier: 5 },
+        { id: 'ars', name: 'Арсенал', short: 'ARS', ovr: 88, c1: '#EF0107', c2: '#FFFFFF', tier: 5 },
+        { id: 'liv', name: 'Ливерпуль', short: 'LIV', ovr: 88, c1: '#C8102E', c2: '#F6EB61', tier: 5 },
+        { id: 'che', name: 'Челси', short: 'CHE', ovr: 84, c1: '#034694', c2: '#FFFFFF', tier: 4 },
+        { id: 'mun', name: 'Ман Юнайтед', short: 'MUN', ovr: 83, c1: '#DA291C', c2: '#FBE122', tier: 4 },
+        { id: 'tot', name: 'Тоттенхэм', short: 'TOT', ovr: 82, c1: '#132257', c2: '#FFFFFF', tier: 4 },
+        { id: 'new', name: 'Ньюкасл', short: 'NEW', ovr: 80, c1: '#241F20', c2: '#FFFFFF', tier: 3 },
+        { id: 'avl', name: 'Астон Вилла', short: 'AVL', ovr: 79, c1: '#670E36', c2: '#95BFE5', tier: 3 },
+        { id: 'bha', name: 'Брайтон', short: 'BHA', ovr: 75, c1: '#0057B8', c2: '#FFCD00', tier: 2 },
+        { id: 'wol', name: 'Вулверхэмптон', short: 'WOL', ovr: 70, c1: '#FDB913', c2: '#231F20', tier: 1 }
+      ]},
+      { id: 'laliga', name: 'Ла Лига', flag: '🇪🇸', prestige: 1.12, clubs: [
+        { id: 'rma', name: 'Реал Мадрид', short: 'RMA', ovr: 90, c1: '#FFFFFF', c2: '#FEBE10', tier: 5 },
+        { id: 'bar', name: 'Барселона', short: 'BAR', ovr: 88, c1: '#A50044', c2: '#004D98', tier: 5 },
+        { id: 'atm', name: 'Атлетико', short: 'ATM', ovr: 85, c1: '#CB3524', c2: '#272E61', tier: 4 },
+        { id: 'ath', name: 'Атлетик', short: 'ATH', ovr: 80, c1: '#EE2523', c2: '#FFFFFF', tier: 3 },
+        { id: 'rso', name: 'Реал Сосьедад', short: 'RSO', ovr: 79, c1: '#0067B1', c2: '#FFFFFF', tier: 3 },
+        { id: 'vil', name: 'Вильярреал', short: 'VIL', ovr: 78, c1: '#FFE667', c2: '#005187', tier: 3 },
+        { id: 'bet', name: 'Бетис', short: 'BET', ovr: 77, c1: '#0BB363', c2: '#FFFFFF', tier: 2 },
+        { id: 'sev', name: 'Севилья', short: 'SEV', ovr: 75, c1: '#D4002A', c2: '#FFFFFF', tier: 2 },
+        { id: 'val', name: 'Валенсия', short: 'VAL', ovr: 72, c1: '#EE7500', c2: '#111111', tier: 2 },
+        { id: 'get', name: 'Хетафе', short: 'GET', ovr: 69, c1: '#005999', c2: '#FFFFFF', tier: 1 }
+      ]},
+      { id: 'seriea', name: 'Серия А', flag: '🇮🇹', prestige: 1.06, clubs: [
+        { id: 'int', name: 'Интер', short: 'INT', ovr: 88, c1: '#010E80', c2: '#000000', tier: 5 },
+        { id: 'nap', name: 'Наполи', short: 'NAP', ovr: 85, c1: '#12A0D7', c2: '#FFFFFF', tier: 4 },
+        { id: 'mil', name: 'Милан', short: 'MIL', ovr: 84, c1: '#FB090B', c2: '#000000', tier: 4 },
+        { id: 'juv', name: 'Ювентус', short: 'JUV', ovr: 84, c1: '#111111', c2: '#FFFFFF', tier: 4 },
+        { id: 'ata', name: 'Аталанта', short: 'ATA', ovr: 83, c1: '#1E71B8', c2: '#000000', tier: 4 },
+        { id: 'rom', name: 'Рома', short: 'ROM', ovr: 80, c1: '#8E1F2F', c2: '#F0BC42', tier: 3 },
+        { id: 'laz', name: 'Лацио', short: 'LAZ', ovr: 79, c1: '#87D8F7', c2: '#FFFFFF', tier: 3 },
+        { id: 'fio', name: 'Фиорентина', short: 'FIO', ovr: 77, c1: '#482E92', c2: '#FFFFFF', tier: 2 },
+        { id: 'bol', name: 'Болонья', short: 'BOL', ovr: 75, c1: '#9F1F33', c2: '#1A2F48', tier: 2 },
+        { id: 'lec', name: 'Лечче', short: 'LEC', ovr: 68, c1: '#F7D117', c2: '#D52B1E', tier: 1 }
+      ]},
+      { id: 'bundes', name: 'Бундеслига', flag: '🇩🇪', prestige: 1.08, clubs: [
+        { id: 'bay', name: 'Бавария', short: 'BAY', ovr: 89, c1: '#DC052D', c2: '#0066B2', tier: 5 },
+        { id: 'lev', name: 'Байер', short: 'LEV', ovr: 86, c1: '#E32221', c2: '#111111', tier: 4 },
+        { id: 'bvb', name: 'Боруссия Д', short: 'BVB', ovr: 84, c1: '#FDE100', c2: '#000000', tier: 4 },
+        { id: 'rbl', name: 'РБ Лейпциг', short: 'RBL', ovr: 83, c1: '#DD0741', c2: '#FFFFFF', tier: 4 },
+        { id: 'stu', name: 'Штутгарт', short: 'STU', ovr: 80, c1: '#E32219', c2: '#FFFFFF', tier: 3 },
+        { id: 'sge', name: 'Айнтрахт', short: 'SGE', ovr: 79, c1: '#E1000F', c2: '#111111', tier: 3 },
+        { id: 'fre', name: 'Фрайбург', short: 'FRE', ovr: 76, c1: '#D71920', c2: '#111111', tier: 2 },
+        { id: 'wob', name: 'Вольфсбург', short: 'WOB', ovr: 75, c1: '#65B32E', c2: '#FFFFFF', tier: 2 },
+        { id: 'wer', name: 'Вердер', short: 'WER', ovr: 72, c1: '#1D9053', c2: '#FFFFFF', tier: 2 },
+        { id: 'boc', name: 'Бохум', short: 'BOC', ovr: 67, c1: '#005CA9', c2: '#FFFFFF', tier: 1 }
+      ]},
+      { id: 'ligue1', name: 'Лига 1', flag: '🇫🇷', prestige: 1.0, clubs: [
+        { id: 'psg', name: 'ПСЖ', short: 'PSG', ovr: 89, c1: '#004170', c2: '#DA291C', tier: 5 },
+        { id: 'mon', name: 'Монако', short: 'MON', ovr: 82, c1: '#E51B22', c2: '#FFFFFF', tier: 4 },
+        { id: 'mar', name: 'Марсель', short: 'OM', ovr: 81, c1: '#2FAEE0', c2: '#FFFFFF', tier: 3 },
+        { id: 'lil', name: 'Лилль', short: 'LIL', ovr: 80, c1: '#E01E13', c2: '#242B5E', tier: 3 },
+        { id: 'lyo', name: 'Лион', short: 'OL', ovr: 79, c1: '#14387F', c2: '#DA291C', tier: 3 },
+        { id: 'nic', name: 'Ницца', short: 'NIC', ovr: 78, c1: '#CC0000', c2: '#111111', tier: 3 },
+        { id: 'len', name: 'Ланс', short: 'LEN', ovr: 76, c1: '#EC1C24', c2: '#FFF200', tier: 2 },
+        { id: 'ren', name: 'Ренн', short: 'REN', ovr: 75, c1: '#E30613', c2: '#111111', tier: 2 },
+        { id: 'str', name: 'Страсбург', short: 'STR', ovr: 71, c1: '#009FE3', c2: '#FFFFFF', tier: 2 },
+        { id: 'hac', name: 'Гавр', short: 'HAC', ovr: 66, c1: '#1C355E', c2: '#75B2DD', tier: 1 }
+      ]}
+    ];
+
+    const AI_STARS = {
+      epl: [{ name: 'Э. Холанд', clubId: 'mci' }, { name: 'М. Салах', clubId: 'liv' }, { name: 'Б. Сака', clubId: 'ars' }, { name: 'К. Палмер', clubId: 'che' }],
+      laliga: [{ name: 'К. Мбаппе', clubId: 'rma' }, { name: 'Р. Левандовски', clubId: 'bar' }, { name: 'Винисиус Ж.', clubId: 'rma' }, { name: 'А. Гризманн', clubId: 'atm' }],
+      seriea: [{ name: 'Л. Мартинес', clubId: 'int' }, { name: 'Д. Влахович', clubId: 'juv' }, { name: 'Р. Леау', clubId: 'mil' }, { name: 'Р. Лукаку', clubId: 'nap' }],
+      bundes: [{ name: 'Г. Кейн', clubId: 'bay' }, { name: 'Ф. Виртц', clubId: 'lev' }, { name: 'Д. Мусиала', clubId: 'bay' }, { name: 'С. Гирасси', clubId: 'bvb' }],
+      ligue1: [{ name: 'У. Дембеле', clubId: 'psg' }, { name: 'Б. Барколя', clubId: 'psg' }, { name: 'Д. Дэвид', clubId: 'lil' }, { name: 'М. Гринвуд', clubId: 'mar' }]
+    };
+
+    const POSITIONS = {
+      ST:  { code: 'ST',  name: 'Форвард',   icon: '⚡', base: { pac: 66, sho: 68, pas: 56, dri: 63, def: 34, phy: 60 }, w: { pac: 0.22, sho: 0.30, pas: 0.12, dri: 0.20, def: 0.03, phy: 0.13 } },
+      LW:  { code: 'LW',  name: 'Вингер',    icon: '💨', base: { pac: 69, sho: 63, pas: 60, dri: 68, def: 38, phy: 54 }, w: { pac: 0.28, sho: 0.20, pas: 0.16, dri: 0.28, def: 0.03, phy: 0.05 } },
+      CAM: { code: 'CAM', name: 'Плеймейкер',icon: '🎯', base: { pac: 63, sho: 62, pas: 68, dri: 67, def: 44, phy: 55 }, w: { pac: 0.14, sho: 0.18, pas: 0.30, dri: 0.26, def: 0.05, phy: 0.07 } },
+      CM:  { code: 'CM',  name: 'Центр. ПЗ', icon: '⚙️', base: { pac: 61, sho: 58, pas: 66, dri: 63, def: 58, phy: 62 }, w: { pac: 0.12, sho: 0.12, pas: 0.28, dri: 0.20, def: 0.15, phy: 0.13 } },
+      CB:  { code: 'CB',  name: 'Защитник',  icon: '🛡️', base: { pac: 60, sho: 40, pas: 56, dri: 50, def: 68, phy: 67 }, w: { pac: 0.15, sho: 0.04, pas: 0.12, dri: 0.07, def: 0.36, phy: 0.26 } }
+    };
+
+    const STAT_META = [
+      { key: 'pac', label: 'PAC', name: 'Скорость', icon: '💨', drill: 'Спринты', energy: 14 },
+      { key: 'sho', label: 'SHO', name: 'Удар',     icon: '🎯', drill: 'Завершение', energy: 14 },
+      { key: 'pas', label: 'PAS', name: 'Пас',      icon: '📐', drill: 'Видение поля', energy: 13 },
+      { key: 'dri', label: 'DRI', name: 'Дриблинг', icon: '🕺', drill: 'Техника', energy: 14 },
+      { key: 'def', label: 'DEF', name: 'Защита',   icon: '🛡️', drill: 'Отбор мяча', energy: 14 },
+      { key: 'phy', label: 'PHY', name: 'Физика',   icon: '🏋️', drill: 'Зал и мощь', energy: 16 }
+    ];
+
+    const AGENTS = [
+      { id: 0, name: 'Дядя Игорь', emoji: '🧔', cost: 0, bonusTop: 0, neg: 0, desc: 'Варианты в середняках.' },
+      { id: 1, name: 'Марко Росси', emoji: '💼', cost: 120000, bonusTop: 15, neg: 12, desc: '+15% к интересу крепких клубов.' },
+      { id: 2, name: 'Дэвид Стерлинг', emoji: '🕶️', cost: 500000, bonusTop: 30, neg: 24, desc: 'Офферы от грандов и сильные торги.' },
+      { id: 3, name: 'Жорже Суперстар', emoji: '👑', cost: 1200000, bonusTop: 50, neg: 36, desc: 'Открывает двери в Реал, Сити, Баварию!' }
+    ];
+
+    const SHOP_CATS = [
+      { id: 'gear', label: 'Экипировка', icon: '👟' },
+      { id: 'housing', label: 'Жилье', icon: '🏡' },
+      { id: 'cars', label: 'Автопарк', icon: '🏎️' },
+      { id: 'staff', label: 'Персонал', icon: '🧠' },
+      { id: 'leisure', label: 'Отдых', icon: '🌴' }
+    ];
+
+    const SHOP_ITEMS = [
+      { id: 'g1', cat: 'gear', name: 'Базовые бутсы', icon: '👟', cost: 8000, desc: '+1 PAC и SHO', ef: { stat: { pac: 1, sho: 1 } } },
+      { id: 'g2', cat: 'gear', name: 'Умные щитки', icon: '🛡️', cost: 20000, desc: '+2 DEF/PHY, -10% травм', ef: { stat: { def: 2, phy: 2 }, injRed: 0.1 } },
+      { id: 'g3', cat: 'gear', name: 'Карбоновые бутсы Pro', icon: '⚡', cost: 110000, desc: '+3 PAC/SHO/DRI', ef: { stat: { pac: 3, sho: 3, dri: 3 } } },
+      { id: 'g4', cat: 'gear', name: 'Именные бутсы Gold', icon: '👑', cost: 340000, desc: '+5 атака, +8% тренировок', ef: { stat: { pac: 5, sho: 5, dri: 5, pas: 3 }, train: 0.08 } },
+      { id: 'h1', cat: 'housing', name: 'Общежитие клуба', icon: '🛏️', cost: 0, lvl: 1, desc: 'Базовое жилье', ef: { happy: 0, energy: 0 } },
+      { id: 'h2', cat: 'housing', name: 'Съемная студия', icon: '🏢', cost: 25000, lvl: 2, desc: '+2 счастья, +3 энергии/тур', ef: { happy: 2, energy: 3 } },
+      { id: 'h3', cat: 'housing', name: 'Квартира в центре', icon: '🏙️', cost: 120000, lvl: 3, desc: '+4 счастья, +5 энергии/тур', ef: { happy: 4, energy: 5 } },
+      { id: 'h4', cat: 'housing', name: 'Пентхаус у стадиона', icon: '🌆', cost: 650000, lvl: 4, desc: '+8 счастья, +10 энергии/тур', ef: { happy: 8, energy: 10 } },
+      { id: 'h5', cat: 'housing', name: 'Вилла на побережье', icon: '🏖️', cost: 1400000, lvl: 5, desc: '+11 счастья, +14 энергии/тур', ef: { happy: 11, energy: 14 } },
+      { id: 'c1', cat: 'cars', name: 'Хэтчбек', icon: '🚗', cost: 12000, lvl: 1, desc: '+3K фанов, +1 счастья/тур', ef: { fans: 3000, happy: 1 } },
+      { id: 'c2', cat: 'cars', name: 'Немецкий седан', icon: '🚘', cost: 55000, lvl: 2, desc: '+12K фанов, +2 счастья/тур', ef: { fans: 12000, happy: 2 } },
+      { id: 'c3', cat: 'cars', name: 'Спортивное купе', icon: '🏎️', cost: 160000, lvl: 3, desc: '+35K фанов, +4 счастья/тур', ef: { fans: 35000, happy: 4 } },
+      { id: 'c4', cat: 'cars', name: 'Итальянский суперкар', icon: '🔥', cost: 680000, lvl: 4, desc: '+150K фанов, +7 счастья/тур', ef: { fans: 150000, happy: 7 } },
+      { id: 's1', cat: 'staff', name: 'Личный диетолог', icon: '🥗', cost: 65000, desc: '+12 энергии после матча', ef: { energy: 12 } },
+      { id: 's2', cat: 'staff', name: 'Физиотерапевт', icon: '💆', cost: 130000, desc: '-40% риска травмы', ef: { injRed: 0.4 } },
+      { id: 's3', cat: 'staff', name: 'Спортивный психолог', icon: '🧠', cost: 165000, desc: 'Счастье не падает ниже 45%!', ef: { happyFloor: 45, happy: 2 } },
+      { id: 's4', cat: 'staff', name: 'Тренер по технике', icon: '📋', cost: 240000, desc: '+15% к шансу тренировок', ef: { train: 0.15 } },
+      { id: 's5', cat: 'staff', name: 'Медиа-менеджер', icon: '📱', cost: 290000, desc: '+25% к доходу спонсоров и фанам', ef: { media: 0.25 } },
+      { id: 'l1', cat: 'leisure', name: 'Кино и ресторан', icon: '🍿', cost: 3000, cons: true, desc: '+10 счастья, +6 энергии', ef: { happyNow: 10, energyNow: 6 } },
+      { id: 'l2', cat: 'leisure', name: 'СПА-восстановление', icon: '🧖', cost: 12000, cons: true, desc: '+16 счастья, +22 энергии', ef: { happyNow: 16, energyNow: 22 } },
+      { id: 'l3', cat: 'leisure', name: 'Выходные в горах', icon: '🏔️', cost: 35000, cons: true, desc: '+28 счастья, +32 энергии', ef: { happyNow: 28, energyNow: 32 } },
+      { id: 'l4', cat: 'leisure', name: 'Чартер на острова', icon: '🏝️', cost: 90000, cons: true, desc: '+45 счастья, +45 энергии', ef: { happyNow: 45, energyNow: 45 } }
+    ];
+
+    const SPONSORS = [
+      { id: 'sp1', name: 'Local Energy', req: 3000, match: 6000, goal: 4000, icon: '⚡' },
+      { id: 'sp2', name: 'Apex Sport', req: 30000, match: 18000, goal: 12000, icon: '👕' },
+      { id: 'sp3', name: 'Chronos Watch', req: 120000, match: 48000, goal: 30000, icon: '⌚' },
+      { id: 'sp4', name: 'AeroJet Global', req: 450000, match: 120000, goal: 75000, icon: '✈️' },
+      { id: 'sp5', name: 'Titan Icon', req: 1200000, match: 260000, goal: 150000, icon: '👑' }
+    ];
+
+    const TACTICS = {
+      press:   { id: 'press',   name: 'Высокий прессинг', short: 'Прессинг',   icon: '🔥', beats: 'tiki',    losesTo: 'counter' },
+      tiki:    { id: 'tiki',    name: 'Тики-така',        short: 'Тики-така',  icon: '🎯', beats: 'counter', losesTo: 'press' },
+      counter: { id: 'counter', name: 'Контратаки',       short: 'Контратаки', icon: '⚡', beats: 'press',   losesTo: 'tiki' }
+    };
+
+    const DEMO_ONLINE = [
+      { tg_id: 'b1', name: 'Kylian_77', club: 'Реал Мадрид', position: 'ST', ovr: 92, tactic: 'counter', rating: 1460, wins: 20, draws: 3, losses: 3 },
+      { tg_id: 'b2', name: 'AlexPro_MSK', club: 'Манчестер Сити', position: 'CAM', ovr: 90, tactic: 'tiki', rating: 1390, wins: 17, draws: 4, losses: 4 },
+      { tg_id: 'b3', name: 'ViniJr_Fan', club: 'Барселона', position: 'LW', ovr: 89, tactic: 'press', rating: 1340, wins: 15, draws: 5, losses: 4 },
+      { tg_id: 'b4', name: 'MunchenKing', club: 'Бавария', position: 'ST', ovr: 87, tactic: 'press', rating: 1280, wins: 14, draws: 3, losses: 6 },
+      { tg_id: 'b5', name: 'DimaGoal99', club: 'Арсенал', position: 'CM', ovr: 86, tactic: 'tiki', rating: 1240, wins: 13, draws: 4, losses: 6 },
+      { tg_id: 'b6', name: 'SanSiroWall', club: 'Интер', position: 'CB', ovr: 85, tactic: 'counter', rating: 1200, wins: 12, draws: 4, losses: 6 },
+      { tg_id: 'b7', name: 'ParisStar', club: 'ПСЖ', position: 'LW', ovr: 84, tactic: 'counter', rating: 1165, wins: 11, draws: 3, losses: 7 },
+      { tg_id: 'b8', name: 'MaxStriker', club: 'Ливерпуль', position: 'ST', ovr: 83, tactic: 'press', rating: 1135, wins: 10, draws: 4, losses: 7 },
+      { tg_id: 'b9', name: 'TikiTakaGod', club: 'Атлетико', position: 'CAM', ovr: 82, tactic: 'tiki', rating: 1110, wins: 9, draws: 5, losses: 6 },
+      { tg_id: 'b10', name: 'Niko_BLR', club: 'Байер', position: 'CM', ovr: 81, tactic: 'press', rating: 1085, wins: 9, draws: 2, losses: 8 },
+      { tg_id: 'b11', name: 'TurboSergey', club: 'Челси', position: 'ST', ovr: 80, tactic: 'counter', rating: 1060, wins: 8, draws: 4, losses: 7 },
+      { tg_id: 'b12', name: 'JuveLegend', club: 'Ювентус', position: 'CB', ovr: 79, tactic: 'counter', rating: 1035, wins: 7, draws: 5, losses: 7 },
+      { tg_id: 'b13', name: 'VladFootball', club: 'Боруссия Д', position: 'LW', ovr: 78, tactic: 'press', rating: 1015, wins: 7, draws: 3, losses: 8 },
+      { tg_id: 'b14', name: 'RomaMaestro', club: 'Рома', position: 'CAM', ovr: 77, tactic: 'tiki', rating: 995, wins: 6, draws: 4, losses: 8 },
+      { tg_id: 'b15', name: 'Kirill_KZN', club: 'Наполи', position: 'ST', ovr: 76, tactic: 'press', rating: 975, wins: 6, draws: 3, losses: 9 },
+      { tg_id: 'b16', name: 'Milanista', club: 'Милан', position: 'CB', ovr: 75, tactic: 'counter', rating: 955, wins: 5, draws: 4, losses: 8 },
+      { tg_id: 'b17', name: 'Egor_SPB', club: 'Тоттенхэм', position: 'CM', ovr: 74, tactic: 'tiki', rating: 935, wins: 5, draws: 3, losses: 9 },
+      { tg_id: 'b18', name: 'LyonSpeed', club: 'Лион', position: 'LW', ovr: 73, tactic: 'counter', rating: 910, wins: 4, draws: 3, losses: 9 },
+      { tg_id: 'b19', name: 'BrightonBoy', club: 'Брайтон', position: 'CAM', ovr: 71, tactic: 'tiki', rating: 885, wins: 3, draws: 4, losses: 10 },
+      { tg_id: 'b20', name: 'WolvesPack', club: 'Вулверхэмптон', position: 'CB', ovr: 69, tactic: 'press', rating: 850, wins: 2, draws: 3, losses: 10 }
+    ];
+
+    /* ================= STATE & HELPERS ================= */
+    let state = null;
+    let activeTab = 'home'; // home | match | training | shop | career | online
+    let shopSubTab = 'gear';
+    let careerSubTab = 'table'; // table | scorers | transfers | sponsors | friends
+    let onlineSubTab = 'pvp'; // pvp | leaderboard
+    let selectedTableLeague = 'epl';
+    let creationDraft = { name: '', pos: 'ST', leagueId: 'epl' };
+    let liveMatch = null;
+    let lastSalaryAd = 0, postAdUsed = false;
+    let inviteSent = false;
+    let onlineBoard = [], onlineLoading = false, onlineSynced = false;
+    let pvpOpp = null, pvpScouted = false, livePvp = null, countdownTimer = null;
+
+    const getLeague = id => LEAGUES.find(l => l.id === id) || LEAGUES[0];
+    function getClub(cid) {
+      for (const l of LEAGUES) {
+        const c = l.clubs.find(x => x.id === cid);
+        if (c) return { ...c, leagueId: l.id, leagueName: l.name, flag: l.flag, prestige: l.prestige };
+      }
+      return { ...LEAGUES[0].clubs[9], leagueId: 'epl', leagueName: 'АПЛ', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', prestige: 1.15 };
+    }
+    function calcOVR(stats, posKey) {
+      const pos = POSITIONS[posKey] || POSITIONS.ST;
+      const w = pos.w;
+      const v = stats.pac*w.pac + stats.sho*w.sho + stats.pas*w.pas + stats.dri*w.dri + stats.def*w.def + stats.phy*w.phy;
+      return Math.min(99, Math.max(40, Math.round(v)));
+    }
+    function fmtMoney(n) {
+      if (n >= 1000000) return '€' + (n / 1000000).toFixed(2) + ' млн';
+      if (n >= 1000) return '€' + Math.round(n / 1000) + ' тыс.';
+      return '€' + Math.round(n);
+    }
+    function fmtFans(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return String(Math.round(n));
+    }
+    function crest(club, sz = 36) {
+      const darkTxt = ['#FFFFFF','#FFE667','#FDE100','#FDB913','#F7D117'].includes(club.c1);
+      return `<svg width="${sz}" height="${sz}" viewBox="0 0 48 48" class="shrink-0"><defs><linearGradient id="cg${club.id}${sz}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${club.c1}"/><stop offset="100%" stop-color="${club.c2}"/></linearGradient></defs><path d="M24 3L42 10V24C42 35 33.5 42.5 24 46C14.5 42.5 6 35 6 24V10Z" fill="url(#cg${club.id}${sz})" stroke="rgba(255,255,255,0.7)" stroke-width="2"/><text x="24" y="28" text-anchor="middle" fill="${darkTxt ? '#0f172a' : '#fff'}" font-family="Oswald,sans-serif" font-weight="700" font-size="11">${club.short}</text></svg>`;
+    }
+    function cardClass(ovr) {
+      if (ovr >= 90) return 'fut-toty';
+      if (ovr >= 85) return 'fut-hero';
+      if (ovr >= 78) return 'fut-gold';
+      if (ovr >= 68) return 'fut-silver';
+      return 'fut-bronze';
+    }
+    function cardBadge(ovr) {
+      if (ovr >= 90) return 'TOTY';
+      if (ovr >= 85) return 'HERO';
+      if (ovr >= 78) return 'GOLD';
+      if (ovr >= 68) return 'SILVER';
+      return 'BRONZE';
+    }
+    function getRole(trust) {
+      if (trust >= 70) return { label: 'Основа', color: 'text-emerald-400', moments: 4 };
+      if (trust >= 35) return { label: 'Ротация', color: 'text-amber-400', moments: 3 };
+      return { label: 'Запас', color: 'text-rose-400', moments: 2 };
+    }
+    function expectedSalary(ovr) {
+      if (ovr < 68) return 12000;
+      if (ovr < 74) return 22000;
+      if (ovr < 79) return 42000;
+      if (ovr < 84) return 85000;
+      return 160000;
+    }
+
+    function getBonuses() {
+      const owned = (state && state.player && state.player.ownedItems) || [];
+      const stat = { pac: 0, sho: 0, pas: 0, dri: 0, def: 0, phy: 0 };
+      let train = 0, energy = 0, injRed = 0, happyFloor = 0, staffHappy = 0, media = 1;
+      let bestH = SHOP_ITEMS.find(i => i.id === 'h1'), bestC = null;
+      SHOP_ITEMS.forEach(it => {
+        if (!owned.includes(it.id)) return;
+        const e = it.ef || {};
+        if (it.cat === 'gear') {
+          if (e.stat) Object.keys(e.stat).forEach(k => stat[k] = Math.max(stat[k], e.stat[k]));
+          if (e.train) train += e.train;
+          if (e.injRed) injRed += e.injRed;
+        } else if (it.cat === 'housing' && it.lvl > bestH.lvl) bestH = it;
+        else if (it.cat === 'cars' && (!bestC || it.lvl > bestC.lvl)) bestC = it;
+        else if (it.cat === 'staff') {
+          if (e.energy) energy += e.energy;
+          if (e.injRed) injRed += e.injRed;
+          if (e.happyFloor) happyFloor = Math.max(happyFloor, e.happyFloor);
+          if (e.happy) staffHappy += e.happy;
+          if (e.train) train += e.train;
+          if (e.media) media += e.media;
+        }
+      });
+      return {
+        stat, train, energy: energy + (bestH.ef.energy || 0),
+        injRed: Math.min(0.75, injRed), happyFloor,
+        lifestyleHappy: (bestH.ef.happy || 0) + (bestC ? bestC.ef.happy : 0) + staffHappy,
+        media, bestH, bestC
+      };
+    }
+
+    function getHappyInfo(v) {
+      if (v >= 80) return { label: 'Вдохновлен', em: '🤩', cls: 'text-emerald-400', bg: 'bg-emerald-500/20 border-emerald-400/40', matchMod: 8, trainMod: 0.2, injAdd: 0, desc: '+8% в матчах, +20% к тренировкам' };
+      if (v >= 60) return { label: 'Счастлив', em: '😊', cls: 'text-sky-300', bg: 'bg-sky-500/15 border-sky-400/35', matchMod: 0, trainMod: 0, injAdd: 0, desc: 'Стабильный настрой, без штрафов' };
+      if (v >= 45) return { label: 'Спокоен', em: '😐', cls: 'text-amber-300', bg: 'bg-amber-500/15 border-amber-400/35', matchMod: 0, trainMod: 0, injAdd: 0, desc: 'Нормальное состояние' };
+      if (v >= 20) return { label: 'Подавлен', em: '😞', cls: 'text-orange-400', bg: 'bg-orange-500/20 border-orange-400/40', matchMod: -8, trainMod: -0.15, injAdd: 0.05, desc: '-8% в матчах, -15% к тренировкам' };
+      return { label: 'Выгорание', em: '😫', cls: 'text-rose-400', bg: 'bg-rose-500/20 border-rose-500/50', matchMod: -15, trainMod: -0.25, injAdd: 0.16, desc: '-15% в матчах, риск травмы!' };
+    }
+
+    function getHappyFactors() {
+      const p = state.player, ovr = calcOVR(p.stats, p.pos), b = getBonuses();
+      const f = [];
+      if (p.trust >= 70) f.push({ t: 'Игровое время (Основа)', d: 3, desc: 'Вы регулярно выходите в старте.' });
+      else if (p.trust < 35) f.push({ t: 'Запасной', d: -4, desc: 'Мало игрового времени.' });
+      else f.push({ t: 'Ротация', d: 0, desc: 'Стабильные выходы на поле.' });
+
+      const exp = expectedSalary(ovr);
+      if (ovr >= 78 && p.salary < exp * 0.72) f.push({ t: 'Низкая зарплата', d: -5, desc: `Для OVR ${ovr} нужно ~${fmtMoney(exp)}/матч.` });
+      else if (p.salary >= exp * 1.15) f.push({ t: 'Отличный контракт', d: 2, desc: 'Клуб щедро платит.' });
+      else f.push({ t: 'Адекватная зарплата', d: 0, desc: 'Соответствует уровню.' });
+
+      const expComf = ovr >= 86 ? 8 : (ovr >= 78 ? 4 : 0);
+      const net = b.lifestyleHappy - expComf;
+      f.push({ t: 'Жилье и авто', d: Math.max(-5, Math.min(8, net)), desc: `${b.bestH.name}${b.bestC ? ' + ' + b.bestC.name : ''}` });
+      if (p.energy < 25) f.push({ t: 'Усталость (<25%)', d: -5, desc: 'Срочно нужен отдых!' });
+      if (b.happyFloor > 0) f.push({ t: 'Спортивный психолог', d: 0, desc: `Счастье не упадёт ниже ${b.happyFloor}%.` });
+      return f;
+    }
+
+    function addHappy(d) {
+      const b = getBonuses();
+      state.player.happiness = Math.max(b.happyFloor || 0, Math.min(100, Math.round(state.player.happiness + d)));
+    }
+
+    /* ================= SCHEDULE & MIGRATION ================= */
+    function genSchedule(clubs) {
+      const ids = clubs.map(c => c.id), n = ids.length, half = n / 2, rounds = [], arr = [...ids];
+      for (let r = 0; r < n - 1; r++) {
+        const ms = [];
+        for (let i = 0; i < half; i++) {
+          const h = r % 2 === 0 ? arr[i] : arr[n - 1 - i];
+          const a = r % 2 === 0 ? arr[n - 1 - i] : arr[i];
+          ms.push({ home: h, away: a });
+        }
+        rounds.push(ms);
+        arr.splice(1, 0, arr.pop());
+      }
+      return [...rounds, ...rounds.map(r => r.map(m => ({ home: m.away, away: m.home })))];
+    }
+
+    function initSeasonData() {
+      const tables = {}, schedules = {}, scorers = {};
+      LEAGUES.forEach(l => {
+        tables[l.id] = l.clubs.map(c => ({ clubId: c.id, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 }));
+        schedules[l.id] = genSchedule(l.clubs);
+        scorers[l.id] = (AI_STARS[l.id] || []).map(s => ({ ...s, goals: 0 }));
+      });
+      return { tables, schedules, scorers };
+    }
+
+    function sortTable(rows) {
+      return [...rows].sort((a, b) => (b.pts - a.pts) || ((b.gf - b.ga) - (a.gf - a.ga)) || (b.gf - a.gf));
+    }
+
+    function saveState() {
+      try { if (state) localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (_) {}
+    }
+
+    function ensureStateIntegrity() {
+      if (!state || !state.player) return;
+      if (typeof state.season !== 'number') state.season = 1;
+      if (typeof state.round !== 'number') state.round = 0;
+      if (typeof state.weekSlots !== 'number') state.weekSlots = 3;
+      if (typeof state.adTrainUsed !== 'boolean') state.adTrainUsed = false;
+      if (!Array.isArray(state.offers)) state.offers = [];
+      if (!state.ucl) state.ucl = { active: false, stage: null, oppId: null, finished: false, won: false };
+      if (!state.tables || !state.schedules || !state.scorers) Object.assign(state, initSeasonData());
+      if (!state.referrals) state.referrals = { count: 0, earned: 0, lastAt: 0, claims: 0 };
+      if (!state.online) state.online = { rating: 1000, wins: 0, draws: 0, losses: 0, defTac: 'press', atkTac: 'press', lastDate: '', playedToday: 0, adExtraDate: '' };
+      const p = state.player;
+      if (!POSITIONS[p.pos]) p.pos = 'ST';
+      if (typeof p.happiness !== 'number') p.happiness = 72;
+      if (typeof p.energy !== 'number') p.energy = 100;
+      if (typeof p.trust !== 'number') p.trust = 48;
+      if (typeof p.fans !== 'number') p.fans = 1500;
+      if (typeof p.injury !== 'number') p.injury = 0;
+      if (typeof p.agentId !== 'number') p.agentId = 0;
+      if (!Array.isArray(p.ownedItems)) p.ownedItems = ['h1'];
+      if (!p.ownedItems.includes('h1')) p.ownedItems.push('h1');
+      if (!p.sStats) p.sStats = { m: 0, g: 0, a: 0, rSum: 0 };
+      if (!p.cStats) p.cStats = { m: 0, g: 0, a: 0, rSum: 0 };
+      if (!p.trophies) p.trophies = { league: 0, ucl: 0, boot: 0, bdor: 0 };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return false;
+        state = JSON.parse(raw);
+        if (state && state.player) {
+          ensureStateIntegrity();
+          selectedTableLeague = state.player.leagueId;
+          return true;
+        }
+      } catch (_) {
+        try { localStorage.removeItem(SAVE_KEY); } catch (__) {}
+      }
+      state = null;
+      return false;
+    }
+
+    function createCareer() {
+      const l = getLeague(creationDraft.leagueId);
+      const startClub = [...l.clubs].sort((a, b) => a.ovr - b.ovr)[0];
+      const pos = POSITIONS[creationDraft.pos] || POSITIONS.ST;
+      state = {
+        season: 1, round: 0, weekSlots: 3, adTrainUsed: false, offers: [], awardsDone: false,
+        ucl: { active: false, stage: null, oppId: null, finished: false, won: false },
+        ...initSeasonData(),
+        referrals: { count: 0, earned: 0, lastAt: 0, claims: 0 },
+        online: { rating: 1000, wins: 0, draws: 0, losses: 0, defTac: 'press', atkTac: 'press', lastDate: '', playedToday: 0, adExtraDate: '' },
+        player: {
+          name: (creationDraft.name || tgUser.firstName || 'Артём Волков').trim(),
+          pos: pos.code, age: 17, leagueId: l.id, clubId: startClub.id,
+          salary: 14000, money: 25000, stats: { ...pos.base },
+          energy: 100, happiness: 75, trust: 48, fans: 1500, injury: 0,
+          agentId: 0, ownedItems: ['h1'], sponsorId: null,
+          sStats: { m: 0, g: 0, a: 0, rSum: 0 },
+          cStats: { m: 0, g: 0, a: 0, rSum: 0 },
+          trophies: { league: 0, ucl: 0, boot: 0, bdor: 0 }
+        }
+      };
+      selectedTableLeague = l.id;
+      activeTab = 'home';
+      saveState();
+      haptic('success');
+      render();
+      showToast(`Добро пожаловать в ${startClub.name}!`, 'success');
+    }
+
+    /* ================= MATCH ENGINE ================= */
+    function simScore(h, a) {
+      const diff = (h.ovr + 2) - a.ovr;
+      const pois = lam => { let L = Math.exp(-lam), k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L && k < 7); return k - 1; };
+      return { hg: pois(Math.max(0.35, 1.35 + diff * 0.06)), ag: pois(Math.max(0.3, 1.15 - diff * 0.05)) };
+    }
+
+    function applyTable(lid, hid, aid, hg, ag) {
+      const t = state.tables[lid];
+      const hr = t.find(x => x.clubId === hid), ar = t.find(x => x.clubId === aid);
+      if (!hr || !ar) return;
+      hr.p++; ar.p++; hr.gf += hg; hr.ga += ag; ar.gf += ag; ar.ga += hg;
+      if (hg > ag) { hr.w++; hr.pts += 3; ar.l++; }
+      else if (ag > hg) { ar.w++; ar.pts += 3; hr.l++; }
+      else { hr.d++; hr.pts++; ar.d++; ar.pts++; }
+      (state.scorers[lid] || []).forEach(sc => {
+        if (sc.clubId === hid && hg > 0 && Math.random() < 0.55) sc.goals++;
+        if (sc.clubId === aid && ag > 0 && Math.random() < 0.5) sc.goals++;
+      });
+    }
+
+    function simOtherMatches(rIdx, exLid, exMatch) {
+      LEAGUES.forEach(l => {
+        const ms = state.schedules[l.id][rIdx] || [];
+        ms.forEach(m => {
+          if (l.id === exLid && exMatch && m.home === exMatch.home && m.away === exMatch.away) return;
+          const s = simScore(getClub(m.home), getClub(m.away));
+          applyTable(l.id, m.home, m.away, s.hg, s.ag);
+        });
+      });
+    }
+
+    function getNextMatch() {
+      const p = state.player;
+      if (state.ucl.active && !state.ucl.finished) {
+        return { type: 'ucl', stage: state.ucl.stage, oppId: state.ucl.oppId, home: p.clubId, away: state.ucl.oppId, isHome: true };
+      }
+      if (state.round >= 18) return null;
+      const m = (state.schedules[p.leagueId][state.round] || []).find(x => x.home === p.clubId || x.away === p.clubId);
+      if (!m) return null;
+      const isHome = m.home === p.clubId;
+      return { type: 'league', round: state.round + 1, home: m.home, away: m.away, oppId: isHome ? m.away : m.home, isHome };
+    }
+
+    function actionChance(statKey, oppOvr, mod = 0) {
+      const p = state.player, b = getBonuses(), hp = getHappyInfo(p.happiness);
+      const eff = p.stats[statKey] + (b.stat[statKey] || 0);
+      const enMod = p.energy < 30 ? -10 : (p.energy > 80 ? 3 : 0);
+      return Math.max(12, Math.min(95, Math.round(53 + (eff - oppOvr) * 1.4 + hp.matchMod + enMod + mod)));
+    }
+
+    function makeMoment(opp) {
+      const o = opp.ovr;
+      const pool = [
+        { title: 'Выход 1 на 1!', icon: '🔥', desc: `Вы вырываетесь к воротам ${opp.name}!`, choices: [
+          { label: 'Ударить в угол', stat: 'sho', ch: actionChance('sho', o, 2), type: 'goal', ok: 'ГОЛ! Пушечный удар в девятку!', fail: 'Вратарь перевёл на угловой.' },
+          { label: 'Обыграть вратаря', stat: 'dri', ch: actionChance('dri', o, -2), type: 'goal', ok: 'ГОЛ! Хладнокровный финт!', fail: 'Голкипер забрал мяч в ногах.' },
+          { label: 'Пас партнёру', stat: 'pas', ch: actionChance('pas', o, 8), type: 'assist', ok: 'АССИСТ! Партнёр забивает в пустые!', fail: 'Защитник перехватил пас.' }
+        ]},
+        { title: 'Прорыв по флангу!', icon: '💨', desc: 'Вы набираете скорость и входите в штрафную.', choices: [
+          { label: 'Сместиться и пробить', stat: 'dri', ch: actionChance('dri', o, 0), type: 'goal', ok: 'ГОЛ! Закрутил в дальний угол!', fail: 'Удар заблокирован.' },
+          { label: 'Прострел в центр', stat: 'pas', ch: actionChance('pas', o, 7), type: 'assist', ok: 'АССИСТ! Идеальный прострел!', fail: 'Никто не успел замкнуть.' }
+        ]},
+        { title: 'Контратака соперника!', icon: '🛡️', isDef: true, desc: `${opp.name} летит на ваши ворота!`, choices: [
+          { label: 'Чистый подкат', stat: 'def', ch: actionChance('def', o, 3), type: 'save', ok: 'Блестящий отбор!', fail: 'Соперник прошёл и забил...' },
+          { label: 'Силовая борьба', stat: 'phy', ch: actionChance('phy', o, 2), type: 'save', ok: 'Оттеснили форварда корпусом!', fail: 'Форвард устоял и забил.' }
+        ]},
+        { title: 'ПЕНАЛЬТИ!', icon: '⚽', isPen: true, desc: 'Судья указывает на 11-метровую точку! Выберите угол:' }
+      ];
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function openPreMatch() {
+      const next = getNextMatch();
+      if (!next) { openSeasonSummary(); return; }
+      if (state.player.injury > 0) { openInjuryModal(); return; }
+      const my = getClub(state.player.clubId), opp = getClub(next.oppId);
+      const role = getRole(state.player.trust), hp = getHappyInfo(state.player.happiness);
+      openModal(`
+        <div class="w-full max-w-[410px] glass p-5 anim">
+          <div class="text-center text-xs font-bold uppercase text-emerald-400 mb-3">
+            ${next.type === 'ucl' ? (next.stage === 'semi' ? '🏆 ЛЧ — 1/2 финала' : '🏆 ФИНАЛ ЛЧ') : `${my.flag} ${my.name} • Тур ${next.round}/18`}
+          </div>
+          <div class="flex items-center justify-between bg-slate-900/80 rounded-2xl p-4 border border-white/10">
+            <div class="flex flex-col items-center w-[40%]">${crest(my, 46)}<div class="text-xs font-bold mt-1.5 text-center">${my.name}</div><div class="text-[10px] text-slate-400">OVR ${my.ovr}</div></div>
+            <div class="font-sport text-2xl font-bold text-slate-400">VS</div>
+            <div class="flex flex-col items-center w-[40%]">${crest(opp, 46)}<div class="text-xs font-bold mt-1.5 text-center">${opp.name}</div><div class="text-[10px] text-slate-400">OVR ${opp.ovr}</div></div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs">
+            <div class="bg-slate-900/70 rounded-xl p-2"><div class="text-[10px] text-slate-400">Роль</div><div class="font-bold ${role.color}">${role.label}</div></div>
+            <div class="bg-slate-900/70 rounded-xl p-2"><div class="text-[10px] text-slate-400">Энергия</div><div class="font-bold ${state.player.energy < 35 ? 'text-rose-400' : 'text-emerald-400'}">${state.player.energy}%</div></div>
+            <div class="bg-slate-900/70 rounded-xl p-2"><div class="text-[10px] text-slate-400">Счастье</div><div class="font-bold ${hp.cls}">${hp.em} ${state.player.happiness}%</div></div>
+          </div>
+          <div class="flex flex-col gap-2 mt-4">
+            <button onclick="startLiveMatch()" class="btn-primary py-3.5 text-sm">⚽ Играть ключевые моменты</button>
+            <button onclick="quickSimMatch()" class="btn-sec py-3 text-xs">⏩ Быстрая симуляция</button>
+            <button onclick="closeModal()" class="text-xs text-slate-400 py-1">Отмена</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function startLiveMatch() {
+      const next = getNextMatch(), my = getClub(state.player.clubId), opp = getClub(next.oppId);
+      const cnt = getRole(state.player.trust).moments;
+      const mins = Array.from({ length: cnt }, (_, i) => 16 + i * Math.floor(68 / cnt) + Math.floor(Math.random() * 5));
+      liveMatch = { next, my, opp, min: 0, ms: 0, os: 0, pg: 0, pa: 0, missPen: 0, rat: 6.2, mins, idx: 0, mom: null, log: [{ m: 0, t: `Стартовый свисток! ${my.name} — ${opp.name}`, c: 'info' }], timer: null, done: false };
+      renderLiveMatch();
+      resumeLiveMatch();
+    }
+
+    function resumeLiveMatch() {
+      if (!liveMatch || liveMatch.done) return;
+      clearInterval(liveMatch.timer);
+      liveMatch.timer = setInterval(() => {
+        if (!liveMatch || liveMatch.mom) return;
+        liveMatch.min += 3;
+        const diff = liveMatch.my.ovr - liveMatch.opp.ovr;
+        if (Math.random() < Math.max(0.01, 0.025 + diff * 0.001) && liveMatch.min < 88) {
+          liveMatch.ms++; liveMatch.log.unshift({ m: liveMatch.min, t: `⚽ Партнёр по ${liveMatch.my.name} забивает!`, c: 'good' });
+        } else if (Math.random() < Math.max(0.01, 0.025 - diff * 0.001) && liveMatch.min < 88) {
+          liveMatch.os++; liveMatch.log.unshift({ m: liveMatch.min, t: `🔴 ${liveMatch.opp.name} забивает мяч.`, c: 'bad' });
+        }
+        if (liveMatch.mins[liveMatch.idx] && liveMatch.min >= liveMatch.mins[liveMatch.idx]) {
+          clearInterval(liveMatch.timer);
+          liveMatch.mom = makeMoment(liveMatch.opp);
+          liveMatch.idx++;
+          haptic('medium');
+          renderLiveMatch();
+          return;
+        }
+        if (liveMatch.min >= 90) {
+          liveMatch.min = 90; clearInterval(liveMatch.timer);
+          if (liveMatch.next.type === 'ucl' && liveMatch.ms === liveMatch.os) {
+            if (Math.random() < 0.52) { liveMatch.ms++; liveMatch.log.unshift({ m: 90, t: '🏆 Победа по пенальти!', c: 'good' }); }
+            else { liveMatch.os++; liveMatch.log.unshift({ m: 90, t: '💔 Поражение по пенальти...', c: 'bad' }); }
+          }
+          liveMatch.done = true;
+          liveMatch.log.unshift({ m: 90, t: '🏁 Финальный свисток!', c: 'info' });
+        }
+        renderLiveMatch();
+      }, 170);
+    }
+
+    function pickMoment(i) {
+      if (!liveMatch || !liveMatch.mom) return;
+      const c = liveMatch.mom.choices[i];
+      const ok = Math.random() * 100 < c.ch;
+      if (ok) {
+        haptic('success');
+        if (c.type === 'goal') { liveMatch.ms++; liveMatch.pg++; liveMatch.rat = Math.min(10, liveMatch.rat + 1.1); }
+        else if (c.type === 'assist') { liveMatch.ms++; liveMatch.pa++; liveMatch.rat = Math.min(10, liveMatch.rat + 0.8); }
+        else liveMatch.rat = Math.min(10, liveMatch.rat + 0.7);
+        liveMatch.log.unshift({ m: liveMatch.min, t: c.ok, c: 'good' });
+      } else {
+        haptic('error');
+        liveMatch.rat = Math.max(4.5, liveMatch.rat - 0.35);
+        if (liveMatch.mom.isDef) liveMatch.os++;
+        liveMatch.log.unshift({ m: liveMatch.min, t: c.fail, c: 'bad' });
+      }
+      liveMatch.mom = null;
+      renderLiveMatch();
+      setTimeout(resumeLiveMatch, 420);
+    }
+
+    function shootPen(dir) {
+      if (!liveMatch || !liveMatch.mom) return;
+      const keep = ['left', 'center', 'right'][Math.floor(Math.random() * 3)];
+      const ch = actionChance('sho', liveMatch.opp.ovr, 16);
+      const ok = dir !== keep ? Math.random() * 100 < Math.min(95, ch + 15) : Math.random() * 100 < Math.max(20, ch - 35);
+      if (ok) {
+        haptic('success'); liveMatch.ms++; liveMatch.pg++; liveMatch.rat = Math.min(10, liveMatch.rat + 1.0);
+        liveMatch.log.unshift({ m: liveMatch.min, t: '⚽ ГОЛ с пенальти!', c: 'good' });
+      } else {
+        haptic('error'); liveMatch.missPen++; liveMatch.rat = Math.max(4.5, liveMatch.rat - 0.6);
+        liveMatch.log.unshift({ m: liveMatch.min, t: '🧤 Вратарь отбил пенальти (-6 счастья)!', c: 'bad' });
+      }
+      liveMatch.mom = null;
+      renderLiveMatch();
+      setTimeout(resumeLiveMatch, 420);
+    }
+
+    function renderLiveMatch() {
+      if (!liveMatch) return;
+      const lm = liveMatch;
+      let momHtml = '';
+      if (lm.mom) {
+        if (lm.mom.isPen) {
+          momHtml = `
+            <div class="mt-3 p-3.5 rounded-2xl bg-slate-900 border border-emerald-500/50 anim">
+              <div class="text-xs font-bold text-emerald-400 mb-2">⚽ ${lm.mom.title}</div>
+              <div class="goal-net h-28 grid grid-cols-3 gap-1.5 p-2">
+                <button onclick="shootPen('left')" class="rounded-lg border border-dashed border-emerald-400/50 bg-black/30 text-xs font-bold">↖️ ЛЕВЫЙ</button>
+                <button onclick="shootPen('center')" class="rounded-lg border border-dashed border-emerald-400/50 bg-black/30 text-xs font-bold">🧤 ЦЕНТР</button>
+                <button onclick="shootPen('right')" class="rounded-lg border border-dashed border-emerald-400/50 bg-black/30 text-xs font-bold">↗️ ПРАВЫЙ</button>
+              </div>
+            </div>`;
+        } else {
+          momHtml = `
+            <div class="mt-3 p-3.5 rounded-2xl bg-slate-900 border border-emerald-500/50 anim">
+              <div class="text-xs font-bold text-emerald-400">${lm.mom.icon} ${lm.mom.title}</div>
+              <div class="text-[11px] text-slate-300 mt-1 mb-2.5">${lm.mom.desc}</div>
+              <div class="flex flex-col gap-1.5">
+                ${lm.mom.choices.map((c, idx) => `
+                  <button onclick="pickMoment(${idx})" class="w-full p-2.5 rounded-xl bg-slate-800 border border-white/10 flex justify-between items-center text-left active:scale-[0.98]">
+                    <span class="text-xs font-bold">${c.label} <span class="text-[10px] text-sky-300">(${c.stat.toUpperCase()})</span></span>
+                    <span class="font-sport text-sm font-bold ${c.ch >= 65 ? 'text-emerald-400' : 'text-amber-300'}">${c.ch}%</span>
+                  </button>`).join('')}
+              </div>
+            </div>`;
+        }
+      }
+      openModal(`
+        <div class="w-full max-w-[430px] glass p-4 flex flex-col max-h-[90vh]">
+          <div class="bg-slate-950 rounded-2xl p-3 border border-white/10">
+            <div class="flex justify-between text-[11px] mb-1.5">
+              <span class="text-slate-400">${lm.next.type === 'ucl' ? '🏆 ЛЧ' : 'Тур ' + lm.next.round}</span>
+              <span class="font-sport font-bold text-emerald-400">${lm.min}'</span>
+              <span class="text-amber-300 font-bold">⭐ ${lm.rat.toFixed(1)}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 w-[38%]">${crest(lm.my, 32)}<span class="text-xs font-bold truncate">${lm.my.short}</span></div>
+              <div class="font-sport text-3xl font-bold">${lm.ms} : ${lm.os}</div>
+              <div class="flex items-center justify-end gap-2 w-[38%]"><span class="text-xs font-bold truncate">${lm.opp.short}</span>${crest(lm.opp, 32)}</div>
+            </div>
+          </div>
+          ${momHtml}
+          <div class="mt-3 flex-1 overflow-y-auto space-y-1.5 max-h-40">
+            ${lm.log.map(x => `<div class="text-[11px] px-2.5 py-1.5 rounded-lg border ${x.c === 'good' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' : (x.c === 'bad' ? 'bg-rose-500/10 border-rose-500/30 text-rose-200' : 'bg-slate-900 border-white/5 text-slate-300')}"><b>${x.m}'</b> ${x.t}</div>`).join('')}
+          </div>
+          ${lm.done ? `<button onclick="finishLiveMatch()" class="btn-primary py-3 text-sm mt-3 w-full">К итогам матча →</button>` : ''}
+        </div>
+      `);
+    }
+
+    function finishLiveMatch() {
+      const lm = liveMatch; liveMatch = null;
+      finalizeMatch({ next: lm.next, my: lm.my, opp: lm.opp, ms: lm.ms, os: lm.os, pg: lm.pg, pa: lm.pa, missPen: lm.missPen, rat: Number(lm.rat.toFixed(1)) });
+    }
+
+    function quickSimMatch() {
+      const next = getNextMatch(), my = getClub(state.player.clubId), opp = getClub(next.oppId);
+      const s = simScore(my, opp);
+      let ms = s.hg, os = s.ag;
+      if (next.type === 'ucl' && ms === os) { if (Math.random() < 0.52) ms++; else os++; }
+      const pg = ms > 0 && Math.random() < 0.55 ? 1 : 0;
+      const pa = ms > pg && Math.random() < 0.45 ? 1 : 0;
+      const rat = Number(Math.min(10, Math.max(5.5, 6.3 + pg * 1.1 + pa * 0.7 + (ms > os ? 0.5 : -0.2))).toFixed(1));
+      finalizeMatch({ next, my, opp, ms, os, pg, pa, missPen: 0, rat });
+    }
+
+    function finalizeMatch(r) {
+      const p = state.player, b = getBonuses(), hp = getHappyInfo(p.happiness);
+      const won = r.ms > r.os, draw = r.ms === r.os;
+      if (r.next.type === 'league') {
+        const hg = r.next.isHome ? r.ms : r.os, ag = r.next.isHome ? r.os : r.ms;
+        applyTable(p.leagueId, r.next.home, r.next.away, hg, ag);
+        simOtherMatches(state.round, p.leagueId, { home: r.next.home, away: r.next.away });
+        state.round++;
+      } else {
+        if (won) {
+          if (r.next.stage === 'semi') {
+            state.ucl.stage = 'final';
+            const oth = LEAGUES.filter(l => l.id !== p.leagueId).map(l => sortTable(state.tables[l.id])[0].clubId);
+            state.ucl.oppId = oth[Math.floor(Math.random() * oth.length)];
+          } else { state.ucl.finished = true; state.ucl.won = true; p.trophies.ucl++; p.fans += Math.round(250000 * b.media); }
+        } else { state.ucl.finished = true; state.ucl.won = false; }
+      }
+
+      p.sStats.m++; p.sStats.g += r.pg; p.sStats.a += r.pa; p.sStats.rSum += r.rat;
+      p.cStats.m++; p.cStats.g += r.pg; p.cStats.a += r.pa; p.cStats.rSum += r.rat;
+
+      let spInc = 0;
+      if (p.sponsorId) {
+        const sp = SPONSORS.find(x => x.id === p.sponsorId);
+        if (sp) spInc = Math.round((sp.match + sp.goal * r.pg) * b.media);
+      }
+      const sal = p.salary + (won ? Math.round(p.salary * 0.25) : 0);
+      p.money += sal + spInc;
+      lastSalaryAd = sal; postAdUsed = false;
+
+      const prevEn = p.energy;
+      p.energy = Math.max(5, Math.min(100, p.energy - Math.max(10, 25 - b.energy) + 10));
+      let injNow = false;
+      const risk = ((prevEn < 35 ? (38 - prevEn) * 0.016 : 0.01) + hp.injAdd) * (1 - b.injRed);
+      if ((prevEn < 35 || hp.injAdd > 0) && Math.random() < risk) { p.injury = Math.random() < 0.65 ? 1 : 2; injNow = true; }
+
+      const wDelta = getHappyFactors().reduce((s, f) => s + f.d, 0);
+      const eDelta = (won ? 4 : (draw ? 0 : -4)) + r.pg * 3 + r.pa * 2 - r.missPen * 6 - (injNow ? 12 : 0);
+      addHappy(wDelta + eDelta);
+
+      p.trust = Math.max(10, Math.min(100, p.trust + (r.rat >= 8 ? 7 : (r.rat >= 7 ? 3 : -3)) + r.pg * 2));
+      p.fans += Math.round((r.pg * 4000 + r.pa * 2000 + (won ? 1500 : 300)) * r.my.tier * 0.5 * b.media);
+      state.weekSlots = 3; state.adTrainUsed = false;
+
+      if (r.next.type === 'league' && state.round === 9) genOffers(false);
+      if (r.next.type === 'league' && state.round === 18) {
+        const rank = sortTable(state.tables[p.leagueId]).findIndex(x => x.clubId === p.clubId);
+        if (rank <= 1) {
+          const oth = LEAGUES.filter(l => l.id !== p.leagueId).map(l => sortTable(state.tables[l.id])[0].clubId);
+          state.ucl = { active: true, stage: 'semi', oppId: oth[Math.floor(Math.random() * oth.length)], finished: false, won: false };
+        }
+      }
+      saveState();
+
+      openModal(`
+        <div class="w-full max-w-[410px] glass p-5 anim">
+          <div class="text-center font-sport text-2xl font-bold ${won ? 'text-emerald-400' : (draw ? 'text-amber-300' : 'text-rose-400')}">
+            ${won ? 'ПОБЕДА!' : (draw ? 'НИЧЬЯ' : 'ПОРАЖЕНИЕ')} (${r.ms} : ${r.os})
+          </div>
+          <div class="grid grid-cols-3 gap-2 my-3 text-center">
+            <div class="bg-slate-900 rounded-xl p-2"><div class="text-[10px] text-slate-400">Оценка</div><div class="font-sport text-xl text-amber-300">${r.rat} ⭐</div></div>
+            <div class="bg-slate-900 rounded-xl p-2"><div class="text-[10px] text-slate-400">Голы</div><div class="font-sport text-xl text-emerald-400">${r.pg}</div></div>
+            <div class="bg-slate-900 rounded-xl p-2"><div class="text-[10px] text-slate-400">Ассисты</div><div class="font-sport text-xl text-sky-400">${r.pa}</div></div>
+          </div>
+          <div class="text-xs space-y-1 bg-slate-900/70 rounded-xl p-3 border border-white/5">
+            <div class="flex justify-between"><span class="text-slate-400">Зарплата</span><span class="font-bold text-emerald-400">+${fmtMoney(sal)}</span></div>
+            ${spInc ? `<div class="flex justify-between"><span class="text-slate-400">Спонсор</span><span class="font-bold text-amber-300">+${fmtMoney(spInc)}</span></div>` : ''}
+            <div class="flex justify-between"><span class="text-slate-400">Счастье</span><span class="font-bold">${p.happiness}%</span></div>
+            ${injNow ? `<div class="text-rose-400 font-bold pt-1">🚑 Травма на ${p.injury} тур(а)!</div>` : ''}
+          </div>
+          <div id="ad-sal-box" class="mt-3">
+            <button onclick="adDoubleSal()" class="btn-ad w-full py-3 text-xs">🎬 Удвоить зарплату (+${fmtMoney(sal)})</button>
+          </div>
+          <button onclick="closePostMatch()" class="btn-primary w-full py-3 text-sm mt-2">Продолжить</button>
+        </div>
+      `);
+    }
+
+    function adDoubleSal() {
+      if (postAdUsed) return;
+      showRewardedAd('double_salary', () => {
+        postAdUsed = true;
+        state.player.money += lastSalaryAd;
+        saveState();
+        const b = document.getElementById('ad-sal-box');
+        if (b) b.innerHTML = `<div class="p-2 rounded-xl bg-emerald-500/15 text-emerald-300 text-xs font-bold text-center">✓ Удвоено (+${fmtMoney(lastSalaryAd)})!</div>`;
+        render();
+      });
+    }
+
+    function closePostMatch() {
+      closeModal();
+      if (state.round >= 18 && (!state.ucl.active || state.ucl.finished)) openSeasonSummary();
+      else render();
+    }
+
+    /* ================= INJURIES & SEASON END ================= */
+    function openInjuryModal() {
+      const cost = Math.max(25000, Math.round(state.player.salary * 1.4));
+      openModal(`
+        <div class="w-full max-w-[390px] glass p-5 text-center anim">
+          <div class="text-4xl mb-1">🚑</div>
+          <h3 class="font-bold text-base text-rose-300">Травма (${state.player.injury} тур.)</h3>
+          <div class="flex flex-col gap-2 mt-4">
+            <button onclick="showRewardedAd('heal_injury', () => { state.player.injury=Math.max(0,state.player.injury-1); saveState(); closeModal(); render(); showToast('Лечение ускорено (-1 тур)!','success'); })" class="btn-ad py-3 text-xs">🎬 -1 тур лечения (Смотреть ролик)</button>
+            <button onclick="if(state.player.money<${cost}){showToast('Мало денег!','error');return;} state.player.money-=${cost}; state.player.injury=0; saveState(); closeModal(); render(); showToast('Вы здоровы!','success');" class="btn-gold py-3 text-xs">💉 Клиника (${fmtMoney(cost)})</button>
+            <button onclick="skipInjury()" class="btn-sec py-2.5 text-xs">🛌 Пропустить тур (+30 энергии)</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function skipInjury() {
+      if (state.round < 18) { simOtherMatches(state.round, null, null); state.round++; }
+      state.player.injury = Math.max(0, state.player.injury - 1);
+      state.player.energy = Math.min(100, state.player.energy + 30);
+      state.weekSlots = 3; state.adTrainUsed = false;
+      saveState(); closeModal(); render();
+    }
+
+    function openSeasonSummary() {
+      const p = state.player, l = getLeague(p.leagueId);
+      const rank = sortTable(state.tables[p.leagueId]).findIndex(x => x.clubId === p.clubId) + 1;
+      const isChamp = rank === 1;
+      const aiMax = Math.max(...(state.scorers[p.leagueId] || []).map(x => x.goals), 10);
+      const boot = p.sStats.g >= aiMax && p.sStats.g >= 10;
+      const ovr = calcOVR(p.stats, p.pos);
+      const bdor = ovr >= 82 && p.sStats.g >= 14 && (isChamp || state.ucl.won);
+      if (!state.awardsDone) {
+        if (isChamp) { p.trophies.league++; p.money += 250000; }
+        if (boot) { p.trophies.boot++; p.money += 150000; }
+        if (bdor) { p.trophies.bdor++; p.money += 1000000; }
+        state.awardsDone = true;
+        genOffers(true);
+        saveState();
+      }
+      openModal(`
+        <div class="w-full max-w-[410px] glass p-5 text-center anim">
+          <div class="text-xs font-bold text-amber-400 uppercase">Итоги сезона ${state.season}</div>
+          <h2 class="font-sport text-2xl font-bold mt-1">${l.flag} ${l.name} — ${rank}-е место</h2>
+          <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+            <div class="bg-slate-900 p-2.5 rounded-xl">Голы: <b class="text-emerald-400">${p.sStats.g}</b></div>
+            <div class="bg-slate-900 p-2.5 rounded-xl">Ассисты: <b class="text-sky-400">${p.sStats.a}</b></div>
+          </div>
+          <div class="space-y-1.5 text-xs mb-4">
+            ${isChamp ? '<div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 font-bold">🏆 Чемпион лиги! (+€250 тыс.)</div>' : ''}
+            ${state.ucl.won ? '<div class="p-2 rounded-xl bg-sky-500/20 text-sky-300 font-bold">🌟 Победитель Лиги Чемпионов!</div>' : ''}
+            ${boot ? '<div class="p-2 rounded-xl bg-amber-500/20 text-amber-300 font-bold">👟 Золотая бутса! (+€150 тыс.)</div>' : ''}
+            ${bdor ? '<div class="p-2 rounded-xl bg-amber-400/30 text-amber-100 font-extrabold">🌕 ЗОЛОТОЙ МЯЧ! (+€1 млн)</div>' : ''}
+          </div>
+          <button onclick="nextSeason()" class="btn-primary w-full py-3.5 text-sm">🚀 Начать Сезон ${state.season + 1}</button>
+        </div>
+      `);
+    }
+
+    function nextSeason() {
+      const p = state.player;
+      p.age++;
+      Object.assign(state, initSeasonData());
+      state.season++; state.round = 0; state.weekSlots = 3; state.adTrainUsed = false; state.awardsDone = false;
+      state.ucl = { active: false, stage: null, oppId: null, finished: false, won: false };
+      p.energy = 100; p.injury = 0; p.sStats = { m: 0, g: 0, a: 0, rSum: 0 };
+      saveState(); closeModal(); render();
+    }
+
+    /* ================= TRAINING, SHOP, TRANSFERS, REFERRALS ================= */
+    function trainChance(v) {
+      const b = getBonuses(), hp = getHappyInfo(state.player.happiness);
+      return Math.max(12, Math.min(97, Math.round((92 - Math.max(0, v - 58) * 2.1) * (1 + b.train + hp.trainMod))));
+    }
+    function doTrain(key) {
+      const p = state.player, m = STAT_META.find(x => x.key === key);
+      if (state.weekSlots <= 0) return showToast('Слоты закончились!', 'error');
+      if (p.energy < m.energy) return showToast('Мало энергии!', 'error');
+      if (p.stats[key] >= 99) return showToast('Максимум 99!', 'gold');
+      p.energy -= m.energy; state.weekSlots--;
+      if (p.energy < 20) addHappy(-4);
+      if (Math.random() * 100 < trainChance(p.stats[key])) {
+        p.stats[key]++; addHappy(2); haptic('success'); showToast(`🔥 ${m.name} +1 (${p.stats[key]})`, 'success');
+      } else { haptic('light'); showToast('Тренировка завершена, без роста.', 'info'); }
+      saveState(); render();
+    }
+    function doRest() {
+      if (state.weekSlots <= 0) return showToast('Слоты закончились!', 'error');
+      state.player.energy = Math.min(100, state.player.energy + 28);
+      addHappy(5); state.weekSlots--; saveState(); render();
+      showToast('+28% энергии, +5% счастья!', 'success');
+    }
+    function doTeamTrain() {
+      if (state.weekSlots <= 0 || state.player.energy < 12) return showToast('Нет слотов или энергии!', 'error');
+      state.player.energy -= 12; state.player.trust = Math.min(100, state.player.trust + 7);
+      addHappy(3); state.weekSlots--; saveState(); render();
+      showToast('+7 доверия тренера!', 'success');
+    }
+
+    function buyItem(id) {
+      const it = SHOP_ITEMS.find(x => x.id === id), p = state.player;
+      if (!it || (!it.cons && p.ownedItems.includes(id))) return;
+      if (p.money < it.cost) return showToast('Недостаточно средств!', 'error');
+      p.money -= it.cost;
+      const e = it.ef || {};
+      if (it.cons) {
+        if (e.happyNow) addHappy(e.happyNow);
+        if (e.energyNow) p.energy = Math.min(100, p.energy + e.energyNow);
+        showToast(`${it.icon} Отличный отдых!`, 'success');
+      } else {
+        p.ownedItems.push(id);
+        if (e.fans) p.fans += e.fans;
+        if (it.cat === 'housing' || it.cat === 'cars') addHappy(6);
+        if (id === 's3' && p.happiness < 45) p.happiness = 45;
+        showToast(`Куплено: ${it.name}!`, 'gold');
+      }
+      saveState(); render();
+    }
+
+    function genOffers(summer) {
+      const p = state.player, ovr = calcOVR(p.stats, p.pos), ag = AGENTS[p.agentId] || AGENTS[0];
+      const all = [];
+      LEAGUES.forEach(l => l.clubs.forEach(c => { if (c.id !== p.clubId) all.push({ ...c, lid: l.id, lname: l.name, flag: l.flag }); }));
+      const maxR = ovr + 5 + Math.round(ag.bonusTop * 0.22);
+      let cands = all.filter(c => c.ovr <= maxR && c.ovr >= Math.max(66, ovr - 6));
+      if (cands.length < 3) cands = all.sort((a, b) => Math.abs(a.ovr - ovr) - Math.abs(b.ovr - ovr)).slice(0, 6);
+      cands.sort(() => Math.random() - 0.5);
+      state.offers = cands.slice(0, summer ? 4 : 3).map((c, i) => ({
+        id: 'of_' + Date.now() + '_' + i, clubId: c.id,
+        sal: Math.max(15000, Math.round((Math.pow(c.tier, 2) * 9500 + Math.max(0, ovr - 65) * 4000) / 1000) * 1000),
+        neg: false, fail: false
+      }));
+      saveState();
+    }
+    function negOffer(id) {
+      const o = state.offers.find(x => x.id === id);
+      if (!o || o.neg || o.fail) return;
+      o.neg = true;
+      const ch = 45 + (AGENTS[state.player.agentId]?.neg || 0);
+      if (Math.random() * 100 < ch) { o.sal = Math.round(o.sal * 1.22 / 1000) * 1000; showToast(`Зарплата повышена до ${fmtMoney(o.sal)}!`, 'gold'); }
+      else { o.fail = true; showToast('Клуб отозвал предложение!', 'error'); }
+      saveState(); render();
+    }
+    function acceptOffer(id) {
+      const o = state.offers.find(x => x.id === id);
+      if (!o || o.fail) return;
+      const c = getClub(o.clubId);
+      state.player.clubId = c.id; state.player.leagueId = c.leagueId;
+      state.player.salary = o.sal; state.player.trust = 60;
+      addHappy(10); state.offers = []; selectedTableLeague = c.leagueId;
+      saveState(); render(); showToast(`Переход в ${c.name}!`, 'gold');
+    }
+
+    function getRefLink() {
+      const uid = (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) || tgUser.id || 'pro';
+      const bot = CONFIG.BOT_USERNAME.replace(/^@/, '').trim();
+      return CONFIG.APP_SHORT_NAME ? `https://t.me/${bot}/${CONFIG.APP_SHORT_NAME}?startapp=ref_${uid}` : `https://t.me/${bot}?start=ref_${uid}`;
+    }
+    function shareRef() {
+      const link = getRefLink(), txt = '⚽ Залетай в PRO CAREER: TOP 5 и забери +20 000 € на старт!';
+      const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(txt)}`;
+      inviteSent = true;
+      try { if (window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(url); else window.open(url, '_blank'); } catch (_) { window.open(url, '_blank'); }
+      render();
+    }
+    function copyRef() { inviteSent = true; copySafe(getRefLink()); showToast('Ссылка скопирована!', 'success'); render(); }
+    function claimRef() {
+      const r = state.referrals;
+      if (!inviteSent) return showToast('Сначала отправьте ссылку другу!', 'info');
+      if (Date.now() - r.lastAt < 25000) return showToast('Подождите немного перед следующей проверкой.', 'info');
+      r.count++; r.earned += CONFIG.REFERRAL_REWARD; r.lastAt = Date.now(); inviteSent = false;
+      state.player.money += CONFIG.REFERRAL_REWARD; addHappy(5);
+      saveState(); render(); showToast(`+${fmtMoney(CONFIG.REFERRAL_REWARD)} за друга!`, 'gold');
+    }
+
+    /* ================= ONLINE: PRO LEAGUE LIVE + SUPABASE ================= */
+    const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+    function untilMidnight() {
+      const now = new Date(), nxt = new Date(now); nxt.setHours(24,0,0,0);
+      const s = Math.max(0, Math.floor((nxt - now) / 1000));
+      return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    }
+    function pvpLimit() { return 1 + (state.online.adExtraDate === todayStr() ? 1 : 0); }
+    function pvpPlayed() { return state.online.lastDate === todayStr() ? (state.online.playedToday || 0) : 0; }
+    function pvpAvail() { return pvpPlayed() < pvpLimit(); }
+
+    function myOnlineRow() {
+      const p = state.player, c = getClub(p.clubId);
+      return {
+        tg_id: String(tgUser.id || 'demo_1001'), name: p.name, club: c.name, position: p.pos,
+        ovr: calcOVR(p.stats, p.pos), tactic: state.online.defTac || 'press',
+        rating: state.online.rating, wins: state.online.wins, draws: state.online.draws, losses: state.online.losses,
+        updated_at: new Date().toISOString()
+      };
+    }
+
+    function sbHeaders(extra = {}) {
+      return { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', ...extra };
+    }
+
+    async function syncSupabase() {
+      try {
+        const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/players?on_conflict=tg_id`, {
+          method: 'POST', headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify(myOnlineRow())
+        });
+        return res.ok;
+      } catch (_) { return false; }
+    }
+
+    function demoBoard() {
+      const list = [...DEMO_ONLINE.map(x => ({ ...x })), myOnlineRow()];
+      return list.sort((a, b) => (b.rating - a.rating) || (b.ovr - a.ovr)).slice(0, 50);
+    }
+
+    async function fetchLeaderboard(silent = false) {
+      onlineLoading = true;
+      if (!silent && activeTab === 'online') render();
+      try {
+        await syncSupabase();
+        const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/players?select=*&order=rating.desc,ovr.desc&limit=50`, { headers: sbHeaders() });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const rows = await res.json();
+        onlineBoard = Array.isArray(rows) && rows.length ? rows : demoBoard();
+      } catch (_) {
+        onlineBoard = demoBoard();
+      } finally {
+        onlineLoading = false;
+        if (!pvpOpp) pickOpp(true);
+        if (activeTab === 'online') render();
+      }
+    }
+
+    function pickOpp(silent = false) {
+      const myId = String(tgUser.id || 'demo_1001');
+      const pool = (onlineBoard.length > 1 ? onlineBoard : DEMO_ONLINE).filter(x => String(x.tg_id) !== myId);
+      const src = pool.length ? pool : DEMO_ONLINE;
+      pvpOpp = { ...src[Math.floor(Math.random() * src.length)] };
+      pvpScouted = false;
+      if (!silent) { render(); showToast(`Соперник: ${pvpOpp.name}`, 'info'); }
+    }
+
+    function startPvp() {
+      if (!pvpAvail()) return showToast('Лимит матчей на сегодня исчерпан!', 'info');
+      if (!pvpOpp) pickOpp(true);
+      const p = state.player, opp = pvpOpp;
+      const myTac = TACTICS[state.online.atkTac] || TACTICS.press;
+      const oppTac = TACTICS[opp.tactic] || TACTICS.press;
+      const tacMod = myTac.beats === oppTac.id ? 12 : (myTac.losesTo === oppTac.id ? -12 : 0);
+      const myOvr = calcOVR(p.stats, p.pos);
+      const winCh = Math.max(20, Math.min(82, 50 + (myOvr - (opp.ovr || 75)) * 1.6 + tacMod));
+
+      let ms = 0, os = 0;
+      const steps = [15, 34, 55, 73, 88].map(m => {
+        const r = Math.random() * 100;
+        if (r < winCh * 0.55) { ms++; return { m, s: 'my', t: `⚽ ${p.name} забивает гол!`, ms, os }; }
+        if (r < winCh * 0.55 + (100 - winCh) * 0.55) { os++; return { m, s: 'opp', t: `🔴 ${opp.name} поражает ворота!`, ms, os }; }
+        return { m, s: 'n', t: '🧤 Опасный момент, но вратарь спасает!', ms, os };
+      });
+      livePvp = { opp, myTac, oppTac, tacMod, steps, shown: 0, ms, os, done: false, timer: null };
+      renderPvpModal();
+      livePvp.timer = setInterval(() => {
+        livePvp.shown++;
+        if (livePvp.shown >= livePvp.steps.length) {
+          clearInterval(livePvp.timer);
+          livePvp.done = true;
+          const t = todayStr();
+          state.online.playedToday = state.online.lastDate === t ? state.online.playedToday + 1 : 1;
+          state.online.lastDate = t;
+          const rd = ms > os ? 30 : (ms === os ? 10 : -15);
+          const rew = ms > os ? 25000 : (ms === os ? 10000 : 5000);
+          if (ms > os) state.online.wins++; else if (ms === os) state.online.draws++; else state.online.losses++;
+          state.online.rating = Math.max(500, state.online.rating + rd);
+          state.player.money += rew;
+          livePvp.rd = rd; livePvp.rew = rew;
+          saveState();
+          fetchLeaderboard(true);
+        }
+        renderPvpModal();
+      }, 750);
+    }
+
+    function renderPvpModal() {
+      if (!livePvp) return;
+      const lp = livePvp, sh = lp.steps.slice(0, lp.shown);
+      const cm = sh.length ? sh[sh.length - 1].ms : 0, co = sh.length ? sh[sh.length - 1].os : 0;
+      openModal(`
+        <div class="w-full max-w-[420px] glass p-5 anim">
+          <div class="text-center text-xs font-bold text-indigo-300 mb-2">⚔️ PRO LEAGUE LIVE</div>
+          <div class="bg-slate-900 rounded-2xl p-3.5 border border-white/10 text-center">
+            <div class="flex justify-between items-center">
+              <div class="w-[38%] text-xs font-bold text-emerald-300 truncate">${state.player.name}<div class="text-[10px] text-slate-400">${lp.myTac.icon} ${lp.myTac.short}</div></div>
+              <div class="font-sport text-3xl font-bold">${cm} : ${co}</div>
+              <div class="w-[38%] text-xs font-bold text-amber-300 truncate">${lp.opp.name}<div class="text-[10px] text-slate-400">${lp.oppTac.icon} ${lp.oppTac.short}</div></div>
+            </div>
+            <div class="text-[11px] font-bold mt-2 ${lp.tacMod > 0 ? 'text-emerald-400' : (lp.tacMod < 0 ? 'text-rose-400' : 'text-slate-400')}">
+              ${lp.tacMod > 0 ? 'Контр-тактика (+12%)' : (lp.tacMod < 0 ? 'Тактика проиграна (-12%)' : 'Равные тактики (0%)')}
+            </div>
+          </div>
+          <div class="mt-3 space-y-1.5 min-h-[140px]">
+            ${sh.map(x => `<div class="p-2 rounded-xl text-xs border ${x.s==='my'?'bg-emerald-500/15 border-emerald-400/40 text-emerald-200':(x.s==='opp'?'bg-rose-500/15 border-rose-400/40 text-rose-200':'bg-slate-900 border-white/10 text-slate-300')}"><b>${x.m}'</b> ${x.t}</div>`).join('')}
+          </div>
+          ${lp.done ? `
+            <div class="mt-3 p-3 rounded-xl bg-slate-900 text-xs space-y-1">
+              <div class="flex justify-between"><span>Рейтинг</span><b class="${lp.rd>=0?'text-emerald-400':'text-rose-400'}">${lp.rd>=0?'+':''}${lp.rd} (${state.online.rating})</b></div>
+              <div class="flex justify-between"><span>Награда</span><b class="text-amber-300">+${fmtMoney(lp.rew)}</b></div>
+            </div>
+            <button onclick="livePvp=null; closeModal(); pickOpp(true); render();" class="btn-primary w-full py-3 text-sm mt-3">Забрать</button>
+          ` : ''}
+        </div>
+      `);
+    }
+
+    /* ================= MODALS ================= */
+    function openModal(html) {
+      const l = document.getElementById('modal-layer');
+      l.innerHTML = html; l.classList.remove('hidden'); l.classList.add('flex');
+    }
+    function closeModal() {
+      const l = document.getElementById('modal-layer');
+      l.classList.add('hidden'); l.classList.remove('flex'); l.innerHTML = '';
+    }
+    function openHappyModal() {
+      const p = state.player, hp = getHappyInfo(p.happiness), facs = getHappyFactors();
+      openModal(`
+        <div class="w-full max-w-[400px] glass p-5 anim">
+          <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm">${hp.em} Факторы счастья (${p.happiness}%)</h3><button onclick="closeModal()" class="text-slate-400">✕</button></div>
+          <div class="p-3 rounded-xl border ${hp.bg} text-xs mb-3"><b class="${hp.cls}">${hp.label}</b> — ${hp.desc}</div>
+          <div class="space-y-1.5 mb-4">
+            ${facs.map(f => `<div class="p-2.5 rounded-xl bg-slate-900 border border-white/5 flex justify-between items-center text-xs"><div><div class="font-bold">${f.t}</div><div class="text-[10px] text-slate-400">${f.desc}</div></div><span class="font-bold ${f.d>0?'text-emerald-400':(f.d<0?'text-rose-400':'text-slate-400')}">${f.d>0?'+'+f.d:f.d}</span></div>`).join('')}
+          </div>
+          <button onclick="closeModal()" class="btn-sec w-full py-2.5 text-xs">Закрыть</button>
+        </div>
+      `);
+    }
+
+    /* ================= RENDER SCREENS ================= */
+    function renderCreate() {
+      if (!creationDraft.name) creationDraft.name = tgUser.firstName || 'Артём Волков';
+      return `
+        <div class="p-5 pb-10 space-y-4 anim">
+          <div class="text-center pt-2">
+            <div class="text-[11px] font-bold uppercase text-emerald-400">⚽ Telegram Mini App</div>
+            <h1 class="font-sport text-4xl font-bold text-white">PRO CAREER: TOP 5</h1>
+            <p class="text-xs text-slate-400">Путь от таланта до Золотого мяча</p>
+          </div>
+          <div class="glass p-4">
+            <div class="text-xs font-bold text-slate-300 mb-2">Имя футболиста</div>
+            <input type="text" maxlength="20" value="${creationDraft.name}" oninput="creationDraft.name=this.value" class="w-full bg-slate-900 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-emerald-400" />
+          </div>
+          <div class="glass p-4">
+            <div class="text-xs font-bold text-slate-300 mb-2">Позиция</div>
+            <div class="grid grid-cols-5 gap-1.5">
+              ${Object.values(POSITIONS).map(p => `
+                <button onclick="creationDraft.pos='${p.code}'; render();" class="p-2 rounded-xl border text-center ${creationDraft.pos===p.code?'bg-emerald-500/20 border-emerald-400':'bg-slate-900 border-white/10'}">
+                  <div class="text-lg">${p.icon}</div>
+                  <div class="font-sport text-xs font-bold">${p.code}</div>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div class="glass p-4">
+            <div class="text-xs font-bold text-slate-300 mb-2">Стартовая лига</div>
+            <div class="space-y-1.5">
+              ${LEAGUES.map(l => {
+                const st = [...l.clubs].sort((a,b)=>a.ovr-b.ovr)[0];
+                return `<button onclick="creationDraft.leagueId='${l.id}'; render();" class="w-full p-2.5 rounded-xl border flex justify-between items-center text-xs ${creationDraft.leagueId===l.id?'bg-emerald-500/20 border-emerald-400':'bg-slate-900 border-white/10'}">
+                  <span>${l.flag} <b>${l.name}</b> <span class="text-slate-400">(${st.name})</span></span>
+                  <span>${creationDraft.leagueId===l.id?'✓':''}</span>
+                </button>`;
+              }).join('')}
+            </div>
+          </div>
+          <button onclick="createCareer()" class="btn-primary w-full py-4 text-base">🚀 НАЧАТЬ КАРЬЕРУ</button>
+        </div>
+      `;
+    }
+
+    function renderHome() {
+      const p = state.player, c = getClub(p.clubId), ovr = calcOVR(p.stats, p.pos), hp = getHappyInfo(p.happiness), b = getBonuses();
+      const done = state.round >= 18 && (!state.ucl.active || state.ucl.finished);
+      return `
+        <div class="p-4 space-y-3.5 anim">
+          <div class="fut-card ${cardClass(ovr)}">
+            <div class="flex justify-between items-start relative z-10">
+              <div class="flex items-center gap-3">
+                <div class="text-center leading-none">
+                  <div class="font-sport text-5xl font-bold">${ovr}</div>
+                  <div class="font-sport text-xs font-bold text-amber-300">${p.pos} • ${cardBadge(ovr)}</div>
+                </div>
+                <div>
+                  <div class="font-bold text-lg leading-tight">${p.name}</div>
+                  <div class="text-xs text-slate-300">${c.flag} ${c.name} • ${p.age} лет</div>
+                  <div class="text-[11px] text-emerald-300 font-bold mt-1">ЗП: ${fmtMoney(p.salary)}/матч</div>
+                </div>
+              </div>
+              ${crest(c, 42)}
+            </div>
+            <div class="grid grid-cols-6 gap-1 mt-4 pt-3 border-t border-white/15 text-center relative z-10">
+              ${STAT_META.map(s => `<div><div class="text-[9px] text-slate-300">${s.label}</div><div class="font-sport text-lg font-bold">${p.stats[s.key]}${b.stat[s.key]?`<span class="text-[10px] text-emerald-300">+${b.stat[s.key]}</span>`:''}</div></div>`).join('')}
+            </div>
+          </div>
+
+          <div class="glass p-3.5 space-y-2.5 text-xs">
+            <div class="flex justify-between"><span>⚡ Энергия</span><b>${p.energy}%</b></div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-emerald-400" style="width:${p.energy}%"></div></div>
+            <div class="flex justify-between items-center">
+              <span>${hp.em} Счастье: <b class="${hp.cls}">${hp.label} (${p.happiness}%)</b></span>
+              <button onclick="openHappyModal()" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-sky-300 font-bold">Факторы</button>
+            </div>
+            <div class="flex justify-between"><span>🤝 Доверие тренера (${getRole(p.trust).label})</span><b>${p.trust}%</b></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="glass p-2.5"><div class="text-[10px] text-slate-400">Голы (С${state.season})</div><div class="font-sport text-xl text-emerald-400">${p.sStats.g}</div></div>
+            <div class="glass p-2.5"><div class="text-[10px] text-slate-400">Ассисты</div><div class="font-sport text-xl text-sky-400">${p.sStats.a}</div></div>
+            <div class="glass p-2.5"><div class="text-[10px] text-slate-400">Фанаты</div><div class="font-sport text-xl text-amber-300">${fmtFans(p.fans)}</div></div>
+          </div>
+
+          <button onclick="${done ? 'openSeasonSummary()' : 'openPreMatch()'}" class="btn-primary w-full py-3.5 text-sm">
+            ${done ? '🏆 Подвести итоги сезона' : (p.injury > 0 ? `🚑 Травма (${p.injury} тур.)` : '⚽ ИГРАТЬ СЛЕДУЮЩИЙ МАТЧ')}
+          </button>
+
+          <button onclick="switchTab('career'); careerSubTab='friends'; render();" class="w-full p-3 rounded-2xl bg-indigo-500/20 border border-indigo-400/40 flex justify-between items-center text-xs font-bold">
+            <span>🎁 Пригласи друга в Telegram</span>
+            <span class="text-emerald-300">+20 000 € →</span>
+          </button>
+        </div>
+      `;
+    }
+
+    function renderMatchTab() {
+      const next = getNextMatch();
+      if (!next) return `<div class="p-6 text-center space-y-3"><div class="text-3xl">🏆</div><div class="font-bold">Сезон ${state.season} завершён!</div><button onclick="openSeasonSummary()" class="btn-primary px-6 py-3 text-sm">Открыть итоги</button></div>`;
+      const my = getClub(state.player.clubId), opp = getClub(next.oppId);
+      return `
+        <div class="p-4 space-y-4 anim">
+          <div class="glass p-5 text-center space-y-4">
+            <div class="text-xs font-bold uppercase text-emerald-400">${next.type==='ucl'?'🏆 Лига Чемпионов':`${my.flag} ${my.leagueName} • Тур ${next.round}/18`}</div>
+            <div class="flex justify-around items-center">
+              <div class="flex flex-col items-center">${crest(my, 54)}<b class="text-xs mt-1.5">${my.name}</b><span class="text-[10px] text-slate-400">OVR ${my.ovr}</span></div>
+              <div class="font-sport text-3xl text-slate-500">VS</div>
+              <div class="flex flex-col items-center">${crest(opp, 54)}<b class="text-xs mt-1.5">${opp.name}</b><span class="text-[10px] text-slate-400">OVR ${opp.ovr}</span></div>
+            </div>
+            <button onclick="openPreMatch()" class="btn-primary w-full py-3.5 text-sm">⚽ Выйти на поле</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTraining() {
+      const p = state.player;
+      return `
+        <div class="p-4 space-y-3 anim">
+          <div class="glass p-3.5 flex justify-between items-center">
+            <div><div class="text-xs font-bold text-emerald-400">Тренировки недели</div><div class="text-[10px] text-slate-400">Энергия: ${p.energy}%</div></div>
+            <div class="font-sport text-2xl font-bold">${state.weekSlots} / 3</div>
+          </div>
+          ${!state.adTrainUsed ? `<button onclick="showRewardedAd('free_training',()=>{state.adTrainUsed=true;state.weekSlots++;saveState();render();showToast('+1 тренировка!','gold');})" class="btn-ad w-full py-3 text-xs">🎬 +1 бесплатная тренировка</button>` : ''}
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="doTeamTrain()" class="glass p-3 text-left text-xs"><b>🤝 С командой</b><div class="text-[10px] text-slate-400">-12⚡ • +7 доверия</div></button>
+            <button onclick="doRest()" class="glass p-3 text-left text-xs"><b>🛌 Отдых</b><div class="text-[10px] text-emerald-400">+28⚡ • +5% счастья</div></button>
+          </div>
+          <div class="space-y-2">
+            ${STAT_META.map(s => `
+              <button onclick="doTrain('${s.key}')" class="w-full glass p-3 flex justify-between items-center text-left active:scale-[0.98]">
+                <div><div class="text-xs font-bold">${s.icon} ${s.drill} <span class="text-sky-300">(${s.label} ${p.stats[s.key]})</span></div><div class="text-[10px] text-slate-400">Шанс +1: <b class="text-emerald-400">${trainChance(p.stats[s.key])}%</b></div></div>
+                <span class="text-xs font-bold text-amber-300">-${s.energy}⚡</span>
+              </button>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderShop() {
+      const p = state.player, items = SHOP_ITEMS.filter(i => i.cat === shopSubTab);
+      return `
+        <div class="p-4 space-y-3 anim">
+          <div class="flex gap-1.5 overflow-x-auto pb-1">
+            ${SHOP_CATS.map(c => `<button onclick="shopSubTab='${c.id}'; render();" class="px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 border ${shopSubTab===c.id?'bg-emerald-500/20 border-emerald-400 text-emerald-300':'bg-slate-900 border-white/10 text-slate-400'}">${c.icon} ${c.label}</button>`).join('')}
+          </div>
+          <div class="space-y-2">
+            ${items.map(it => {
+              const own = !it.cons && p.ownedItems.includes(it.id);
+              return `
+                <div class="glass p-3 flex justify-between items-center gap-2">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="text-2xl">${it.icon}</span>
+                    <div class="min-w-0"><div class="text-xs font-bold truncate">${it.name}</div><div class="text-[10px] text-slate-400">${it.desc}</div></div>
+                  </div>
+                  ${own ? `<span class="text-[10px] font-bold text-emerald-400 shrink-0">Куплено ✓</span>` : `<button onclick="buyItem('${it.id}')" class="px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0 ${p.money>=it.cost?'bg-amber-500/20 border border-amber-400/50 text-amber-200':'bg-slate-800 text-slate-500'}">${fmtMoney(it.cost)}</button>`}
+                </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCareer() {
+      const p = state.player;
+      let body = '';
+      if (careerSubTab === 'table') {
+        const rows = sortTable(state.tables[selectedTableLeague] || []);
+        body = `
+          <div class="flex gap-1 overflow-x-auto pb-1">${LEAGUES.map(l => `<button onclick="selectedTableLeague='${l.id}'; render();" class="px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 ${selectedTableLeague===l.id?'bg-emerald-500 text-slate-950':'bg-slate-900 text-slate-400'}">${l.flag} ${l.name}</button>`).join('')}</div>
+          <div class="glass overflow-hidden text-xs">
+            <div class="px-3 py-2 bg-slate-900 font-bold flex justify-between text-[10px] text-slate-400"><span># Клуб</span><span>И • РМ • О</span></div>
+            ${rows.map((r, i) => {
+              const c = getClub(r.clubId), me = r.clubId === p.clubId;
+              return `<div class="px-3 py-2 flex justify-between border-t border-white/5 ${me?'bg-emerald-500/15 font-bold text-emerald-300':''}"><span>${i+1}. ${c.name}</span><span>${r.p} • ${r.gf-r.ga} • <b>${r.pts}</b></span></div>`;
+            }).join('')}
+          </div>`;
+      } else if (careerSubTab === 'scorers') {
+        const list = [...(state.scorers[p.leagueId] || []), { name: p.name + ' (Вы)', clubId: p.clubId, goals: p.sStats.g, me: true }].sort((a,b) => b.goals - a.goals);
+        body = `<div class="glass overflow-hidden text-xs">${list.map((s,i) => `<div class="px-3 py-2.5 flex justify-between border-t border-white/5 ${s.me?'bg-emerald-500/15 font-bold text-emerald-300':''}"><span>${i+1}. ${s.name} <span class="text-slate-400 text-[10px]">(${getClub(s.clubId).short})</span></span><b class="font-sport text-base">${s.goals}</b></div>`).join('')}</div>`;
+      } else if (careerSubTab === 'transfers') {
+        body = `
+          <div class="glass p-3.5 space-y-2.5">
+            <div class="flex justify-between items-center"><b class="text-xs text-emerald-400">Офферы клубов</b><button onclick="showRewardedAd('refresh_offers',()=>{genOffers(false);render();showToast('Офферы обновлены!','gold');})" class="btn-ad px-3 py-1.5 text-[11px]">🎬 Обновить</button></div>
+            ${state.offers.length === 0 ? `<div class="text-xs text-slate-400 text-center py-3">Нет офферов. Нажмите «🎬 Обновить».</div>` : state.offers.map(o => {
+              const c = getClub(o.clubId);
+              if (o.fail) return `<div class="p-2.5 rounded-xl bg-rose-950/40 text-xs text-rose-300">${c.name} — сделка сорвалась</div>`;
+              return `<div class="p-3 rounded-xl bg-slate-900 border border-white/10 space-y-2"><div class="flex justify-between text-xs"><b>${c.flag} ${c.name} (OVR ${c.ovr})</b><b class="text-emerald-400">${fmtMoney(o.sal)}/м</b></div><div class="grid grid-cols-2 gap-2"><button onclick="acceptOffer('${o.id}')" class="btn-primary py-2 text-xs">✍️ Подписать</button><button onclick="negOffer('${o.id}')" ${o.neg?'disabled':''} class="btn-sec py-2 text-xs ${o.neg?'opacity-40':''}">💬 Торг</button></div></div>`;
+            }).join('')}
+          </div>
+          <div class="glass p-3.5 space-y-2">
+            <b class="text-xs text-amber-400">Агенты</b>
+            ${AGENTS.map(a => `<div class="p-2.5 rounded-xl bg-slate-900 flex justify-between items-center text-xs"><div><b>${a.emoji} ${a.name}</b><div class="text-[10px] text-slate-400">${a.desc}</div></div>${p.agentId>=a.id?'<span class="text-emerald-400 font-bold">✓</span>':`<button onclick="if(state.player.money<${a.cost}){showToast('Мало денег!','error');return;} state.player.money-=${a.cost}; state.player.agentId=${a.id}; saveState(); render();" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-200 font-bold">${fmtMoney(a.cost)}</button>`}</div>`).join('')}
+          </div>`;
+      } else if (careerSubTab === 'sponsors') {
+        body = `<div class="glass p-3.5 space-y-2">${SPONSORS.map(s => `<div class="p-3 rounded-xl bg-slate-900 flex justify-between items-center text-xs"><div><b>${s.icon} ${s.name}</b><div class="text-[10px] text-emerald-300">+${fmtMoney(s.match)}/м • +${fmtMoney(s.goal)}/гол</div><div class="text-[10px] text-slate-400">Нужно ${fmtFans(s.req)} фанов</div></div>${p.sponsorId===s.id?'<span class="text-emerald-400 font-bold">Активен</span>':`<button onclick="if(state.player.fans<${s.req}){showToast('Мало фанатов!','error');return;} state.player.sponsorId='${s.id}'; saveState(); render();" class="px-2.5 py-1 rounded-lg ${p.fans>=s.req?'bg-sky-500/20 text-sky-200':'bg-slate-800 text-slate-500'} font-bold">${p.fans>=s.req?'Выбрать':'🔒'}</button>`}</div>`).join('')}</div>`;
+      } else {
+        const r = state.referrals;
+        body = `
+          <div class="glass p-4 space-y-3 text-center">
+            <div class="text-3xl">🎁</div>
+            <div class="font-sport text-xl font-bold">ДРУЗЬЯ +20 000 €</div>
+            <div class="grid grid-cols-2 gap-2 text-xs"><div class="bg-slate-900 p-2.5 rounded-xl">Друзей: <b>${r.count}</b></div><div class="bg-slate-900 p-2.5 rounded-xl">Бонус: <b class="text-emerald-400">${fmtMoney(r.earned)}</b></div></div>
+            <div class="p-2.5 rounded-xl bg-slate-950 text-[10px] text-sky-300 font-mono break-all">${getRefLink()}</div>
+            <button onclick="shareRef()" class="btn-primary w-full py-3 text-xs">✈️ Пригласить в Telegram</button>
+            <button onclick="copyRef()" class="btn-sec w-full py-2.5 text-xs">📋 Скопировать ссылку</button>
+            <button onclick="claimRef()" class="btn-gold w-full py-2.5 text-xs">✅ Забрать +20 000 €</button>
+          </div>`;
+      }
+      const tabs = [['table','Таблица'],['scorers','Голы'],['transfers','Трансф.'],['sponsors','Спонс.'],['friends','Друзья']];
+      return `
+        <div class="p-4 space-y-3 anim">
+          <div class="grid grid-cols-5 gap-1 bg-slate-900 p-1 rounded-xl">
+            ${tabs.map(([k,l]) => `<button onclick="careerSubTab='${k}'; render();" class="py-1.5 rounded-lg text-[10px] font-bold ${careerSubTab===k?'bg-emerald-500 text-slate-950':'text-slate-400'}">${l}</button>`).join('')}
+          </div>
+          ${body}
+        </div>
+      `;
+    }
+
+    function renderOnline() {
+      const canPlay = pvpAvail(), canExtra = state.online.adExtraDate !== todayStr();
+      const myId = String(tgUser.id || 'demo_1001');
+      let body = '';
+      if (onlineSubTab === 'pvp') {
+        const oTac = pvpOpp ? (TACTICS[pvpOpp.tactic] || TACTICS.press) : TACTICS.press;
+        body = `
+          ${canPlay ? `<div class="glass p-3 border-emerald-500/40 flex justify-between items-center text-xs"><b class="text-emerald-300">⚔️ Ежедневный PvP-тур открыт!</b><span class="font-bold">${pvpPlayed()}/${pvpLimit()}</span></div>` : `
+            <div class="glass p-4 text-center space-y-2 border-amber-400/40">
+              <div class="text-xs font-bold text-amber-300">⏳ Следующий тур через:</div>
+              <div id="pvp-cd" class="font-sport text-3xl font-bold">${untilMidnight()}</div>
+              ${canExtra ? `<button onclick="showRewardedAd('extra_pvp_match',()=>{state.online.adExtraDate=todayStr();saveState();render();showToast('+1 PvP матч!','gold');})" class="btn-ad w-full py-2.5 text-xs">🎬 +1 доп. PvP-матч сегодня</button>` : ''}
+            </div>`}
+          <div class="glass p-3.5 space-y-2.5">
+            <div class="flex justify-between items-center"><b class="text-xs">Соперник</b><button onclick="pickOpp()" class="text-[11px] text-sky-300 font-bold">🔄 Другой</button></div>
+            ${pvpOpp ? `
+              <div class="p-3 rounded-xl bg-slate-900 flex justify-between items-center">
+                <div><div class="text-sm font-bold">${pvpOpp.name} <span class="text-amber-300 text-xs">${pvpOpp.position||'ST'}</span></div><div class="text-[10px] text-slate-400">${pvpOpp.club} • 🏆 ${pvpOpp.rating}</div><div class="text-[11px] mt-1">Тактика: <b>${pvpScouted ? oTac.icon+' '+oTac.name : '❓ Скрыта'}</b></div></div>
+                <div class="font-sport text-3xl font-bold text-amber-300">${pvpOpp.ovr}</div>
+              </div>
+              ${!pvpScouted ? `<button onclick="showRewardedAd('scout_opponent',()=>{pvpScouted=true;render();showToast('Тактика раскрыта!','gold');})" class="btn-ad w-full py-2.5 text-xs">🕵️ Разведка скаута (Ролик)</button>` : ''}
+            ` : ''}
+          </div>
+          <div class="glass p-3.5 space-y-2">
+            <div class="text-xs font-bold text-emerald-400">Тактика на матч (+12% за контр-стиль)</div>
+            <div class="grid grid-cols-3 gap-1.5">
+              ${Object.values(TACTICS).map(t => `<button onclick="state.online.atkTac='${t.id}'; saveState(); render();" class="p-2 rounded-xl border text-center ${state.online.atkTac===t.id?'bg-emerald-500/20 border-emerald-400':'bg-slate-900 border-white/10'}"><div class="text-lg">${t.icon}</div><div class="text-[10px] font-bold">${t.short}</div></button>`).join('')}
+            </div>
+            <button onclick="startPvp()" ${!canPlay?'disabled':''} class="btn-primary w-full py-3 text-sm ${!canPlay?'opacity-40':''}">⚔️ ИГРАТЬ PvP</button>
+          </div>
+          <div class="glass p-3 space-y-1.5">
+            <div class="text-[11px] font-bold text-slate-300">🛡️ Тактика защиты</div>
+            <div class="grid grid-cols-3 gap-1.5">
+              ${Object.values(TACTICS).map(t => `<button onclick="state.online.defTac='${t.id}'; saveState(); syncSupabase(); render();" class="py-1.5 rounded-lg border text-[10px] font-bold ${state.online.defTac===t.id?'bg-sky-500/20 border-sky-400 text-sky-300':'bg-slate-900 border-white/10 text-slate-400'}">${t.icon} ${t.short}</button>`).join('')}
+            </div>
+          </div>`;
+      } else {
+        const list = onlineBoard.length ? onlineBoard : demoBoard();
+        body = `
+          <div class="glass p-3 flex justify-between items-center text-xs">
+            <div>Рейтинг: <b class="text-emerald-400">${state.online.rating}</b> (В:${state.online.wins} Н:${state.online.draws} П:${state.online.losses})</div>
+            <button onclick="fetchLeaderboard(false)" class="px-2.5 py-1 rounded-lg bg-slate-800 text-sky-300 font-bold">${onlineLoading?'⏳':'🔄'}</button>
+          </div>
+          <div class="glass overflow-hidden text-xs">
+            ${list.map((r, i) => {
+              const me = String(r.tg_id) === myId;
+              return `<div class="px-3 py-2 flex justify-between items-center border-t border-white/5 ${me?'bg-emerald-500/15 font-bold text-emerald-300':''}">
+                <div class="truncate"><b>${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</b> ${r.name} <span class="text-[10px] text-slate-400">${r.club}</span></div>
+                <div class="shrink-0 flex gap-2"><span class="text-amber-300 font-sport">${r.ovr}</span><b class="font-sport text-sm w-10 text-right">${r.rating}</b></div>
+              </div>`;
+            }).join('')}
+          </div>`;
+      }
+      return `
+        <div class="p-4 space-y-3 anim">
+          <div class="flex justify-between items-center"><b class="font-sport text-lg">PRO LEAGUE LIVE</b><span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">🟢 ONLINE</span></div>
+          <div class="grid grid-cols-2 gap-1.5 bg-slate-900 p-1 rounded-xl">
+            <button onclick="onlineSubTab='pvp'; render();" class="py-1.5 rounded-lg text-xs font-bold ${onlineSubTab==='pvp'?'bg-emerald-500 text-slate-950':'text-slate-400'}">⚔️ PvP Матч</button>
+            <button onclick="onlineSubTab='leaderboard'; render();" class="py-1.5 rounded-lg text-xs font-bold ${onlineSubTab==='leaderboard'?'bg-emerald-500 text-slate-950':'text-slate-400'}">🌍 Топ-50</button>
+          </div>
+          ${body}
+        </div>
+      `;
+    }
+
+    function switchTab(t) {
+      activeTab = t;
+      haptic('light');
+      clearInterval(countdownTimer);
+      if (t === 'online') {
+        countdownTimer = setInterval(() => { const el = document.getElementById('pvp-cd'); if (el) el.textContent = untilMidnight(); }, 1000);
+        if (!onlineSynced) { onlineSynced = true; fetchLeaderboard(false); }
+        else if (!pvpOpp) pickOpp(true);
+      }
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function render() {
+      const root = document.getElementById('root');
+      if (!root) return;
+      try {
+        if (!state || !state.player) { root.innerHTML = renderCreate(); return; }
+        ensureStateIntegrity();
+        const p = state.player, c = getClub(p.clubId), hp = getHappyInfo(p.happiness);
+        const nav = [
+          ['home', 'Главная', '🏠'],
+          ['match', 'Матч', '⚽'],
+          ['training', 'Тренир.', '🏋️'],
+          ['shop', 'Магазин', '🛍️'],
+          ['career', 'Карьера', '💼'],
+          ['online', 'Онлайн', '🌍']
+        ];
+        const pages = { home: renderHome, match: renderMatchTab, training: renderTraining, shop: renderShop, career: renderCareer, online: renderOnline };
+        root.innerHTML = `
+          <header class="sticky top-0 z-30 px-3 py-2 bg-[#060913]/95 backdrop-blur-md border-b border-white/5 flex justify-between items-center gap-2">
+            <div class="flex items-center gap-2 min-w-0">${crest(c, 28)}<div class="min-w-0"><div class="text-xs font-bold truncate">${c.name}</div><div class="text-[10px] text-slate-400">С${state.season} • Тур ${Math.min(18, state.round+1)}/18</div></div></div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="openHappyModal()" class="px-2 py-1 rounded-xl border text-[10px] font-bold ${hp.bg} ${hp.cls}">${hp.em} ${p.happiness}%</button>
+              <div class="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-sport text-xs font-bold">${fmtMoney(p.money)}</div>
+            </div>
+          </header>
+          <main class="flex-1 pb-20">${(pages[activeTab] || renderHome)()}</main>
+          <nav class="bottom-nav grid grid-cols-6">
+            ${nav.map(([id, lbl, ic]) => `
+              <button onclick="switchTab('${id}')" class="nav-btn ${activeTab===id?'active':''}">
+                <div class="relative text-base leading-none mb-1">${ic}${id==='online'&&pvpAvail()?'<span class="online-dot absolute -top-0.5 -right-1.5 w-2 h-2 rounded-full bg-emerald-400"></span>':''}</div>
+                <span>${lbl}</span>
+              </button>`).join('')}
+          </nav>
+        `;
+      } catch (e) {
+        root.innerHTML = `<div class="p-6 text-center space-y-3"><div class="text-rose-400 font-bold text-sm">Ошибка рендера: ${e.message}</div><button onclick="localStorage.removeItem(SAVE_KEY); state=null; render();" class="btn-primary px-5 py-2.5 text-xs">Сбросить и перезапустить</button></div>`;
+      }
+    }
+
+    // Мгновенный запуск без ожидания внешних SDK
+    try { initTelegram(); loadState(); } catch (_) {}
+    render();
+  </script>
+</body>
+</html>
