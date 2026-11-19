@@ -245,8 +245,8 @@
      *************************************************************************/
     const CONFIG = {
       BOT_USERNAME: 'BooomBer_bot', // имя бота для реферальной ссылки
-      APP_SHORT_NAME: '', // короткое имя mini app
-      ADSGRAM_BLOCK_ID: '60696', // вставьте сюда свой Block ID из AdsGram (если пусто — работает встроенный демо-плеер рекламы)
+      APP_SHORT_NAME: '', // оставьте пустым или впишите короткое имя без пробелов (из /newapp)
+      ADSGRAM_BLOCK_ID: '60696', // ваш Block ID из AdsGram (если пусто — работает встроенный демо-плеер)
       REFERRAL_REWARD: 20000 // 20 000 € за приглашенного друга
     };
 
@@ -2309,19 +2309,23 @@
     const REF_MAX_SESSION = 5; // лимит бонусов за сессию в клиентском режиме
 
     function getReferralLink() {
-      const uid = tgUser.id || 'player';
-      return `https://t.me/${CONFIG.BOT_USERNAME}/${CONFIG.APP_SHORT_NAME}?startapp=ref_${uid}`;
+      const uid = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || tgUser.id || 'pro';
+      const refParam = 'ref_' + uid;
+      if (CONFIG.APP_SHORT_NAME && CONFIG.APP_SHORT_NAME.trim() !== '') {
+        return `https://t.me/${CONFIG.BOT_USERNAME}/${CONFIG.APP_SHORT_NAME.trim()}?startapp=${refParam}`;
+      }
+      return `https://t.me/${CONFIG.BOT_USERNAME}?start=${refParam}`;
     }
 
     function shareReferralTelegram() {
       const link = getReferralLink();
-      const text = encodeURIComponent(`⚽ Я качаю футболиста в PRO CAREER: TOP 5! Залетай по моей ссылке — заберем бонус!`);
-      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`;
+      const text = '⚽ Я качаю футболиста в PRO CAREER: TOP 5! Залетай по моей ссылке — заберем +20 000 € на старт!';
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
       inviteSentFlag = true;
       haptic('medium');
       try {
-        if (tg && tg.openTelegramLink) {
-          tg.openTelegramLink(shareUrl);
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+          window.Telegram.WebApp.openTelegramLink(shareUrl);
         } else {
           window.open(shareUrl, '_blank');
         }
@@ -3171,4 +3175,4 @@
     });
   </script>
 </body>
-</html>
+  </html>
