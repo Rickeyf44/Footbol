@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Pro Career 27 — Админ-панель</title>
+<style>
+:root {
+  --bg: #070d19;
+  --card: #101b31;
+  --card2: #162442;
+  --border: rgba(148, 163, 184, 0.16);
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --green: #10b981;
+  --gold: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --red: #ef4444;
+  --cyan: #06b6d4;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0;
+  background: radial-gradient(circle at top, #112240 0%, var(--bg) 65%);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  font-size: 14px; line-height: 1.45; min-height: 100vh;
+}
+button, input, select, textarea { font-family: inherit; }
+button { cursor: pointer; border: none; outline: none; transition: transform .1s ease, opacity .15s ease; }
+button:active { transform: scale(0.97); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Lock Screen */
+#lock-screen {
+  position: fixed; inset: 0; z-index: 999;
+  background: radial-gradient(circle at top, #112240 0%, #050a14 75%);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.lock-box {
+  width: 100%; max-width: 340px; background: var(--card);
+  border: 1px solid rgba(59,130,246,0.35); border-radius: 20px;
+  padding: 24px 20px; text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+}
+.lock-ico {
+  width: 60px; height: 60px; border-radius: 16px; margin: 0 auto 12px;
+  background: linear-gradient(135deg, #2563eb, #1e3a8a);
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+}
+
+/* Main Shell */
+#admin-app { max-width: 1040px; margin: 0 auto; padding: 12px 12px 48px; display: none; }
+.topbar {
+  background: rgba(16, 27, 49, 0.92); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 12px 14px; margin-bottom: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-ico {
+  width: 38px; height: 38px; border-radius: 11px;
+  background: linear-gradient(135deg, #2563eb, #10b981);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.brand-t { font-weight: 900; font-size: 16px; }
+.brand-s { font-size: 11px; color: var(--muted); }
+.top-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* Buttons & Inputs */
+.btn {
+  padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 12px;
+  color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+}
+.btn.green { background: linear-gradient(135deg, #10b981, #059669); }
+.btn.gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0b1120; }
+.btn.red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.btn.ghost { background: rgba(148,163,184,0.12); color: var(--text); border: 1px solid var(--border); }
+.btn.active-chip { background: rgba(16,185,129,0.22); border: 1px solid #10b981; color: #6ee7b7; }
+.inp, .sel {
+  width: 100%; padding: 9px 11px; border-radius: 10px;
+  background: #091121; border: 1px solid var(--border); color: var(--text); font-size: 13px;
+}
+.inp:focus, .sel:focus { border-color: var(--blue); outline: none; }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0; padding: 9px 14px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--muted); font-size: 13px; font-weight: 700;
+}
+.tab-btn.active { background: var(--blue); color: #fff; border-color: transparent; }
+
+/* Cards & Grids */
+.card {
+  background: linear-gradient(180deg, var(--card) 0%, #0c1528 100%);
+  border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 12px;
+}
+.card.warn { border-color: rgba(245,158,11,0.5); background: linear-gradient(180deg, rgba(245,158,11,0.14), var(--card)); }
+.card.ok { border-color: rgba(16,185,129,0.45); }
+.card-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.card-t { font-weight: 800; font-size: 15px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 9px; margin-bottom: 12px; }
+.kpi {
+  background: #0b1427; border: 1px solid var(--border); border-radius: 14px; padding: 11px 12px;
+}
+.kpi.green { border-color: rgba(16,185,129,0.4); }
+.kpi.blue { border-color: rgba(59,130,246,0.4); }
+.kpi.gold { border-color: rgba(245,158,11,0.4); }
+.kpi.purple { border-color: rgba(139,92,246,0.4); }
+.kpi-lbl { font-size: 11px; color: var(--muted); font-weight: 700; }
+.kpi-val { font-size: 24px; font-weight: 900; margin: 3px 0 2px; line-height: 1.1; }
+.kpi-sub { font-size: 11px; color: var(--muted); }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+
+/* Badges & Bars */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  background: rgba(148,163,184,0.14); color: var(--text);
+}
+.badge.green { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+.badge.gold { background: rgba(245,158,11,0.2); color: #fcd34d; }
+.badge.blue { background: rgba(59,130,246,0.2); color: #93c5fd; }
+.badge.red { background: rgba(239,68,68,0.2); color: #fca5a5; }
+.badge.purple { background: rgba(139,92,246,0.22); color: #c4b5fd; }
+.bar-wrap { height: 8px; background: rgba(148,163,184,0.14); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+.bar-fill { height: 100%; border-radius: 999px; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th, .tbl td { padding: 8px 6px; border-bottom: 1px solid rgba(148,163,184,0.1); text-align: left; }
+.tbl th { color: var(--muted); font-weight: 700; font-size: 11px; white-space: nowrap; }
+.tbl td.num, .tbl th.num { text-align: center; }
+.tbl tr.click-row { cursor: pointer; }
+.tbl tr.click-row:hover { background: rgba(59,130,246,0.1); }
+
+/* Retention Heatmap cells */
+.ret-cell { display: inline-block; min-width: 44px; padding: 3px 6px; border-radius: 7px; font-weight: 800; font-size: 11px; text-align: center; }
+.ret-hi { background: rgba(16,185,129,0.28); color: #6ee7b7; }
+.ret-mid { background: rgba(245,158,11,0.24); color: #fde68a; }
+.ret-lo { background: rgba(239,68,68,0.22); color: #fca5a5; }
+.ret-na { background: rgba(148,163,184,0.1); color: var(--muted); }
+
+/* Funnel */
+.funnel-row { margin-bottom: 9px; }
+.funnel-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+
+/* SVG Chart */
+.chart-box { width: 100%; overflow-x: auto; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--muted); margin-top: 6px; }
+.leg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+
+/* SQL Code */
+.sql-pre {
+  background: #060b16; border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px; font-family: monospace; font-size: 11px; color: #93c5fd;
+  overflow-x: auto; white-space: pre; line-height: 1.45; margin: 8px 0;
+}
+
+/* Modal & Toast */
+#modal-ov {
+  position: fixed; inset: 0; z-index: 1000; background: rgba(2,6,17,0.82);
+  backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 14px;
+}
+.modal {
+  width: 100%; max-width: 480px; max-height: 86vh; overflow-y: auto;
+  background: #0f1b33; border: 1px solid rgba(148,163,184,0.28); border-radius: 18px; padding: 16px;
+}
+#toast {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 1200;
+  background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 12px; padding: 9px 14px; font-size: 13px; font-weight: 700;
+  display: none; box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.kv { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(148,163,184,0.08); font-size: 13px; }
+.kv:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="modal-ov" onclick="if(event.target===this) closeModal()">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<!-- PIN Lock Screen -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-ico">📊</div>
+    <div style="font-size:19px;font-weight:900;">PRO CAREER 27</div>
+    <div class="small muted" style="margin:4px 0 16px;">Панель аналитики и управления</div>
+    <input id="pin-inp" class="inp" type="password" inputmode="numeric" placeholder="Введите PIN (по умолч. 2727)" style="text-align:center;font-size:18px;letter-spacing:4px;margin-bottom:10px;" onkeydown="if(event.key==='Enter') unlockAdmin()" />
+    <button class="btn green" style="width:100%;padding:11px;" onclick="unlockAdmin()">🔓 Войти в админку</button>
+    <div id="pin-err" class="small" style="color:#fca5a5;margin-top:8px;display:none;">Неверный PIN-код</div>
+    <div class="small muted" style="margin-top:12px;">PIN можно поменять в первой строке JS файла <code>admin.html</code></div>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="admin-app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-ico">⚽</div>
+      <div>
+        <div class="brand-t">Pro Career 27 · Admin</div>
+        <div class="brand-s" id="sync-meta">Загрузка данных из Supabase...</div>
+      </div>
+    </div>
+    <div class="top-controls">
+      <button id="btn-filter-real" class="btn active-chip" onclick="toggleRealOnly()">👤 Только реальные TG</button>
+      <button class="btn blue" onclick="loadAllData(false)">🔄 Обновить</button>
+      <button class="btn ghost" onclick="logoutAdmin()">🔒</button>
+    </div>
+  </div>
+
+  <div id="status-banner"></div>
+
+  <div class="tabs" id="admin-tabs"></div>
+  <div id="admin-content"></div>
+</div>
+
+<script>
+/* ================= CONFIG (МОЖНО СМЕНИТЬ PIN ЗДЕСЬ) ================= */
+var ADMIN_PIN = '2727';
+var SB_URL = 'https://qarxtuqfhyjzdddpjjlj.supabase.co';
+var SB_KEY = 'sb_publishable_IEkcSO4AnZfsbnhRBXzABg_jVdNDEfh';
+
+/* ================= STATE ================= */
+var A = {
+  tab: 'overview',
+  realOnly: true,
+  search: '',
+  sortBy: 'updated',
+  loading: false,
+  lastLoad: null,
+  tables: { players: null, match_logs: null, referrals: null, tasks: null, analytics_events: null },
+  players: [],
+  matchLogs: [],
+  referrals: [],
+  tasks: [],
+  events: []
+};
+
+/* ================= HELPERS ================= */
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmt(n) { return Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+function pct(part, total) { return total > 0 ? Math.round((part / total) * 100) : 0; }
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(window.__tTimer);
+  window.__tTimer = setTimeout(function(){ el.style.display = 'none'; }, 2600);
+}
+function openModal(html) {
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-ov').style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('modal-ov').style.display = 'none';
+}
+
+function isRealTgId(id) {
+  var s = String(id || '');
+  return /^\d{5,15}$/.test(s);
+}
+function dayKey(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  var m = d.getUTCMonth() + 1;
+  var day = d.getUTCDate();
+  return d.getUTCFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
+}
+function dayKeyOffset(daysAgo) {
+  var d = new Date(Date.now() - daysAgo * 86400000);
+  var m = d.getUTCMonth() + 1;
+  var day = d.getUTCDate();
+  return d.getUTCFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
+}
+function shortDay(dk) {
+  if (!dk || dk.length < 10) return dk;
+  return dk.slice(8, 10) + '.' + dk.slice(5, 7);
+}
+function timeAgo(iso) {
+  if (!iso) return '—';
+  var ms = Date.now() - new Date(iso).getTime();
+  if (isNaN(ms) || ms < 0) return 'только что';
+  var min = Math.floor(ms / 60000);
+  if (min < 1) return 'только что';
+  if (min < 60) return min + ' мин назад';
+  var hr = Math.floor(min / 60);
+  if (hr < 24) return hr + ' ч назад';
+  var d = Math.floor(hr / 24);
+  return d + ' дн назад';
+}
+
+/* ================= AUTH ================= */
+function getStoredPin() {
+  try { return localStorage.getItem('pc27_admin_pin_override') || ADMIN_PIN; } catch (e) { return ADMIN_PIN; }
+}
+function unlockAdmin() {
+  var val = (document.getElementById('pin-inp').value || '').trim();
+  if (val === getStoredPin()) {
+    try { sessionStorage.setItem('pc27_admin_ok', '1'); } catch (e) {}
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'block';
+    loadAllData(true);
+  } else {
+    document.getElementById('pin-err').style.display = 'block';
+  }
+}
+function logoutAdmin() {
+  try { sessionStorage.removeItem('pc27_admin_ok'); } catch (e) {}
+  document.getElementById('admin-app').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('pin-inp').value = '';
+}
+function changeLocalPin() {
+  var p = (document.getElementById('new-pin-inp').value || '').trim();
+  if (p.length < 4) { showToast('PIN должен быть от 4 символов'); return; }
+  try { localStorage.setItem('pc27_admin_pin_override', p); } catch (e) {}
+  showToast('✅ Локальный PIN обновлён для этого браузера');
+}
+
+/* ================= SUPABASE FETCH ================= */
+function sbHeaders(extra) {
+  var h = { 'apikey': SB_KEY, 'Content-Type': 'application/json' };
+  if (extra) Object.keys(extra).forEach(function(k){ h[k] = extra[k]; });
+  return h;
+}
+function sbFetch(path, opts) {
+  opts = opts || {};
+  return fetch(SB_URL + '/rest/v1/' + path, {
+    method: opts.method || 'GET',
+    headers: sbHeaders(opts.headers),
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  }).then(function(res) {
+    return res.text().then(function(txt) {
+      if (!res.ok) throw new Error('HTTP ' + res.status + (txt ? ': ' + txt.slice(0, 120) : ''));
+      if (!txt || !txt.trim()) return null;
+      try { return JSON.parse(txt); } catch (e) { return null; }
+    });
+  });
+}
+
+function loadAllData(silent) {
+  A.loading = true;
+  document.getElementById('sync-meta').textContent = 'Обновление данных из Supabase...';
+
+  var p1 = sbFetch('players?select=*&order=updated_at.desc&limit=1000')
+    .then(function(d){ A.players = Array.isArray(d) ? d : []; A.tables.players = 'ok'; })
+    .catch(function(e){ A.tables.players = e.message; });
+
+  var p2 = sbFetch('match_logs?select=*&order=created_at.desc&limit=1000')
+    .then(function(d){ A.matchLogs = Array.isArray(d) ? d : []; A.tables.match_logs = 'ok'; })
+    .catch(function(e){ A.tables.match_logs = e.message; });
+
+  var p3 = sbFetch('referrals?select=*&order=created_at.desc&limit=1000')
+    .then(function(d){ A.referrals = Array.isArray(d) ? d : []; A.tables.referrals = 'ok'; })
+    .catch(function(e){ A.tables.referrals = e.message; });
+
+  var p4 = sbFetch('tasks?select=*&order=id.desc&limit=100')
+    .then(function(d){ A.tasks = Array.isArray(d) ? d : []; A.tables.tasks = 'ok'; })
+    .catch(function(e){ A.tables.tasks = e.message; });
+
+  var since30 = new Date(Date.now() - 30 * 86400000).toISOString();
+  var p5 = sbFetch('analytics_events?select=*&created_at=gte.' + encodeURIComponent(since30) + '&order=created_at.desc&limit=5000')
+    .then(function(d){ A.events = Array.isArray(d) ? d : []; A.tables.analytics_events = 'ok'; })
+    .catch(function(e){ A.events = []; A.tables.analytics_events = e.message; });
+
+  Promise.all([p1, p2, p3, p4, p5]).then(function() {
+    A.loading = false;
+    A.lastLoad = new Date();
+    var hh = A.lastLoad.getHours(), mm = A.lastLoad.getMinutes();
+    document.getElementById('sync-meta').textContent =
+      'Обновлено в ' + (hh < 10 ? '0' + hh : hh) + ':' + (mm < 10 ? '0' + mm : mm) +
+      ' · Игроков: ' + A.players.length + ' · Событий (30д): ' + A.events.length;
+    if (!silent) showToast('✅ Данные обновлены');
+    renderAdmin();
+  });
+}
+
+function toggleRealOnly() {
+  A.realOnly = !A.realOnly;
+  var b = document.getElementById('btn-filter-real');
+  if (b) {
+    b.className = 'btn ' + (A.realOnly ? 'active-chip' : 'ghost');
+    b.textContent = A.realOnly ? '👤 Только реальные TG' : '👥 Все (TG + гости)';
+  }
+  renderAdmin();
+}
+
+/* ================= ANALYTICS COMPUTATION ================= */
+function computeMetrics() {
+  var allPlayers = A.players.filter(function(p){ return String(p.tg_id || '').indexOf('bot_') !== 0; });
+  var realPlayers = allPlayers.filter(function(p){ return isRealTgId(p.tg_id); });
+  var guestPlayers = allPlayers.filter(function(p){ return !isRealTgId(p.tg_id); });
+  var players = A.realOnly ? realPlayers : allPlayers;
+
+  var events = A.events.filter(function(ev) {
+    if (String(ev.tg_id || '').indexOf('bot_') === 0) return false;
+    if (A.realOnly) return isRealTgId(ev.tg_id) || ev.is_tg === true;
+    return true;
+  });
+
+  var now = Date.now();
+  var ms15m = 15 * 60 * 1000;
+  var ms24h = 24 * 3600 * 1000;
+  var ms7d = 7 * ms24h;
+  var ms30d = 30 * ms24h;
+
+  // Per-user unified map (from players + events)
+  var userMap = {};
+  function ensureUser(id) {
+    if (!userMap[id]) {
+      userMap[id] = {
+        tg_id: id, is_tg: isRealTgId(id),
+        name: 'Без карьеры', club: '—', position: '—', ovr: 0, rating: 1000,
+        wins: 0, losses: 0, createdAt: null, lastSeen: null,
+        daysActive: {}, eventsCount: 0, matches: 0, pvpMatches: 0, ads: 0, purchases: 0, trainings: 0,
+        hasCareer: false, username: '', platform: ''
+      };
+    }
+    return userMap[id];
+  }
+
+  players.forEach(function(p) {
+    var u = ensureUser(p.tg_id);
+    u.name = p.name || u.name;
+    u.club = p.club || '—';
+    u.position = p.position || '—';
+    u.ovr = p.ovr || 0;
+    u.rating = p.rating || 1000;
+    u.wins = p.wins || 0;
+    u.losses = p.losses || 0;
+    u.hasCareer = true;
+    var uTs = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+    var cTs = p.created_at ? new Date(p.created_at).getTime() : uTs;
+    if (cTs && (!u.createdAt || cTs < u.createdAt)) u.createdAt = cTs;
+    if (uTs && (!u.lastSeen || uTs > u.lastSeen)) u.lastSeen = uTs;
+    if (p.updated_at) u.daysActive[dayKey(p.updated_at)] = true;
+    if (p.created_at) u.daysActive[dayKey(p.created_at)] = true;
+  });
+
+  var adByPlace = {};
+  var shopCounts = {};
+  var dailyDauSets = {};
+  var dailyNewSets = {};
+  var dailyAds = {};
+  var dailyMatches = {};
+  var ads24h = 0, matches24h = 0;
+
+  events.forEach(function(ev) {
+    var u = ensureUser(ev.tg_id);
+    if (ev.is_tg) u.is_tg = true;
+    var ts = ev.created_at ? new Date(ev.created_at).getTime() : 0;
+    var dk = dayKey(ev.created_at);
+    u.eventsCount++;
+    if (ts) {
+      if (!u.createdAt || ts < u.createdAt) u.createdAt = ts;
+      if (!u.lastSeen || ts > u.lastSeen) u.lastSeen = ts;
+    }
+    if (dk) {
+      u.daysActive[dk] = true;
+      if (!dailyDauSets[dk]) dailyDauSets[dk] = {};
+      dailyDauSets[dk][ev.tg_id] = true;
+    }
+    var meta = ev.meta || {};
+    if (meta.username) u.username = meta.username;
+    if (meta.platform) u.platform = meta.platform;
+
+    if (ev.event_type === 'career_created') u.hasCareer = true;
+    if (ev.event_type === 'training_done') u.trainings++;
+    if (ev.event_type === 'match_played') {
+      u.matches++;
+      if (meta.mode === 'pvp' || meta.mode === 'cup' || meta.mode === 'duel' || meta.mode === 'revenge') u.pvpMatches++;
+      if (now - ts <= ms24h) matches24h++;
+      if (dk) dailyMatches[dk] = (dailyMatches[dk] || 0) + 1;
+    }
+    if (ev.event_type === 'ad_watched') {
+      u.ads++;
+      var pl = meta.placement || 'general';
+      adByPlace[pl] = (adByPlace[pl] || 0) + 1;
+      if (now - ts <= ms24h) ads24h++;
+      if (dk) dailyAds[dk] = (dailyAds[dk] || 0) + 1;
+    }
+    if (ev.event_type === 'shop_purchase') {
+      u.purchases++;
+      var sk = (meta.shop || 'shop') + ': ' + (meta.item || 'item');
+      shopCounts[sk] = (shopCounts[sk] || 0) + 1;
+    }
+  });
+
+  // Also backfill dailyDauSets from players.updated_at if analytics_events is empty
+  players.forEach(function(p) {
+    var dk = dayKey(p.updated_at);
+    if (dk) {
+      if (!dailyDauSets[dk]) dailyDauSets[dk] = {};
+      dailyDauSets[dk][p.tg_id] = true;
+    }
+  });
+
+  var usersList = Object.keys(userMap).map(function(k){ return userMap[k]; });
+  var onlineNow = 0, dau = 0, wau = 0, mau = 0, newToday = 0;
+  var todayK = dayKeyOffset(0);
+  var sumOvr = 0, cntCareer = 0, totalAds = 0, totalMatches = 0, usersWithAd = 0, usersWith1M = 0, usersWith5M = 0, usersWithPvp = 0;
+  var ovrBuckets = { bronze:0, silver:0, gold:0, icon:0 };
+  var depthBuckets = { d1:0, d23:0, d47:0, d8p:0 };
+  var clubCounts = {};
+
+  usersList.forEach(function(u) {
+    if (u.lastSeen) {
+      var diff = now - u.lastSeen;
+      if (diff <= ms15m) onlineNow++;
+      if (diff <= ms24h) dau++;
+      if (diff <= ms7d) wau++;
+      if (diff <= ms30d) mau++;
+    }
+    var firstDk = u.createdAt ? dayKey(new Date(u.createdAt).toISOString()) : '';
+    if (firstDk) {
+      if (!dailyNewSets[firstDk]) dailyNewSets[firstDk] = {};
+      dailyNewSets[firstDk][u.tg_id] = true;
+      if (firstDk === todayK) newToday++;
+    }
+    if (u.hasCareer) {
+      cntCareer++;
+      sumOvr += u.ovr;
+      if (u.ovr >= 85) ovrBuckets.icon++;
+      else if (u.ovr >= 75) ovrBuckets.gold++;
+      else if (u.ovr >= 65) ovrBuckets.silver++;
+      else ovrBuckets.bronze++;
+      if (u.club && u.club !== '—') clubCounts[u.club] = (clubCounts[u.club] || 0) + 1;
+    }
+    var effMatches = Math.max(u.matches, (u.wins || 0) + (u.losses || 0));
+    totalMatches += effMatches;
+    totalAds += u.ads;
+    if (u.ads > 0) usersWithAd++;
+    if (effMatches >= 1) usersWith1M++;
+    if (effMatches >= 5) usersWith5M++;
+    if (u.pvpMatches > 0 || (u.wins + u.losses) > 0) usersWithPvp++;
+
+    var dCnt = Object.keys(u.daysActive).length || 1;
+    if (dCnt === 1) depthBuckets.d1++;
+    else if (dCnt <= 3) depthBuckets.d23++;
+    else if (dCnt <= 7) depthBuckets.d47++;
+    else depthBuckets.d8p++;
+  });
+
+  // Retention Cohorts (last 14 days)
+  var cohorts = [];
+  var sumD1N = 0, sumD1D = 0, sumD3N = 0, sumD3D = 0, sumD7N = 0, sumD7D = 0, sumD14N = 0, sumD14D = 0;
+
+  for (var ago = 13; ago >= 0; ago--) {
+    var cDay = dayKeyOffset(ago);
+    var cUsers = usersList.filter(function(u){ return u.createdAt && dayKey(new Date(u.createdAt).toISOString()) === cDay; });
+    var size = cUsers.length;
+    function calcRet(offsetDays) {
+      if (ago < offsetDays || size === 0) return null;
+      var targetK = dayKeyOffset(ago - offsetDays);
+      var targetMs = new Date(cDay + 'T00:00:00Z').getTime() + offsetDays * 86400000;
+      var hit = 0;
+      cUsers.forEach(function(u) {
+        if (u.daysActive[targetK]) { hit++; return; }
+        // Fallback when only players table exists (created_at & updated_at)
+        if (A.tables.analytics_events !== 'ok' && u.lastSeen && u.lastSeen >= targetMs) hit++;
+      });
+      return { hit: hit, pct: Math.round((hit / size) * 100) };
+    }
+    var r1 = calcRet(1), r3 = calcRet(3), r7 = calcRet(7);
+    if (r1) { sumD1N += r1.hit; sumD1D += size; }
+    if (r3) { sumD3N += r3.hit; sumD3D += size; }
+    if (r7) { sumD7N += r7.hit; sumD7D += size; }
+    cohorts.push({ day: cDay, size: size, r1: r1, r3: r3, r7: r7 });
+  }
+  // D14 overall from users 14+ days old
+  usersList.forEach(function(u) {
+    if (!u.createdAt) return;
+    var ageDays = Math.floor((now - u.createdAt) / 86400000);
+    if (ageDays >= 14) {
+      sumD14D++;
+      if (u.lastSeen && (u.lastSeen - u.createdAt) >= 13.5 * 86400000) sumD14N++;
+    }
+  });
+
+  // 14-day timeline array
+  var days14 = [];
+  for (var dIdx = 13; dIdx >= 0; dIdx--) {
+    var k = dayKeyOffset(dIdx);
+    days14.push({
+      day: k,
+      label: shortDay(k),
+      dau: dailyDauSets[k] ? Object.keys(dailyDauSets[k]).length : 0,
+      newUsers: dailyNewSets[k] ? Object.keys(dailyNewSets[k]).length : 0,
+      ads: dailyAds[k] || 0,
+      matches: dailyMatches[k] || 0
+    });
+  }
+
+  return {
+    totalUsers: usersList.length,
+    realCount: realPlayers.length,
+    guestCount: guestPlayers.length,
+    onlineNow: onlineNow,
+    dau: dau, wau: wau, mau: mau,
+    stickiness: pct(dau, Math.max(1, mau)),
+    newToday: newToday,
+    avgOvr: cntCareer > 0 ? (sumOvr / cntCareer).toFixed(1) : '—',
+    avgMatches: usersList.length > 0 ? (totalMatches / usersList.length).toFixed(1) : '0',
+    totalMatches: totalMatches,
+    matches24h: matches24h,
+    totalAds: totalAds,
+    ads24h: ads24h,
+    usersWithAd: usersWithAd,
+    cntCareer: cntCareer,
+    usersWith1M: usersWith1M,
+    usersWith5M: usersWith5M,
+    usersWithPvp: usersWithPvp,
+    ovrBuckets: ovrBuckets,
+    depthBuckets: depthBuckets,
+    clubCounts: clubCounts,
+    adByPlace: adByPlace,
+    shopCounts: shopCounts,
+    days14: days14,
+    cohorts: cohorts.reverse(),
+    retD1: sumD1D > 0 ? Math.round((sumD1N / sumD1D) * 100) : null,
+    retD3: sumD3D > 0 ? Math.round((sumD3N / sumD3D) * 100) : null,
+    retD7: sumD7D > 0 ? Math.round((sumD7N / sumD7D) * 100) : null,
+    retD14: sumD14D > 0 ? Math.round((sumD14N / sumD14D) * 100) : null,
+    usersList: usersList,
+    events: events
+  };
+}
+
+/* ================= SVG CHART BUILDER (ZERO EXTERNAL LIBS) ================= */
+function renderBarChartSvg(days14) {
+  var w = 640, h = 185, padL = 32, padB = 26, padT = 16, padR = 12;
+  var plotW = w - padL - padR, plotH = h - padT - padB;
+  var maxV = 1;
+  days14.forEach(function(d){ if (d.dau > maxV) maxV = d.dau; if (d.ads > maxV) maxV = d.ads; });
+  var step = plotW / days14.length;
+  var bars = '';
+  var grid = '';
+  for (var g = 0; g <= 3; g++) {
+    var gy = padT + plotH - (plotH * g / 3);
+    var gv = Math.round(maxV * g / 3);
+    grid += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (w - padR) + '" y2="' + gy + '" stroke="rgba(148,163,184,0.14)" stroke-width="1"/>' +
+            '<text x="' + (padL - 5) + '" y="' + (gy + 3) + '" text-anchor="end" fill="#94a3b8" font-size="10">' + gv + '</text>';
+  }
+  var adPts = [];
+  days14.forEach(function(d, idx) {
+    var x = padL + idx * step + 4;
+    var bw = Math.max(8, step - 12);
+    var bhDau = (d.dau / maxV) * plotH;
+    var bhNew = (d.newUsers / maxV) * plotH;
+    bars += '<rect x="' + x + '" y="' + (padT + plotH - bhDau) + '" width="' + bw + '" height="' + bhDau + '" rx="4" fill="#3b82f6" opacity="0.88"><title>' + d.label + ': DAU ' + d.dau + '</title></rect>';
+    if (d.newUsers > 0) {
+      bars += '<rect x="' + (x + 2) + '" y="' + (padT + plotH - bhNew) + '" width="' + Math.max(4, bw - 4) + '" height="' + bhNew + '" rx="3" fill="#10b981"><title>' + d.label + ': Новых ' + d.newUsers + '</title></rect>';
+    }
+    var cx = x + bw / 2;
+    var ay = padT + plotH - (d.ads / maxV) * plotH;
+    adPts.push(cx + ',' + ay);
+    bars += '<text x="' + cx + '" y="' + (h - 8) + '" text-anchor="middle" fill="#94a3b8" font-size="9">' + d.label + '</text>';
+  });
+  var adLine = '<polyline fill="none" stroke="#f59e0b" stroke-width="2.2" points="' + adPts.join(' ') + '"/>';
+  return '<div class="chart-box"><svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;min-width:440px;height:auto;display:block;">' + grid + bars + adLine + '</svg></div>' +
+    '<div class="chart-legend">' +
+      '<span><span class="leg-dot" style="background:#3b82f6;"></span>DAU (активных)</span>' +
+      '<span><span class="leg-dot" style="background:#10b981;"></span>Новые игроки</span>' +
+      '<span><span class="leg-dot" style="background:#f59e0b;"></span>Просмотры AdsGram</span>' +
+    '</div>';
+}
+
+/* ================= RENDER TABS ================= */
+function renderAdmin() {
+  var m = computeMetrics();
+
+  // Status banner if analytics_events not set up yet
+  var sbEl = document.getElementById('status-banner');
+  if (A.tables.analytics_events !== 'ok') {
+    sbEl.innerHTML = '<div class="card warn" style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">' +
+      '<div class="small"><b>⚠️ Таблица <code>analytics_events</code> ещё не создана в Supabase.</b> Сейчас статистика строится по <code>players</code>. Чтобы видеть точный Retention D1/D7, просмотры AdsGram и живую ленту — выполните SQL за 10 секунд.</div>' +
+      '<button class="btn gold" onclick="switchAdminTab(\'sql\')">⚙️ Открыть SQL</button>' +
+    '</div>';
+  } else {
+    sbEl.innerHTML = '';
+  }
+
+  var tabs = [
+    { id:'overview', lbl:'📊 Обзор' },
+    { id:'retention', lbl:'📈 Удержание' },
+    { id:'players', lbl:'👥 Игроки (' + m.totalUsers + ')' },
+    { id:'monetization', lbl:'🎬 Реклама & Рост' },
+    { id:'tasks', lbl:'📢 Задания & Лента' },
+    { id:'sql', lbl:'⚙️ Настройка SQL' }
+  ];
+  document.getElementById('admin-tabs').innerHTML = tabs.map(function(t) {
+    return '<button class="tab-btn ' + (A.tab === t.id ? 'active' : '') + '" onclick="switchAdminTab(\'' + t.id + '\')">' + t.lbl + '</button>';
+  }).join('');
+
+  var box = document.getElementById('admin-content');
+  if (A.tab === 'overview') box.innerHTML = renderOverviewTab(m);
+  else if (A.tab === 'retention') box.innerHTML = renderRetentionTab(m);
+  else if (A.tab === 'players') box.innerHTML = renderPlayersTab(m);
+  else if (A.tab === 'monetization') box.innerHTML = renderMonetizationTab(m);
+  else if (A.tab === 'tasks') box.innerHTML = renderTasksAndFeedTab(m);
+  else box.innerHTML = renderSqlTab();
+}
+
+function switchAdminTab(id) {
+  A.tab = id;
+  renderAdmin();
+}
+
+function renderOverviewTab(m) {
+  var funnelSteps = [
+    { lbl:'1. Открыли приложение', v: m.totalUsers, col:'#3b82f6' },
+    { lbl:'2. Создали футболиста', v: m.cntCareer, col:'#06b6d4' },
+    { lbl:'3. Сыграли 1+ матч', v: m.usersWith1M, col:'#10b981' },
+    { lbl:'4. Сыграли 5+ матчей (ядро)', v: m.usersWith5M, col:'#8b5cf6' },
+    { lbl:'5. Попробовали Онлайн PvP', v: m.usersWithPvp, col:'#ec4899' },
+    { lbl:'6. Посмотрели рекламу AdsGram', v: m.usersWithAd, col:'#f59e0b' }
+  ];
+  var baseF = Math.max(1, m.totalUsers);
+  var funnelHtml = funnelSteps.map(function(s) {
+    var p = pct(s.v, baseF);
+    return '<div class="funnel-row">' +
+      '<div class="funnel-top"><span>' + s.lbl + '</span><span>' + fmt(s.v) + ' <span class="muted">(' + p + '%)</span></span></div>' +
+      '<div class="bar-wrap"><div class="bar-fill" style="width:' + p + '%;background:' + s.col + ';"></div></div>' +
+    '</div>';
+  }).join('');
+
+  var topClubs = Object.keys(m.clubCounts).map(function(k){ return { name:k, c:m.clubCounts[k] }; })
+    .sort(function(a,b){ return b.c - a.c; }).slice(0, 6);
+
+  return '<div class="kpi-grid">' +
+    '<div class="kpi green"><div class="kpi-lbl">👤 Реальные TG-юзеры</div><div class="kpi-val" style="color:#6ee7b7;">' + fmt(m.realCount) + '</div><div class="kpi-sub">Гости в браузере: ' + fmt(m.guestCount) + '</div></div>' +
+    '<div class="kpi blue"><div class="kpi-lbl">🟢 Онлайн / DAU (24ч)</div><div class="kpi-val" style="color:#93c5fd;">' + fmt(m.onlineNow) + ' / ' + fmt(m.dau) + '</div><div class="kpi-sub">Новых сегодня: +' + fmt(m.newToday) + '</div></div>' +
+    '<div class="kpi purple"><div class="kpi-lbl">📆 WAU / MAU</div><div class="kpi-val" style="color:#c4b5fd;">' + fmt(m.wau) + ' / ' + fmt(m.mau) + '</div><div class="kpi-sub">Липкость (DAU/MAU): <b>' + m.stickiness + '%</b></div></div>' +
+    '<div class="kpi gold"><div class="kpi-lbl">🎬 Просмотры AdsGram</div><div class="kpi-val" style="color:#fcd34d;">' + fmt(m.totalAds) + '</div><div class="kpi-sub">За 24ч: ' + fmt(m.ads24h) + ' · Смотрят: ' + pct(m.usersWithAd, m.totalUsers) + '%</div></div>' +
+    '<div class="kpi"><div class="kpi-lbl">⚽ Матчей (всего / 24ч)</div><div class="kpi-val">' + fmt(m.totalMatches) + ' / ' + fmt(m.matches24h) + '</div><div class="kpi-sub">В среднем ' + m.avgMatches + ' на игрока</div></div>' +
+    '<div class="kpi"><div class="kpi-lbl">📈 D1 / D7 Retention</div><div class="kpi-val">' + (m.retD1 != null ? m.retD1 + '%' : '—') + ' / ' + (m.retD7 != null ? m.retD7 + '%' : '—') + '</div><div class="kpi-sub">Средний OVR: ' + m.avgOvr + '</div></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-h"><div class="card-t">📊 Активность по дням (последние 14 дней)</div><span class="badge blue">DAU · Новые · AdsGram</span></div>' +
+    renderBarChartSvg(m.days14) +
+  '</div>' +
+
+  '<div class="grid-2">' +
+    '<div class="card">' +
+      '<div class="card-h"><div class="card-t">🌪️ Воронка вовлечённости</div><span class="badge green">Конверсия</span></div>' +
+      funnelHtml +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-h"><div class="card-t">🏅 Прогресс игроков (OVR) и Клубы</div></div>' +
+      '<div class="kv"><span>🥉 Бронза (OVR 52–64)</span><b>' + m.ovrBuckets.bronze + '</b></div>' +
+      '<div class="kv"><span>⚡ Серебро (OVR 65–74)</span><b>' + m.ovrBuckets.silver + '</b></div>' +
+      '<div class="kv"><span>⭐ Золото (OVR 75–84)</span><b>' + m.ovrBuckets.gold + '</b></div>' +
+      '<div class="kv"><span>👑 Икона (OVR 85+)</span><b>' + m.ovrBuckets.icon + '</b></div>' +
+      '<div style="margin-top:10px;font-weight:700;font-size:12px;color:var(--muted);">Популярные клубы игроков:</div>' +
+      (topClubs.length ? topClubs.map(function(c){ return '<div class="kv"><span>' + esc(c.name) + '</span><b>' + c.c + '</b></div>'; }).join('') : '<div class="small muted">Нет данных</div>') +
+    '</div>' +
+  '</div>';
+}
+
+function retBadge(r) {
+  if (!r) return '<span class="ret-cell ret-na">—</span>';
+  var cls = r.pct >= 30 ? 'ret-hi' : (r.pct >= 15 ? 'ret-mid' : 'ret-lo');
+  return '<span class="ret-cell ' + cls + '" title="' + r.hit + ' игроков">' + r.pct + '%</span>';
+}
+
+function renderRetentionTab(m) {
+  var rows = m.cohorts.map(function(c) {
+    return '<tr>' +
+      '<td><b>' + c.day + '</b></td>' +
+      '<td class="num"><b>' + c.size + '</b></td>' +
+      '<td class="num">' + retBadge(c.r1) + '</td>' +
+      '<td class="num">' + retBadge(c.r3) + '</td>' +
+      '<td class="num">' + retBadge(c.r7) + '</td>' +
+    '</tr>';
+  }).join('');
+
+  var dTot = Math.max(1, m.totalUsers);
+  return '<div class="kpi-grid">' +
+    '<div class="kpi green"><div class="kpi-lbl">D1 Retention (на след. день)</div><div class="kpi-val" style="color:#6ee7b7;">' + (m.retD1 != null ? m.retD1 + '%' : '—') + '</div><div class="kpi-sub">Норма для Mini App: 20–35%</div></div>' +
+    '<div class="kpi blue"><div class="kpi-lbl">D3 Retention (через 3 дня)</div><div class="kpi-val" style="color:#93c5fd;">' + (m.retD3 != null ? m.retD3 + '%' : '—') + '</div><div class="kpi-sub">Показывает привычку</div></div>' +
+    '<div class="kpi gold"><div class="kpi-lbl">D7 Retention (через неделю)</div><div class="kpi-val" style="color:#fcd34d;">' + (m.retD7 != null ? m.retD7 + '%' : '—') + '</div><div class="kpi-sub">Норма: 8–15%</div></div>' +
+    '<div class="kpi purple"><div class="kpi-lbl">D14+ Лояльное ядро</div><div class="kpi-val" style="color:#c4b5fd;">' + (m.retD14 != null ? m.retD14 + '%' : '—') + '</div><div class="kpi-sub">Долгосрочное удержание</div></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-h"><div class="card-t">🗓️ Когортная таблица удержания (14 дней)</div><span class="badge blue">' + (A.tables.analytics_events==='ok'?'Точный расчёт по событиям':'Оценка по players') + '</span></div>' +
+    '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Дата когорты</th><th class="num">Новых</th><th class="num">День 1</th><th class="num">День 3</th><th class="num">День 7</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-h"><div class="card-t">🔥 Глубина вовлечённости (сколько дней играл юзер)</div></div>' +
+    '<div class="kv"><span>1 день (разовый заход)</span><b>' + m.depthBuckets.d1 + ' (' + pct(m.depthBuckets.d1, dTot) + '%)</b></div>' +
+    '<div class="kv"><span>2–3 дня (заинтересован)</span><b>' + m.depthBuckets.d23 + ' (' + pct(m.depthBuckets.d23, dTot) + '%)</b></div>' +
+    '<div class="kv"><span>4–7 дней (постоянный игрок)</span><b>' + m.depthBuckets.d47 + ' (' + pct(m.depthBuckets.d47, dTot) + '%)</b></div>' +
+    '<div class="kv"><span>8+ дней (хардкорное ядро)</span><b style="color:#6ee7b7;">' + m.depthBuckets.d8p + ' (' + pct(m.depthBuckets.d8p, dTot) + '%)</b></div>' +
+  '</div>';
+}
+
+function renderPlayersTab(m) {
+  var q = (A.search || '').toLowerCase().trim();
+  var list = m.usersList.filter(function(u) {
+    if (!q) return true;
+    return String(u.name || '').toLowerCase().indexOf(q) >= 0 ||
+           String(u.club || '').toLowerCase().indexOf(q) >= 0 ||
+           String(u.tg_id || '').toLowerCase().indexOf(q) >= 0 ||
+           String(u.username || '').toLowerCase().indexOf(q) >= 0;
+  });
+
+  list.sort(function(a, b) {
+    if (A.sortBy === 'ovr') return (b.ovr || 0) - (a.ovr || 0);
+    if (A.sortBy === 'elo') return (b.rating || 0) - (a.rating || 0);
+    if (A.sortBy === 'ads') return (b.ads || 0) - (a.ads || 0);
+    if (A.sortBy === 'wins') return (b.wins || 0) - (a.wins || 0);
+    return (b.lastSeen || 0) - (a.lastSeen || 0);
+  });
+
+  window.__filteredPlayers = list;
+  var now = Date.now();
+  var rows = list.slice(0, 100).map(function(u, idx) {
+    var online = u.lastSeen && (now - u.lastSeen <= 15 * 60 * 1000);
+    var daysCnt = Object.keys(u.daysActive).length || 1;
+    return '<tr class="click-row" onclick="openPlayerDetail(' + idx + ')">' +
+      '<td>' + (online ? '🟢 ' : '') + '<b>' + esc(u.name) + '</b> ' +
+        (u.is_tg ? '<span class="badge blue">TG</span>' : '<span class="badge">Гость</span>') +
+        '<div class="small muted">' + esc(u.club) + ' · ID: ' + esc(u.tg_id) + (u.username ? (' · @' + esc(u.username)) : '') + '</div></td>' +
+      '<td class="num"><b>' + u.ovr + '</b></td>' +
+      '<td class="num">' + u.rating + '</td>' +
+      '<td class="num">' + u.wins + '/' + u.losses + '</td>' +
+      '<td class="num">' + u.ads + '</td>' +
+      '<td class="num">' + daysCnt + 'д</td>' +
+      '<td><span class="small muted">' + (u.lastSeen ? timeAgo(new Date(u.lastSeen).toISOString()) : '—') + '</span></td>' +
+    '</tr>';
+  }).join('');
+
+  return '<div class="card">' +
+    '<div class="card-h">' +
+      '<div class="card-t">👥 База игроков (' + list.length + ')</div>' +
+      '<button class="btn green" onclick="exportPlayersCsv()">📥 Экспорт CSV</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">' +
+      '<input class="inp" style="flex:2;min-width:180px;" placeholder="Поиск по имени, клубу, TG ID, @username..." value="' + esc(A.search) + '" oninput="A.search=this.value;renderAdmin();" />' +
+      '<select class="sel" style="flex:1;min-width:150px;" onchange="A.sortBy=this.value;renderAdmin();">' +
+        '<option value="updated" ' + (A.sortBy==='updated'?'selected':'') + '>Сорт: Последний вход</option>' +
+        '<option value="ovr" ' + (A.sortBy==='ovr'?'selected':'') + '>Сорт: OVR</option>' +
+        '<option value="elo" ' + (A.sortBy==='elo'?'selected':'') + '>Сорт: Рейтинг ELO</option>' +
+        '<option value="wins" ' + (A.sortBy==='wins'?'selected':'') + '>Сорт: Победы PvP</option>' +
+        '<option value="ads" ' + (A.sortBy==='ads'?'selected':'') + '>Сорт: Просмотры AdsGram</option>' +
+      '</select>' +
+    '</div>' +
+    '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Игрок</th><th class="num">OVR</th><th class="num">ELO</th><th class="num">PvP</th><th class="num">Ads</th><th class="num">Дней</th><th>Был</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="7" class="muted" style="text-align:center;padding:18px;">Игроков не найдено</td></tr>') +
+    '</tbody></table></div>' +
+  '</div>';
+}
+
+function openPlayerDetail(idx) {
+  var u = window.__filteredPlayers && window.__filteredPlayers[idx];
+  if (!u) return;
+  var uEvents = A.events.filter(function(e){ return e.tg_id === u.tg_id; }).slice(0, 15);
+  var evHtml = uEvents.length ? uEvents.map(function(e) {
+    return '<div class="kv"><span><b>' + esc(e.event_type) + '</b> <span class="small muted">' + esc(JSON.stringify(e.meta || {})) + '</span></span><span class="small muted">' + timeAgo(e.created_at) + '</span></div>';
+  }).join('') : '<div class="small muted">Нет детальных событий (нужна таблица analytics_events).</div>';
+
+  openModal(
+    '<div>' +
+      '<div class="card-h"><div class="card-t">' + esc(u.name) + '</div><span class="badge blue">OVR ' + u.ovr + '</span></div>' +
+      '<div class="kv"><span>Telegram ID / Тип</span><b>' + esc(u.tg_id) + ' (' + (u.is_tg ? 'Реальный TG' : 'Гость') + ')</b></div>' +
+      (u.username ? '<div class="kv"><span>Username</span><b>@' + esc(u.username) + '</b></div>' : '') +
+      (u.platform ? '<div class="kv"><span>Платформа</span><b>' + esc(u.platform) + '</b></div>' : '') +
+      '<div class="kv"><span>Клуб / Позиция</span><b>' + esc(u.club) + ' (' + esc(u.position) + ')</b></div>' +
+      '<div class="kv"><span>PvP ELO / W-L</span><b>' + u.rating + ' ELO (' + u.wins + 'W / ' + u.losses + 'L)</b></div>' +
+      '<div class="kv"><span>Дней активности</span><b>' + (Object.keys(u.daysActive).length || 1) + '</b></div>' +
+      '<div class="kv"><span>Матчей / Тренировок / AdsGram</span><b>' + u.matches + ' / ' + u.trainings + ' / ' + u.ads + '</b></div>' +
+      '<div class="kv"><span>Последний вход</span><b>' + (u.lastSeen ? timeAgo(new Date(u.lastSeen).toISOString()) : '—') + '</b></div>' +
+      '<div style="font-weight:800;margin:12px 0 6px;">Последние события:</div>' +
+      '<div style="max-height:200px;overflow-y:auto;">' + evHtml + '</div>' +
+      '<button class="btn ghost" style="width:100%;margin-top:12px;" onclick="closeModal()">Закрыть</button>' +
+    '</div>'
+  );
+}
+
+function exportPlayersCsv() {
+  var list = window.__filteredPlayers || [];
+  var header = ['tg_id', 'is_tg', 'name', 'username', 'club', 'position', 'ovr', 'elo', 'pvp_wins', 'pvp_losses', 'ads_watched', 'days_active', 'last_seen'];
+  var lines = [header.join(',')];
+  list.forEach(function(u) {
+    var row = [
+      u.tg_id, u.is_tg ? '1' : '0',
+      '"' + String(u.name || '').replace(/"/g, '""') + '"',
+      '"' + String(u.username || '').replace(/"/g, '""') + '"',
+      '"' + String(u.club || '').replace(/"/g, '""') + '"',
+      u.position, u.ovr, u.rating, u.wins, u.losses, u.ads,
+      Object.keys(u.daysActive).length || 1,
+      u.lastSeen ? new Date(u.lastSeen).toISOString() : ''
+    ];
+    lines.push(row.join(','));
+  });
+  var blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'pro_career_27_players_' + dayKeyOffset(0) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📥 CSV скачан (' + list.length + ' игроков)');
+}
+
+function renderMonetizationTab(m) {
+  var placeNames = {
+    energy:'⚡ Восстановление энергии (+30%)',
+    sponsor:'💰 Спонсорская премия (Матч/Шоп)',
+    match_x2:'⚽ Удвоение выплаты за матч (x2)',
+    pvp_x2:'⚔️ Удвоение монет за PvP (x2)',
+    pvp_bonus:'🎟️ +1 бонусный PvP-матч',
+    pvp_scout:'🔍 Бесплатный скан тактики PvP',
+    viral_show:'🎬 Подкаст / Вирусное шоу',
+    daily_x2:'📅 Календарь входа x2',
+    cup_retry:'🏆 Второй шанс в Кубке',
+    general:'🎬 Другое'
+  };
+  var adRows = Object.keys(m.adByPlace).map(function(k){ return { k:k, c:m.adByPlace[k] }; })
+    .sort(function(a,b){ return b.c - a.c; });
+  var adHtml = adRows.length ? adRows.map(function(r) {
+    var p = pct(r.c, Math.max(1, m.totalAds));
+    return '<div class="funnel-row">' +
+      '<div class="funnel-top"><span>' + esc(placeNames[r.k] || r.k) + '</span><span>' + fmt(r.c) + ' (' + p + '%)</span></div>' +
+      '<div class="bar-wrap"><div class="bar-fill" style="width:' + p + '%;background:linear-gradient(90deg,#9333ea,#f59e0b);"></div></div>' +
+    '</div>';
+  }).join('') : '<div class="small muted">Пока нет данных о просмотрах рекламы (подключите таблицу <code>analytics_events</code>).</div>';
+
+  // Referrals leaderboard
+  var refCounts = {};
+  A.referrals.forEach(function(r) {
+    var k = r.referrer_tg_id || 'unknown';
+    refCounts[k] = (refCounts[k] || 0) + 1;
+  });
+  var topRefs = Object.keys(refCounts).map(function(k) {
+    var pl = A.players.find(function(p){ return p.tg_id === k; });
+    return { id:k, name: pl ? pl.name : ('ID ' + k), c: refCounts[k] };
+  }).sort(function(a,b){ return b.c - a.c; }).slice(0, 10);
+
+  var shopTop = Object.keys(m.shopCounts).map(function(k){ return { k:k, c:m.shopCounts[k] }; })
+    .sort(function(a,b){ return b.c - a.c; }).slice(0, 8);
+
+  var kFactor = m.totalUsers > 0 ? (A.referrals.length / m.totalUsers).toFixed(2) : '0.00';
+  var adsPerUser = m.mau > 0 ? (m.totalAds / m.mau).toFixed(2) : '0.00';
+
+  return '<div class="kpi-grid">' +
+    '<div class="kpi gold"><div class="kpi-lbl">🎬 Всего AdsGram (30д)</div><div class="kpi-val" style="color:#fcd34d;">' + fmt(m.totalAds) + '</div><div class="kpi-sub">На 1 активного (MAU): ' + adsPerUser + '</div></div>' +
+    '<div class="kpi purple"><div class="kpi-lbl">🤝 Приглашено по рефке</div><div class="kpi-val" style="color:#c4b5fd;">' + fmt(A.referrals.length) + '</div><div class="kpi-sub">K-фактор виральности: ' + kFactor + '</div></div>' +
+    '<div class="kpi green"><div class="kpi-lbl">⚔️ PvP-логов в базе</div><div class="kpi-val" style="color:#6ee7b7;">' + fmt(A.matchLogs.length) + '</div><div class="kpi-sub">Синхронизировано с Supabase</div></div>' +
+  '</div>' +
+
+  '<div class="grid-2">' +
+    '<div class="card">' +
+      '<div class="card-h"><div class="card-t">🎬 AdsGram по точкам показа</div><span class="badge gold">Block 60696</span></div>' +
+      adHtml +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-h"><div class="card-t">🤝 Топ рефереров (виральность)</div><span class="badge purple">' + A.referrals.length + ' всего</span></div>' +
+      (topRefs.length ? topRefs.map(function(r, i){ return '<div class="kv"><span>' + (i+1) + '. <b>' + esc(r.name) + '</b></span><span class="badge green">+' + r.c + ' друз.</span></div>'; }).join('') : '<div class="small muted">Рефералов пока нет</div>') +
+      '<div style="font-weight:800;margin:14px 0 6px;">🛍️ Популярные покупки</div>' +
+      (shopTop.length ? shopTop.map(function(s){ return '<div class="kv"><span>' + esc(s.k) + '</span><b>' + s.c + '</b></div>'; }).join('') : '<div class="small muted">Нет данных о покупках</div>') +
+    '</div>' +
+  '</div>';
+}
+
+function renderTasksAndFeedTab(m) {
+  var taskRows = A.tasks.length ? A.tasks.map(function(t) {
+    return '<div class="kv" style="align-items:center;">' +
+      '<div><b>' + esc(t.title) + '</b> ' + (t.active ? '<span class="badge green">Активно</span>' : '<span class="badge red">Выкл</span>') +
+      '<div class="small muted">' + esc(t.url) + ' · +' + fmt(t.reward) + ' 🪙</div></div>' +
+      '<div style="display:flex;gap:5px;">' +
+        '<button class="btn ghost" onclick="toggleTaskActive(\'' + esc(t.id) + '\',' + (!t.active) + ')">' + (t.active ? 'Выкл' : 'Вкл') + '</button>' +
+        '<button class="btn red" onclick="deleteTask(\'' + esc(t.id) + '\')">🗑️</button>' +
+      '</div></div>';
+  }).join('') : '<div class="small muted">Заданий в таблице <code>tasks</code> пока нет.</div>';
+
+  var feedRows = m.events.slice(0, 40).map(function(ev) {
+    var pl = A.players.find(function(p){ return p.tg_id === ev.tg_id; });
+    var who = pl ? pl.name : ('ID ' + ev.tg_id);
+    var col = ev.event_type === 'ad_watched' ? 'gold' : (ev.event_type === 'match_played' ? 'green' : (ev.event_type === 'career_created' ? 'purple' : 'blue'));
+    return '<div class="kv">' +
+      '<div><span class="badge ' + col + '">' + esc(ev.event_type) + '</span> <b>' + esc(who) + '</b> <span class="small muted">OVR ' + (ev.ovr || 0) + ' · ' + esc(JSON.stringify(ev.meta || {})) + '</span></div>' +
+      '<span class="small muted" style="white-space:nowrap;">' + timeAgo(ev.created_at) + '</span>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="grid-2">' +
+    '<div class="card">' +
+      '<div class="card-h"><div class="card-t">📢 Партнёрские задания (таблица tasks)</div></div>' +
+      '<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px;">' +
+        '<input id="t-title" class="inp" placeholder="Название (напр. Подписаться на канал)" />' +
+        '<input id="t-url" class="inp" placeholder="Ссылка (https://t.me/...)" />' +
+        '<div style="display:flex;gap:8px;">' +
+          '<input id="t-rew" class="inp" type="number" value="200" placeholder="Награда 🪙" style="flex:1;" />' +
+          '<button class="btn green" onclick="addPartnerTask()">➕ Добавить</button>' +
+        '</div>' +
+      '</div>' +
+      taskRows +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-h"><div class="card-t">⚡ Живая лента событий (последние 40)</div><button class="btn ghost" onclick="loadAllData(false)">🔄</button></div>' +
+      '<div style="max-height:420px;overflow-y:auto;">' + (feedRows || '<div class="small muted">Событий пока нет (создайте таблицу analytics_events).</div>') + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function addPartnerTask() {
+  var title = (document.getElementById('t-title').value || '').trim();
+  var url = (document.getElementById('t-url').value || '').trim();
+  var reward = parseInt(document.getElementById('t-rew').value, 10) || 200;
+  if (!title || !url) { showToast('Заполните название и ссылку'); return; }
+  sbFetch('tasks', {
+    method: 'POST',
+    headers: { 'Prefer': 'return=representation' },
+    body: { title: title, url: url, reward: reward, active: true }
+  }).then(function() {
+    showToast('✅ Задание добавлено и уже видно игрокам!');
+    loadAllData(true);
+  }).catch(function(e) {
+    showToast('Ошибка добавления: ' + e.message);
+  });
+}
+
+function toggleTaskActive(id, nextActive) {
+  sbFetch('tasks?id=eq.' + encodeURIComponent(id), {
+    method: 'PATCH',
+    headers: { 'Prefer': 'return=minimal' },
+    body: { active: !!nextActive }
+  }).then(function() {
+    showToast('✅ Статус задания обновлён');
+    loadAllData(true);
+  }).catch(function(e) { showToast('Ошибка: ' + e.message); });
+}
+
+function deleteTask(id) {
+  if (!confirm('Удалить задание?')) return;
+  sbFetch('tasks?id=eq.' + encodeURIComponent(id), {
+    method: 'DELETE',
+    headers: { 'Prefer': 'return=minimal' }
+  }).then(function() {
+    showToast('🗑️ Задание удалено');
+    loadAllData(true);
+  }).catch(function(e) { showToast('Ошибка: ' + e.message); });
+}
+
+var ANALYTICS_SQL = [
+  '-- 1. Создаём таблицу событий аналитики для удержания (Retention), воронки и AdsGram',
+  'create table if not exists public.analytics_events (',
+  '  id bigserial primary key,',
+  '  tg_id text not null,',
+  '  is_tg boolean not null default false,',
+  '  event_type text not null,',
+  '  ovr int default 0,',
+  '  season int default 0,',
+  '  round int default 0,',
+  '  meta jsonb default \'{}\'::jsonb,',
+  '  created_at timestamptz not null default now()',
+  ');',
+  '',
+  'create index if not exists idx_ae_created on public.analytics_events (created_at desc);',
+  'create index if not exists idx_ae_tg_id on public.analytics_events (tg_id);',
+  'create index if not exists idx_ae_type on public.analytics_events (event_type);',
+  '',
+  '-- 2. Открываем права для клиента (publishable key / anon)',
+  'alter table public.analytics_events enable row level security;',
+  'drop policy if exists "anon_insert_ae" on public.analytics_events;',
+  'drop policy if exists "anon_select_ae" on public.analytics_events;',
+  'create policy "anon_insert_ae" on public.analytics_events for insert to anon with check (true);',
+  'create policy "anon_select_ae" on public.analytics_events for select to anon using (true);',
+  'grant usage on schema public to anon;',
+  'grant select, insert on public.analytics_events to anon;',
+  'grant usage, select on sequence public.analytics_events_id_seq to anon;'
+].join('\n');
+
+function copyAnalyticsSql() {
+  try {
+    navigator.clipboard.writeText(ANALYTICS_SQL);
+    showToast('📋 SQL скопирован! Вставьте в Supabase → SQL Editor → Run');
+  } catch (e) {
+    prompt('Скопируйте SQL-скрипт:', ANALYTICS_SQL);
+  }
+}
+
+function renderSqlTab() {
+  var stRow = function(name, st) {
+    var ok = st === 'ok';
+    return '<div class="kv"><span>Таблица <code>' + name + '</code></span>' +
+      (ok ? '<span class="badge green">✅ Подключена</span>' : '<span class="badge red">⚠️ ' + esc(st || 'Нет данных') + '</span>') +
+    '</div>';
+  };
+
+  return '<div class="card">' +
+    '<div class="card-h"><div class="card-t">🔌 Статус таблиц Supabase</div><button class="btn blue" onclick="loadAllData(false)">🔄 Проверить</button></div>' +
+    stRow('players', A.tables.players) +
+    stRow('match_logs', A.tables.match_logs) +
+    stRow('referrals', A.tables.referrals) +
+    stRow('tasks', A.tables.tasks) +
+    stRow('analytics_events', A.tables.analytics_events) +
+  '</div>' +
+
+  '<div class="card ok">' +
+    '<div class="card-h"><div class="card-t">🛠️ SQL-скрипт для точной аналитики и Retention</div><button class="btn green" onclick="copyAnalyticsSql()">📋 Скопировать SQL</button></div>' +
+    '<div class="small muted">Откройте <b>Supabase → SQL Editor → New Query</b>, вставьте этот код и нажмите <b>Run</b>. После этого игра автоматически начнёт писать сессии, удержание D1/D3/D7, матчи и просмотры AdsGram.</div>' +
+    '<pre class="sql-pre">' + esc(ANALYTICS_SQL) + '</pre>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-h"><div class="card-t">🔐 Безопасность админки</div></div>' +
+    '<div class="small muted" style="margin-bottom:8px;">Чтобы сменить PIN навсегда для всех устройств, измените <code>var ADMIN_PIN = \'2727\';</code> в файле <code>admin.html</code>. Можно также временно задать PIN для этого браузера:</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<input id="new-pin-inp" class="inp" type="password" placeholder="Новый PIN (мин. 4 символа)" style="flex:1;" />' +
+      '<button class="btn gold" onclick="changeLocalPin()">Сохранить</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ================= BOOT ADMIN ================= */
+(function initAdmin() {
+  try {
+    if (sessionStorage.getItem('pc27_admin_ok') === '1') {
+      document.getElementById('lock-screen').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'block';
+      loadAllData(true);
+    }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
